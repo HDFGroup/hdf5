@@ -1141,6 +1141,9 @@ H5close(void)
  *              use the same memory allocator. It is not intended for
  *              use as a general memory allocator in applications.
  *
+ *              This function is thread-safe and does not take the API
+ *              lock.
+ *
  * Parameters:
  *
  *      size:   The size of the buffer.
@@ -1161,7 +1164,7 @@ H5allocate_memory(size_t size, bool clear)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_NOINIT_NOERR_NOLOCK
 
     if (0 == size)
         HGOTO_DONE(NULL);
@@ -1172,7 +1175,7 @@ H5allocate_memory(size_t size, bool clear)
         ret_value = H5MM_malloc(size);
 
 done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API_NOERR_NOLOCK(ret_value)
 } /* end H5allocate_memory() */
 
 /*-------------------------------------------------------------------------
@@ -1184,6 +1187,9 @@ done:
  *              plugins so that all allocation and free operations
  *              use the same memory allocator. It is not intended for
  *              use as a general memory allocator in applications.
+ *
+ *              This function is thread-safe and does not take the API
+ *              lock.
  *
  * Parameters:
  *
@@ -1204,11 +1210,11 @@ H5resize_memory(void *mem, size_t size)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_NOINIT_NOERR_NOLOCK
 
     ret_value = H5MM_realloc(mem, size);
 
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API_NOERR_NOLOCK(ret_value)
 } /* end H5resize_memory() */
 
 /*-------------------------------------------------------------------------
@@ -1219,6 +1225,9 @@ H5resize_memory(void *mem, size_t size)
  *              that was used to allocate the memory frees it.  Passing
  *              NULL pointers is allowed.
  *
+ *              This function is thread-safe and does not take the API
+ *              lock.
+ *
  * Return:        SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
@@ -1226,12 +1235,12 @@ H5resize_memory(void *mem, size_t size)
 herr_t
 H5free_memory(void *mem)
 {
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_NOINIT_NOERR_NOLOCK
 
     /* At this time, it is impossible for this to fail. */
     H5MM_xfree(mem);
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOERR_NOLOCK(SUCCEED)
 } /* end H5free_memory() */
 
 /*-------------------------------------------------------------------------

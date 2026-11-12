@@ -65,22 +65,27 @@ extern "C" {
  *
  *          Currently, the library will immediately create \p num_threads
  *          threads and retain them until this function is called again. Calling
- *          this function with \p num_threads set to \c 0 will terminate these
- *          threads and disable internal multithreading.
+ *          this function with \p num_threads set to \c 0 or \c 1 will terminate
+ *          these threads and disable internal multithreading.
  *
  *          This is currently only used to accelerate raw data reads of chunked
  *          datasets. This will occur when the following conditions are met:
- *          \li This function is called with \p num_threads > \c 0 .
- *          \li H5Pset_io_threads() was not called with \c threads_enabled set
- *          to \c false .
- *          \li Selection I/O is not used. See H5Pset_selection_io().
- *          \li At least one chunk exists on disk and is not cached by the
+ *          \li This function must be called with \p num_threads > \c 0 .
+ *          \li H5Pset_io_threads() must not be called with \c threads_enabled
+ *          set to \c false .
+ *          \li Selection I/O must not be used. See H5Pset_selection_io().
+ *          \li At least one chunk must exist on disk and not be cached by the
  *          dataset chunk cache.
- *          \li For unfiltered datasets, the chunk cache is large enough to fit
- *          at least one chunk. See H5Pset_chunk_cache().
- *          \li The library is not built with the \c HDF5_ENABLE_THREADSAFE
- *          option.
- *          \li The file does not use an MPI-based file driver.
+ *          \li For unfiltered datasets, the chunk cache must be large enough to
+ *          fit at least one chunk. See H5Pset_chunk_cache().
+ *          \li No data filters re-enter the HDF5 API. All data filters must
+ *          set the \p H5Z_FEAT_FILTER_NO_H5_CALLS capability flag.
+ *          \li The file driver must not re-enter the HDF5 API. It must set the
+ *          \p H5FD_FEAT_READWRITE_NO_H5_CALLS capability flag.
+ *          \li For concurrent execution of the data filter, that filter must
+ *          be thread-safe and report that capability with the
+ *          \p H5Z_FEAT_FILTER_THREADSAFE capability flag.
+ *          \li The file must not use an MPI-based file driver.
  *
  * \note    This function is only present when the library is built with
  *          thread support, i.e. when \c H5_HAVE_THREADS is defined.  This is
@@ -93,7 +98,9 @@ extern "C" {
  *
  * \warning Errors that are printed inside the threaded area, for example by the
  *          data filters, do not currently respect non-default error settings,
- *          and print their errors to stderr upon thread completion.
+ *          except that if errors are disabled on the parent thread, for example
+ *          by #H5E_BEGIN_TRY or H5Epause_stack(), they will also be disabled in
+ *          the child threads.
  *
  * \since 2.3.0
  *

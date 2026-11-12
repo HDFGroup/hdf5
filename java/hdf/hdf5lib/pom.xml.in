@@ -10,8 +10,8 @@
     <version>@HDF5_PACKAGE_VERSION@@HDF5_MAVEN_VERSION_SUFFIX@</version>
     <packaging>jar</packaging>
 
-    <name>HDF5 Java Bindings</name>
-    <description>Java bindings for the HDF5 scientific data format library. Add org.hdfgroup:hdf5-native (platform classifier) for a bundled libhdf5 loaded from the classpath, or use a system HDF5 install found by the OS loader.</description>
+    <name>HDF5 Java FFM Bindings</name>
+    <description>Foreign Function and Memory API bindings for the HDF5 scientific data format library. Add org.hdfgroup:hdf5-native (platform classifier) for a bundled libhdf5 loaded from the classpath, or use a system HDF5 install found by the OS loader.</description>
     <url>https://github.com/HDFGroup/hdf5</url>
 
     <licenses>
