@@ -58,7 +58,7 @@ These options concern the general build process of the main HDF5 libraries, util
 | `BUILD_STATIC_EXECS` | `BOOL` | `OFF` | If `ON`, builds statically-linked executables. **NOTE:** The `BUILD_STATIC_EXECS` option is only valid on some UNIX operating systems. It adds the `-static` flag to `CMAKE_EXE_LINKER_FLAGS`. This flag is not available on Windows and some modern Linux systems will ignore the flag. |
 | `HDF5_DEFAULT_API_VERSION` | `STRING` | `v300` | Specifies the default HDF5 API version to use when compiling HDF5 libraries. Valid values are `v300` (3.x API), `v200` (2.x API), `v114` (1.14.x API), `v112` (1.12.x API), `v110` (1.10.x API), `v18` (1.8.x API) and `v16` (1.6.x API). See [API Compatibility Macros](https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html#title5) for more information on this option. |
 | `HDF5_ALLOW_UNSUPPORTED` | `BOOL` | `OFF` | If `ON`, allows configuring and building HDF5 with unsupported combinations of features. Otherwise, causes a configuration error if an unsupported combination is enabled. See [Unsupported option combinations](#unsupported_combos) for a list of unsupported combinations. |
-| `HDF5_ENABLE_CONCURRENCY` | `BOOL` | `OFF` | If `ON`, enables building of a multi-thread concurrent HDF5 library. Requires C11 threads, Win32 threads or Pthreads. Requires shared HDF5 libraries on Windows. **NOTE:** Currently only used to enable internal multithreading where the library spawns its own threads and internally parallelizes a single operation. Does not yet allow multiple concurrent application threads inside the library. |
+| `HDF5_ENABLE_CONCURRENCY` | `BOOL` | `OFF` | If `ON`, enables building of a multi-thread concurrent HDF5 library. Requires C11 threads, Win32 threads or Pthreads. Requires shared HDF5 libraries on Windows. **NOTE:** Does not yet allow multiple concurrent application threads inside the library. |
 | `HDF5_ENABLE_THREADSAFE` | `BOOL` | `OFF` | If `ON`, enables building of a thread-safe HDF5 library. Requires C11 threads, Win32 threads or Pthreads. Requires shared HDF5 libraries on Windows. |
 | `HDF5_ENABLE_NONSTANDARD_FEATURES` | `BOOL` | `ON` | If `ON`, enables non-standard programming language features. If `OFF`, disables all non-standard programming language features. Each feature has its own separate option. |
 | `HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16` | `BOOL` | `ON` (if `_Float16` type is supported) | If `ON`, enables building of support for the `_Float16` 16-bit floating-point datatype. |
@@ -75,7 +75,7 @@ These options concern the general build process of the main HDF5 libraries, util
 | `HDF5_ENABLE_PREADWRITE` | `BOOL` | `ON` | If `ON`, use `pread(2)` / `pwrite(2)` in Virtual File Drivers if the functions are available. Otherwise, `read(2)` / `write(2)` are used instead. |
 | `HDF5_ENABLE_MAP_API` | `BOOL` | `OFF` | If `ON`, enables building of the HDF5 Map (`H5M`) API for storing and interacting with key-value pair data. |
 | `HDF5_EXTERNAL_LIB_PREFIX` | `STRING` | `""` (empty string) | Specifies a prefix string to use for customizing HDF5 library names. |
-| `HDF5_LIB_INFIX` | `STRING` | `""` (empty string) | Specifies an infix string to use for customizing HDF5 library names. This infix string is added to all library names after "hdf5". |
+| `HDF5_LIB_INFIX` | `STRING` | `""` (empty string) | Specifies an infix string to use for customizing HDF5 library names. This infix string is added to all library names after "hdf5", and to the installed pkg-config files and `libhdf5.settings` (for example `hdf5_openmpi.pc` and `libhdf5_openmpi.settings`), so builds with different infixes can share a library directory. Set `HDF5_INSTALL_INCLUDE_DIR`, `HDF5_INSTALL_CMAKE_DIR`, `HDF5_INSTALL_MODULE_DIR` and `HDF5_INSTALL_BIN_DIR` per build as well, since those directories are not named after the infix. |
 | `HDF5_EXTERNAL_LIB_SUFFIX` | `STRING` | `""` (empty string) | Specifies a suffix string to use for customizing HDF5 library names. |
 | `HDF5_ENABLE_INSTRUMENT` | `BOOL` | `OFF` | If `ON`, enables instrumentation of some parallel HDF5 functions. Depends on `CMAKE_BUILD_TYPE` being `Debug` or `Developer`. |
 | `HDF5_ENABLE_DOXY_WARNINGS` | `BOOL` | `OFF` | If `ON`, causes a build failure if doxygen parsing has warnings. Has no effect if  `HDF5_BUILD_DOC` is `OFF`. |
@@ -166,6 +166,8 @@ These are options which are specific to HDF5's wrappers for programming language
 | `HDF5_JAVA_PACK_JRE` | `BOOL` | `OFF` | If `ON`, packages a Java JRE with an HDF5 installation. |
 | `HDF5_ENABLE_MAVEN_DEPLOY` | `BOOL` | `OFF` | If `ON`, enables Maven repository deployment support. |
 | `HDF5_MAVEN_SNAPSHOT` | `BOOL` | `OFF` | If `ON`, adds "-SNAPSHOT" to version portion of names of Maven artifacts. |
+| `HDF5_JAVA_JARHDF5_NAME` | `STRING` | empty (`jarhdf5-<version>`) | Name of the installed `jarhdf5` jar, without `.jar`. Linux distributions typically set an unversioned name such as `jarhdf5`. Ignored when `HDF5_ENABLE_MAVEN_DEPLOY` is `ON`. |
+| `HDF5_JAVA_JAVAHDF5_NAME` | `STRING` | empty (`javahdf5-<version>`) | Name of the installed `javahdf5` jar, without `.jar`. Ignored when `HDF5_ENABLE_MAVEN_DEPLOY` is `ON`. |
 | `HDF5_JAVA_LOGGING_JAR` | `FILEPATH` | Bundled `java/lib/slf4j-api-2.0.16.jar` | Path to the SLF4J API jar. |
 | `HDF5_JAVA_LOGGING_NOP_JAR` | `FILEPATH` | Bundled `java/lib/ext/slf4j-nop-2.0.16.jar` | Path to the SLF4J NOP binding jar. |
 | `HDF5_JAVA_LOGGING_SIMPLE_JAR` | `FILEPATH` | Bundled `java/lib/ext/slf4j-simple-2.0.16.jar` | Path to the SLF4J simple binding jar. |
@@ -450,7 +452,7 @@ Some HDF5 feature configuration options are incompatible with each other and wil
     - `HDF5_ENABLE_THREADSAFE`
     - `HDF5_BUILD_CPP_LIB`
 
-- The multi-thread concurrency (`HDF5_ENABLE_CONCURRENCY`) and thread-safe (`HDF5_ENABLE_THREADSAFE`) features are incompatible with the high-level, Fortran, Java and C++ interfaces, as locking is not hoisted into the higher-level API calls. Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled:
+- The multi-thread concurrency (`HDF5_ENABLE_CONCURRENCY`) and thread-safe (`HDF5_ENABLE_THREADSAFE`) features are incompatible with the high-level, Fortran, Java and C++ interfaces, as locking is not hoisted into the higher-level API calls. (This does not apply to the library's internal thread pool, which is built in whenever a threading package is available, except in a static library on Windows, and is not controlled by an option.) Unless `HDF5_ALLOW_UNSUPPORTED` has been specified, the following options must be disabled for the concurrent/threadsafe builds:
 
     - `HDF5_BUILD_HL_LIB`
     - `HDF5_BUILD_FORTRAN`

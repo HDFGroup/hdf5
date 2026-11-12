@@ -143,9 +143,11 @@ H5Z__count_table_keys(toml_datum_t tab)
 
 /*
  * toml_parse() in the "C" numeric locale.  tomlc17 converts floats with
- * strtod(), which follows LC_NUMERIC, so a locale whose decimal point is not
- * '.' would reject every TOML float (cktan/tomlc17#57).  Only the calling
- * thread's locale is changed.
+ * strtod(), which follows LC_NUMERIC; since R261109 it substitutes the
+ * decimal point from localeconv() first (cktan/tomlc17#57).  Parsing in the
+ * "C" locale makes that substitution a no-op, so the result does not depend
+ * on locale state that another thread can change.  Only the calling thread's
+ * locale is changed.
  */
 static toml_result_t
 H5Z__toml_parse_c_locale(const char *src, int len)

@@ -12,29 +12,25 @@ needed by the HDF5 filter configuration API are included.
 |---------------|------------------------------------------------|
 | Upstream URL  | https://github.com/cktan/tomlc17               |
 | License       | MIT (see `LICENSE` in this directory)          |
-| Vendored on   | 2026-10-07                                     |
-| Release / tag | `main` at commit `fba134d7d` (after `R261003`)  |
+| Vendored on   | 2026-11-12                                     |
+| Release / tag | `R261109` (commit `aa4ca1bc5`)                 |
 
 Because tomlc17 does not include a version constant in its source, the
 vendored files are identified by their SHA-256 checksums:
 
 | File         | SHA-256                                                            |
 |--------------|--------------------------------------------------------------------|
-| `tomlc17.c`  | `40de13f674959b120606ccee5064d07d7a7c5c0b0affe69d6b10b12248ca950e` |
+| `tomlc17.c`  | `7476923b6c9b8f0858b82b63ed6107f57448882983390e70c31327f7d3e2a362` |
 | `tomlc17.h`  | `29c0909092f4b23c7edce705167064f4a90548db5334b4aa2cd95d7ad801adb9` |
 
 ## HDF5-local modifications
 
-None.  Both files are byte-for-byte identical to upstream commit
-`fba134d7d`, and are intentionally excluded from the HDF5 clang-format pass (see
+None.  Both files are byte-for-byte identical to upstream tag
+`R261109`, and are intentionally excluded from the HDF5 clang-format pass (see
 `.github/workflows/clang-format-check.yml` and `bin/format_source`) so that
 future upstream updates can be dropped in without any re-formatting step.
 Symbols are renamed for static builds by force-including `h5_toml_prefix.h`
 from `src/CMakeLists.txt`, not by editing the sources.
-
-This commit is untagged; it is used instead of `R261003` for the
-`page_create()` UBSan fix (<https://github.com/cktan/tomlc17/issues/56>).
-Replace it with the next tagged release.
 
 The vendored copy contains the two `scan_float()` fixes earlier copies carried
 as local changes, for subnormal float literals:
@@ -61,11 +57,14 @@ documented limitation rather than a gap to close in the parser.
 ### Float parsing depends on `LC_NUMERIC`
 
 `scan_float()` converts float literals with `strtod()`, which follows the
-calling thread's `LC_NUMERIC` locale.  If an application switches to a locale
-whose decimal point is not '.', such as `de_DE`, every float literal fails to
-parse.  Reported as <https://github.com/cktan/tomlc17/issues/57>.  HDF5 works
-around it outside the vendored files: `H5Z__toml_parse_c_locale()` in
-`src/H5Zconfig.c` parses in the "C" numeric locale for the calling thread.
+calling thread's `LC_NUMERIC` locale.  Since `R261109`
+(<https://github.com/cktan/tomlc17/issues/57>), tomlc17 replaces the '.' with
+the decimal point that `localeconv()` reports before calling `strtod()`, so a
+locale such as `de_DE` no longer makes every float literal fail to parse.
+HDF5 still parses in the "C" numeric locale for the calling thread, through
+`H5Z__toml_parse_c_locale()` in `src/H5Zconfig.c`: that makes the upstream
+substitution a no-op and keeps the result independent of `localeconv()`, which
+reads locale state another thread can change.
 
 ## Files
 

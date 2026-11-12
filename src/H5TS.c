@@ -35,7 +35,7 @@
 #include "H5Eprivate.h" /* Error handling                      */
 #include "H5TSpkg.h"    /* Threadsafety                        */
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREADS
 
 /****************/
 /* Local Macros */
@@ -60,18 +60,17 @@ H5TS_api_info_t H5TS_api_info_p;
 /* Library Private Variables */
 /*****************************/
 
-#ifdef H5_HAVE_CONCURRENCY
 /* Global thread pool */
 H5TS_pool_t *H5TS_pool_g = NULL;
 
 /* Whether there are concurrent threads in the library (from internal spawning) */
 bool H5TS_currently_concurrent_g = false;
-#endif /* H5_HAVE_CONCURRENCY */
 
 /*******************/
 /* Local Variables */
 /*******************/
 
+#ifdef H5_HAVE_THREADSAFE_API
 /*--------------------------------------------------------------------------
  * Function:    H5TSmutex_acquire
  *
@@ -155,8 +154,8 @@ H5TSmutex_release(unsigned *lock_count)
 
     FUNC_LEAVE_API_NAMECHECK_ONLY(ret_value)
 } /* end H5TSmutex_release() */
+#endif /* H5_HAVE_THREADSAFE_API */
 
-#ifdef H5_HAVE_CONCURRENCY
 /*--------------------------------------------------------------------------
  * Function:    H5TSset_internal_threads
  *
@@ -200,14 +199,14 @@ H5TSset_internal_threads(unsigned num_threads)
         H5TS_pool_g = NULL;
     }
 
-    /* Create global thread pool if num_threads > 0 */
-    if (num_threads > 0)
+    /* Create global thread pool if num_threads > 1. There is no benefit to using the internal concurrency
+     * code with a single worker thread over simply using the serial algorithm. */
+    if (num_threads > 1)
         if (H5TS_pool_create(&H5TS_pool_g, num_threads) < 0)
             HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "can't create thread pool");
 
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5TSset_internal_threads() */
-#endif /* H5_HAVE_CONCURRENCY */
 
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */

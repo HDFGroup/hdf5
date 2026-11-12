@@ -15,7 +15,7 @@
  *   - H5Pappend_filter / H5Pmodify_filter_by_idx / H5Pget_filter_params_by_idx
  *   - Typed TOML accessor functions (H5Zconfig_get_int, _get_str, etc.)
  *   - Built-in filter set_config / get_config round-trips
- *   - H5Z_class3_t registration, canonical names and H5Zget_filter_class_info
+ *   - H5Z_class4_t registration, canonical names and H5Zget_filter_class_info
  *   - The H5Z_func2_t extended filter callback
  *   - Configuration strings in the filter pipeline message (version 3)
  *   - Regression: existing H5Pset_filter still works
@@ -1122,7 +1122,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * H5Pget_filter_by_id2 reports a class3 filter's registered name
+ * H5Pget_filter_by_id2 reports a class4 filter's registered name
  * ---------------------------------------------------------------------- */
 
 #define TITLE_FILTER_ID 512
@@ -1144,8 +1144,8 @@ title_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 static int
 test_canonical_name_display(void)
 {
-    static const H5Z_class3_t title_cls = {
-        2,                   /* version        */
+    static const H5Z_class4_t title_cls = {
+        H5Z_CLASS_T_VERS_4,  /* version        */
         TITLE_FILTER_ID,     /* id             */
         1,                   /* encoder_present */
         1,                   /* decoder_present */
@@ -1153,6 +1153,7 @@ test_canonical_name_display(void)
         NULL,                /* can_apply      */
         NULL,                /* set_local      */
         title_filter_func,   /* filter         */
+        0,                   /* feature_flags */
         NULL,                /* set_config     */
         NULL,                /* get_config     */
         NULL,                /* description    */
@@ -1199,7 +1200,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * H5Z_class3_t name field tests
+ * H5Z_class4_t name field tests
  * ---------------------------------------------------------------------- */
 
 #define NAME_FILTER_ID 513
@@ -1219,24 +1220,25 @@ name_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_va
 }
 
 static int
-test_class3_name(void)
+test_class4_name(void)
 {
     herr_t ret;
 
-    TESTING("H5Z_class3_t: NULL name rejected by H5Zregister");
+    TESTING("H5Z_class4_t: NULL name rejected by H5Zregister");
     {
-        static const H5Z_class3_t null_name_cls = {
-            2,                /* version        */
-            NAME_FILTER_ID,   /* id             */
-            1,                /* encoder_present */
-            1,                /* decoder_present */
-            NULL,             /* canonical_name - intentionally NULL to trigger error */
-            NULL,             /* can_apply      */
-            NULL,             /* set_local      */
-            name_filter_func, /* filter         */
-            NULL,             /* set_config     */
-            NULL,             /* get_config     */
-            NULL,             /* description    */
+        static const H5Z_class4_t null_name_cls = {
+            H5Z_CLASS_T_VERS_4, /* version        */
+            NAME_FILTER_ID,     /* id             */
+            1,                  /* encoder_present */
+            1,                  /* decoder_present */
+            NULL,               /* canonical_name - intentionally NULL to trigger error */
+            NULL,               /* can_apply      */
+            NULL,               /* set_local      */
+            name_filter_func,   /* filter         */
+            0,                  /* feature_flags */
+            NULL,               /* set_config     */
+            NULL,               /* get_config     */
+            NULL,               /* description    */
         };
         H5E_BEGIN_TRY
         {
@@ -1248,10 +1250,10 @@ test_class3_name(void)
     }
     PASSED();
 
-    TESTING("H5Z_class3_t: valid name accepted by H5Zregister");
+    TESTING("H5Z_class4_t: valid name accepted by H5Zregister");
     {
-        static const H5Z_class3_t valid_cls = {
-            2,                  /* version        */
+        static const H5Z_class4_t valid_cls = {
+            H5Z_CLASS_T_VERS_4, /* version        */
             NAME_FILTER_ID,     /* id             */
             1,                  /* encoder_present */
             1,                  /* decoder_present */
@@ -1259,6 +1261,7 @@ test_class3_name(void)
             NULL,               /* can_apply      */
             NULL,               /* set_local      */
             name_filter_func,   /* filter         */
+            0,                  /* feature_flags */
             NULL,               /* set_config     */
             NULL,               /* get_config     */
             NULL,               /* description    */
@@ -1324,8 +1327,8 @@ fastpath_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *c
 static int
 test_empty_string_fast_path(void)
 {
-    static const H5Z_class3_t fp_cls = {
-        2,                    /* version         */
+    static const H5Z_class4_t fp_cls = {
+        H5Z_CLASS_T_VERS_4,   /* version         */
         FASTPATH_FILTER_ID,   /* id              */
         1,                    /* encoder_present */
         1,                    /* decoder_present */
@@ -1333,12 +1336,13 @@ test_empty_string_fast_path(void)
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         fastpath_filter_func, /* filter          */
+        0,                    /* feature_flags */
         fastpath_set_config,  /* set_config      */
         NULL,                 /* get_config      */
         NULL,                 /* description     */
     };
-    static const H5Z_class3_t nocfg_cls = {
-        2,                    /* version         */
+    static const H5Z_class4_t nocfg_cls = {
+        H5Z_CLASS_T_VERS_4,   /* version         */
         NOCFG_FILTER_ID,      /* id              */
         1,                    /* encoder_present */
         1,                    /* decoder_present */
@@ -1346,6 +1350,7 @@ test_empty_string_fast_path(void)
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         fastpath_filter_func, /* filter          */
+        0,                    /* feature_flags */
         NULL,                 /* set_config      */
         NULL,                 /* get_config      */
         NULL,                 /* description     */
@@ -1471,8 +1476,8 @@ cdvals_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_
 static int
 test_cdvalues_path(void)
 {
-    static const H5Z_class3_t cdv_cls = {
-        2,                  /* version         */
+    static const H5Z_class4_t cdv_cls = {
+        H5Z_CLASS_T_VERS_4, /* version         */
         CDVALS_FILTER_ID,   /* id              */
         1,                  /* encoder_present */
         1,                  /* decoder_present */
@@ -1480,6 +1485,7 @@ test_cdvalues_path(void)
         NULL,               /* can_apply       */
         NULL,               /* set_local       */
         cdvals_filter_func, /* filter          */
+        0,                  /* feature_flags */
         NULL,               /* set_config      */
         NULL,               /* get_config      */
         NULL,               /* description     */
@@ -1596,8 +1602,8 @@ cdvals_clean_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned in
 static int
 test_cdvalues_no_name_pollution(void)
 {
-    static const H5Z_class3_t tc_cls = {
-        2,                        /* version         */
+    static const H5Z_class4_t tc_cls = {
+        H5Z_CLASS_T_VERS_4,       /* version         */
         CDVALS_CLEAN_FILTER_ID,   /* id              */
         1,                        /* encoder_present */
         1,                        /* decoder_present */
@@ -1605,6 +1611,7 @@ test_cdvalues_no_name_pollution(void)
         NULL,                     /* can_apply       */
         NULL,                     /* set_local       */
         cdvals_clean_filter_func, /* filter          */
+        0,                        /* feature_flags */
         cdvals_clean_set_config,  /* set_config      */
         NULL,                     /* get_config      */
         NULL,                     /* description     */
@@ -1672,8 +1679,8 @@ persist_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
 static int
 test_canonical_name_persistence(void)
 {
-    static const H5Z_class3_t persist_cls = {
-        2,                   /* version         */
+    static const H5Z_class4_t persist_cls = {
+        H5Z_CLASS_T_VERS_4,  /* version         */
         PERSIST_FILTER_ID,   /* id              */
         1,                   /* encoder_present */
         1,                   /* decoder_present */
@@ -1681,6 +1688,7 @@ test_canonical_name_persistence(void)
         NULL,                /* can_apply       */
         NULL,                /* set_local       */
         persist_filter_func, /* filter         */
+        0,                   /* feature_flags */
         NULL,                /* set_config      */
         NULL,                /* get_config      */
         NULL,                /* description     */
@@ -1788,8 +1796,8 @@ test_canonical_name_length_limit(void)
                   /* 100 */ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                   "AAAAAAAAAAAAAAAAAAAA"
                   /*  56 */ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; /* 256 'A's + NUL */
-    H5Z_class3_t long_cls = {
-        2,                     /* version         */
+    H5Z_class4_t long_cls = {
+        H5Z_CLASS_T_VERS_4,    /* version         */
         LONGTITLE_FILTER_ID,   /* id              */
         1,                     /* encoder_present */
         1,                     /* decoder_present */
@@ -1797,6 +1805,7 @@ test_canonical_name_length_limit(void)
         NULL,                  /* can_apply       */
         NULL,                  /* set_local       */
         longtitle_filter_func, /* filter          */
+        0,                     /* feature_flags */
         NULL,                  /* set_config      */
         NULL,                  /* get_config      */
         NULL,                  /* description     */
@@ -1837,8 +1846,18 @@ test_canonical_name_length_limit(void)
         size_t i;
 
         for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,    bad[i], NULL,
-                              NULL, longtitle_filter_func, NULL, NULL, NULL};
+            H5Z_class4_t c = {H5Z_CLASS_T_VERS_4,
+                              LONGTITLE_FILTER_ID,
+                              1,
+                              1,
+                              bad[i],
+                              NULL,
+                              NULL,
+                              longtitle_filter_func,
+                              0,
+                              NULL,
+                              NULL,
+                              NULL};
             H5E_BEGIN_TRY
             {
                 ret = H5Zregister(&c);
@@ -1852,8 +1871,18 @@ test_canonical_name_length_limit(void)
         }
 
         for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
-            H5Z_class3_t c = {2,    LONGTITLE_FILTER_ID,   1,    1,    good[i], NULL,
-                              NULL, longtitle_filter_func, NULL, NULL, NULL};
+            H5Z_class4_t c = {H5Z_CLASS_T_VERS_4,
+                              LONGTITLE_FILTER_ID,
+                              1,
+                              1,
+                              good[i],
+                              NULL,
+                              NULL,
+                              longtitle_filter_func,
+                              0,
+                              NULL,
+                              NULL,
+                              NULL};
             if (H5Zregister(&c) < 0) {
                 fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
                 TEST_ERROR;
@@ -1870,7 +1899,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * Class3 filter names must be unique
+ * Class4 filter names must be unique
  * ---------------------------------------------------------------------- */
 #define UNIQUENAME_FILTER_ID_A 536
 #define UNIQUENAME_FILTER_ID_B 537
@@ -1878,13 +1907,31 @@ error:
 static int
 test_canonical_name_uniqueness(void)
 {
-    H5Z_class3_t cls_a = {
-        2,   UNIQUENAME_FILTER_ID_A, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
-        NULL};
-    H5Z_class3_t cls_b = {
-        2,   UNIQUENAME_FILTER_ID_B, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
-        NULL};
-    herr_t ret;
+    H5Z_class4_t cls_a = {H5Z_CLASS_T_VERS_4,
+                          UNIQUENAME_FILTER_ID_A,
+                          1,
+                          1,
+                          "test-unique-name",
+                          NULL,
+                          NULL,
+                          longtitle_filter_func,
+                          0,
+                          NULL,
+                          NULL,
+                          NULL};
+    H5Z_class4_t cls_b = {H5Z_CLASS_T_VERS_4,
+                          UNIQUENAME_FILTER_ID_B,
+                          1,
+                          1,
+                          "test-unique-name",
+                          NULL,
+                          NULL,
+                          longtitle_filter_func,
+                          0,
+                          NULL,
+                          NULL,
+                          NULL};
+    herr_t       ret;
 
     TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
 
@@ -2075,8 +2122,8 @@ callback_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *c
 static int
 test_set_get_config_callbacks(void)
 {
-    static const H5Z_class3_t cb_cls = {
-        2,                    /* version         */
+    static const H5Z_class4_t cb_cls = {
+        H5Z_CLASS_T_VERS_4,   /* version         */
         CALLBACK_FILTER_ID,   /* id              */
         1,                    /* encoder_present */
         1,                    /* decoder_present */
@@ -2084,6 +2131,7 @@ test_set_get_config_callbacks(void)
         NULL,                 /* can_apply       */
         NULL,                 /* set_local       */
         callback_filter_func, /* filter          */
+        0,                    /* feature_flags */
         callback_set_config,  /* set_config      */
         callback_get_config,  /* get_config      */
         NULL,                 /* description     */
@@ -2269,8 +2317,19 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
     return nbytes; /* pass-through */
 }
 
-static const H5Z_class3_t ctxpass_cls = {
-    2, CTXPASS_FILTER_ID, 1, 1, "test_ctxpass_filter", NULL, NULL, ctxpass_filter_cb, NULL, NULL, NULL,
+static const H5Z_class4_t ctxpass_cls = {
+    H5Z_CLASS_T_VERS_4,
+    CTXPASS_FILTER_ID,
+    1,
+    1,
+    "test_ctxpass_filter",
+    NULL,
+    NULL,
+    ctxpass_filter_cb,
+    0,
+    NULL,
+    NULL,
+    NULL,
 };
 
 static int
@@ -2441,8 +2500,8 @@ cfgstr_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_n
     return nbytes; /* pass-through */
 }
 
-static const H5Z_class3_t cfgstr_cls = {
-    2,                  /* version         */
+static const H5Z_class4_t cfgstr_cls = {
+    H5Z_CLASS_T_VERS_4, /* version         */
     CFGSTR_FILTER_ID,   /* id              */
     1,                  /* encoder_present */
     1,                  /* decoder_present */
@@ -2450,6 +2509,7 @@ static const H5Z_class3_t cfgstr_cls = {
     NULL,               /* can_apply       */
     NULL,               /* set_local       */
     cfgstr_filter_func, /* filter          */
+    0,                  /* feature_flags */
     cfgstr_set_config,  /* set_config      */
     cfgstr_get_config,  /* get_config      */
     NULL,               /* description     */
@@ -3553,7 +3613,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * An H5Z_class2_t filter and an H5Z_class3_t filter in the same pipeline
+ * An H5Z_class2_t filter and an H5Z_class4_t filter in the same pipeline
  * ---------------------------------------------------------------------- */
 #define MIXV2_FILTER_ID 533
 #define MIXV3_FILTER_ID 534
@@ -3626,18 +3686,19 @@ static const H5Z_class2_t mixv2_cls = {
     mixv2_filter_func,                      /* filter          */
 };
 
-static const H5Z_class3_t mixv3_cls = {
-    2,                 /* version         */
-    MIXV3_FILTER_ID,   /* id              */
-    1,                 /* encoder_present */
-    1,                 /* decoder_present */
-    "mixv3",           /* canonical name  */
-    NULL,              /* can_apply       */
-    NULL,              /* set_local       */
-    mixv3_filter_func, /* filter          */
-    mixv3_set_config,  /* set_config      */
-    NULL,              /* get_config      */
-    NULL,              /* description     */
+static const H5Z_class4_t mixv3_cls = {
+    H5Z_CLASS_T_VERS_4, /* version         */
+    MIXV3_FILTER_ID,    /* id              */
+    1,                  /* encoder_present */
+    1,                  /* decoder_present */
+    "mixv3",            /* canonical name  */
+    NULL,               /* can_apply       */
+    NULL,               /* set_local       */
+    mixv3_filter_func,  /* filter          */
+    0,                  /* feature_flags */
+    mixv3_set_config,   /* set_config      */
+    NULL,               /* get_config      */
+    NULL,               /* description     */
 };
 
 static int
@@ -3658,7 +3719,7 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
     if (H5Zregister(&mixv3_cls) < 0)
         TEST_ERROR;
 
-    TESTING("mixed pipeline: class2 and class3 filters in one dataset");
+    TESTING("mixed pipeline: class2 and class4 filters in one dataset");
 
     for (i = 0; i < 8; i++)
         for (j = 0; j < 8; j++)
@@ -3970,18 +4031,19 @@ canon_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_ne
     return nbytes; /* pass-through */
 }
 
-static const H5Z_class3_t canon_cls = {
-    2,                 /* version         */
-    CANON_FILTER_ID,   /* id              */
-    1,                 /* encoder_present */
-    1,                 /* decoder_present */
-    "canon_filter",    /* name            */
-    NULL,              /* can_apply       */
-    NULL,              /* set_local       */
-    canon_filter_func, /* filter          */
-    canon_set_config,  /* set_config      */
-    canon_get_config,  /* get_config      */
-    NULL,              /* description     */
+static const H5Z_class4_t canon_cls = {
+    H5Z_CLASS_T_VERS_4, /* version         */
+    CANON_FILTER_ID,    /* id              */
+    1,                  /* encoder_present */
+    1,                  /* decoder_present */
+    "canon_filter",     /* name            */
+    NULL,               /* can_apply       */
+    NULL,               /* set_local       */
+    canon_filter_func,  /* filter          */
+    0,                  /* feature_flags */
+    canon_set_config,   /* set_config      */
+    canon_get_config,   /* get_config      */
+    NULL,               /* description     */
 };
 
 /* Append CANON_FILTER_ID configured with PARAMS and return the DCPL */
@@ -4649,9 +4711,9 @@ main(void)
     nerrors += test_callback_contracts() < 0 ? 1 : 0;
     nerrors += test_modify_filter_pattern() < 0 ? 1 : 0;
 
-    /* H5Z_class3_t registration and canonical names */
+    /* H5Z_class4_t registration and canonical names */
     nerrors += test_canonical_name_display() < 0 ? 1 : 0;
-    nerrors += test_class3_name() < 0 ? 1 : 0;
+    nerrors += test_class4_name() < 0 ? 1 : 0;
     nerrors += test_name_id_fallback() < 0 ? 1 : 0;
     nerrors += test_canonical_name_length_limit() < 0 ? 1 : 0;
     nerrors += test_canonical_name_uniqueness() < 0 ? 1 : 0;
