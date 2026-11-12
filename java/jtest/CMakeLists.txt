@@ -58,6 +58,7 @@ set (HDF5_JAVA_JTEST_FFM_TEST_SOURCES
     TestH5VLffm
     TestH5PLffm
     TestH5Zffm
+    TestH5DeflateNativeffm
     TestH5FDffm
 )
 

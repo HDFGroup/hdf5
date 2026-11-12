@@ -1,0 +1,32 @@
+name: Verify vendored java/lib JARs
+
+# Ensures vendored libraries copies match committed SHA-256
+# digests in java/lib/vendored-jars.sha256 (offline; no network).
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'java/lib/**'
+      - '.github/scripts/verify-vendored-java-lib-jars.sh'
+      - '.github/workflows/verify-vendored-java-lib.yml'
+  pull_request:
+    paths:
+      - 'java/lib/**'
+      - '.github/scripts/verify-vendored-java-lib-jars.sh'
+      - '.github/workflows/verify-vendored-java-lib.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-offline-checksums:
+    name: SHA-256 vs committed manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Verify vendored JARs
+        run: ./.github/scripts/verify-vendored-java-lib-jars.sh
