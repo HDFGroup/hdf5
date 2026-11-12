@@ -237,6 +237,7 @@ H5_DLL herr_t H5E_clear_stack(void);
 H5_DLL herr_t H5E_dump_api_stack(void);
 H5_DLL void   H5E_pause_stack(void);
 H5_DLL void   H5E_resume_stack(void);
+H5_DLL bool   H5E_errors_disabled(void);
 H5_DLL herr_t H5E_user_cb_prepare(H5E_user_cb_state_t *state);
 H5_DLL herr_t H5E_user_cb_restore(const H5E_user_cb_state_t *state);
 

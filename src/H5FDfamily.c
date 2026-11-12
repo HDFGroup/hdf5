@@ -917,25 +917,48 @@ H5FD__family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 static herr_t
 H5FD__family_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    const H5FD_family_t *file = (const H5FD_family_t *)_file; /* Family VFD info */
+    const H5FD_family_t *file      = (const H5FD_family_t *)_file; /* Family VFD info */
+    herr_t               ret_value = SUCCEED;                      /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
+        unsigned u;
+
         *flags = 0;
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations */
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes. */
         *flags |= H5FD_FEAT_DATA_SIEVE; /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
 
-        /* Check for flags that are set by h5repart */
-        if (file && file->repart_members)
-            *flags |= H5FD_FEAT_DIRTY_DRVRINFO_LOAD; /* Mark the superblock dirty when it is loaded (so the
-                                                        family member sizes are rewritten) */
-    }                                                /* end if */
+        /* Check if file is available */
+        if (file) {
+            /* Check if all members have the H5FD_FEAT_READWRITE_NO_H5_CALLS flag */
+            for (u = 0; u < file->nmembs; u++) {
+                unsigned long memb_flags;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+                if (H5FD__query(file->memb[u], &memb_flags) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "member file query failed");
+                if (!(memb_flags & H5FD_FEAT_READWRITE_NO_H5_CALLS))
+                    break;
+            }
+
+            /* If we didn't break out of the loop, all members have the H5FD_FEAT_READWRITE_NO_H5_CALLS flag,
+             * set that flag for this file */
+            if (u == file->nmembs)
+                *flags |= H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the
+                                                              HDF5 API */
+
+            /* Check for flags that are set by h5repart */
+            if (file->repart_members)
+                *flags |= H5FD_FEAT_DIRTY_DRVRINFO_LOAD; /* Mark the superblock dirty when it is loaded (so
+                                                            the family member sizes are rewritten) */
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__family_query() */
 
 /*-------------------------------------------------------------------------

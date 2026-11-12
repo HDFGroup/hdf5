@@ -36,17 +36,19 @@ static herr_t H5Z__deflate_get_config(unsigned flags, size_t cd_nelmts, const un
                                       size_t *buf_size);
 
 /* This message derives from H5Z */
-H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_DEFLATE[1] = {{
-    H5Z_CLASS3_T_VERS,                                     /* H5Z_class3_t version */
-    H5Z_FILTER_DEFLATE,                                    /* Filter id number */
-    1,                                                     /* encoder_present flag (set to true) */
-    1,                                                     /* decoder_present flag (set to true) */
-    "deflate",                                             /* name */
-    NULL,                                                  /* The "can apply" callback */
-    NULL,                                                  /* The "set local" callback */
-    H5Z__filter_deflate,                                   /* The actual filter function */
-    H5Z__deflate_set_config,                               /* String config setter */
-    H5Z__deflate_get_config,                               /* String config getter */
+static const H5Z_class4_t H5Z_DEFLATE[1] = {{
+    H5Z_CLASS_T_VERS_4,  /* H5Z_class4_t version */
+    H5Z_FILTER_DEFLATE,  /* Filter id number */
+    1,                   /* encoder_present flag (set to true) */
+    1,                   /* decoder_present flag (set to true) */
+    "deflate",           /* name */
+    NULL,                /* The "can apply" callback */
+    NULL,                /* The "set local" callback */
+    H5Z__filter_deflate, /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    H5Z__deflate_set_config,         /* String config setter */
+    H5Z__deflate_get_config,         /* String config getter */
     "Deflate (zlib) general-purpose lossless compression", /* description */
 }};
 
@@ -133,6 +135,29 @@ H5Z__deflate_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const u
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__deflate_register
+ *
+ * Purpose:     Register the deflate filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__deflate_register(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register4(H5Z_DEFLATE) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register deflate filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__deflate_register() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z__filter_deflate

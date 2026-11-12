@@ -64,6 +64,8 @@ option (HDF5_ENABLE_ZLIB_SUPPORT "Enable Zlib Filters" OFF)
 option (HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF)
 mark_as_advanced (HDF5_PACKAGE_EXTLIBS)
 
+option (HDF5_ENABLE_THREADS "Enable threading support" ON)
+
 option (HDF5_ENABLE_THREADSAFE "Enable thread-safety" OFF)
 
 option (HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" OFF)
@@ -99,6 +101,14 @@ cmake_dependent_option (HDF5_ENABLE_MAVEN_DEPLOY "Enable Maven repository deploy
 mark_as_advanced (HDF5_ENABLE_MAVEN_DEPLOY)
 cmake_dependent_option (HDF5_MAVEN_SNAPSHOT "Build Maven snapshot versions with -SNAPSHOT suffix" OFF "HDF5_BUILD_JAVA" OFF)
 mark_as_advanced (HDF5_MAVEN_SNAPSHOT)
+# Distributions install unversioned jars (e.g. jarhdf5.jar) so that dependent
+# packages do not change on every HDF5 update. Empty means the versioned
+# default, so the version in the name follows the sources. Maven builds always
+# use the versioned names.
+set (HDF5_JAVA_JARHDF5_NAME "" CACHE STRING "Name of the installed jarhdf5 jar, without .jar (default: jarhdf5-<version>)")
+mark_as_advanced (HDF5_JAVA_JARHDF5_NAME)
+set (HDF5_JAVA_JAVAHDF5_NAME "" CACHE STRING "Name of the installed javahdf5 jar, without .jar (default: javahdf5-<version>)")
+mark_as_advanced (HDF5_JAVA_JAVAHDF5_NAME)
 
 option (HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples" ON)
 

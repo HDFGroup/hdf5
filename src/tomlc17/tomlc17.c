@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <locale.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -14,6 +15,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// static_assert is C11; provide a fallback for C99 (issue #58).
+#if !defined(__cplusplus) &&                                                   \
+    (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 201112L))
+#undef static_assert
+#define TOML_CAT_(a, b) a##b
+#define TOML_CAT(a, b) TOML_CAT_(a, b)
+#define static_assert(cond, msg)                                               \
+  enum { TOML_CAT(toml_static_assert_, __LINE__) = 1 / (int)(!!(cond)) }
+#endif
 
 const toml_datum_t DATUM_ZERO = {0};
 
@@ -1338,6 +1349,11 @@ static toml_datum_t *descend_keypart(parser_t *pp, int lineno, int colno,
 
   for (int i = 0; i < keypart->nspan; i++) {
     const char *reason;
+    // Cannot descend into an inline table.
+    if (tab->flag & TOML_FLAG_INLINED) {
+      SETERROR(pp->ebuf, lineno, "inline table cannot be extended");
+      return NULL;
+    }
     // Find the i-th keypart
     int j = tab_find(tab, keypart->span[i]);
     // Not found: add a new (key, tab) pair.
@@ -1791,6 +1807,16 @@ static int parse_keyvalue_expr(parser_t *pp, token_t tok) {
     }
     toml_datum_t *value = &tab->u.tab.value[j];
     if (value->type == TOML_TABLE) {
+      if (value->flag & TOML_FLAG_INLINED) {
+        return SETERROR(pp->ebuf, keylineno, "inline table cannot be extended");
+      }
+      if (value->flag & TOML_FLAG_EXPLICIT) {
+        return SETERROR(pp->ebuf, keylineno,
+                        "cannot extend a previously defined table using "
+                        "dotted expression");
+      }
+      // Now defined by dotted keys: a later [table] header must fail.
+      value->flag &= ~TOML_FLAG_STDEXPR;
       tab = value;
       continue;
     }
@@ -2696,6 +2722,23 @@ static int scan_float(scanner_t *sp, token_t *tok) {
     return SETERROR(sp->ebuf, lineno, "%s", reason);
   }
 
+  // strtod() honors LC_NUMERIC, but TOML always uses '.'; substitute the
+  // locale's decimal point, which may be multi-byte (issue #57).
+  // No-op in the "C" locale. Literals without '.' (1e3, inf, nan) skip this.
+  char *dot = strchr(buffer, '.');
+  const char *dp = localeconv()->decimal_point; // never empty per C std
+  if (dot && 0 != strcmp(dp, ".")) {
+    size_t dplen = strlen(dp);
+    // Result is strlen(buffer) - 1 + dplen bytes plus NUL; ensure it fits.
+    if (strlen(buffer) + dplen > sizeof(buffer)) {
+      return SETERROR(sp->ebuf, lineno, "number too long");
+    }
+    // Shift the tail (including NUL) to make room, then write dp over '.'.
+    // Regions overlap, hence memmove.
+    memmove(dot + dplen, dot + 1, strlen(dot + 1) + 1);
+    memcpy(dot, dp, dplen);
+  }
+
   errno = 0;
   char *q;
   double fp64 = strtod(buffer, &q);
@@ -3125,6 +3168,9 @@ static int utf8_to_ucs(const char *orig, int len, uint32_t *ret) {
         return -1;
       v = (v << 6) | (i & 0x3f);
     }
+    if (v < 0x80) {
+      return -1; // overlong encoding
+    }
     return *ret = v, (const char *)buf - orig;
   }
 
@@ -3141,10 +3187,13 @@ static int utf8_to_ucs(const char *orig, int len, uint32_t *ret) {
         return -1;
       v = (v << 6) | (i & 0x3f);
     }
+    if (v < 0x800) {
+      return -1; // overlong encoding
+    }
     return *ret = v, (const char *)buf - orig;
   }
 
-  /* 0x00010000 - 0x001FFFFF:
+  /* 0x00010000 - 0x0010FFFF:
      11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
   */
   if (0x1E == (i >> 3)) {
@@ -3156,6 +3205,12 @@ static int utf8_to_ucs(const char *orig, int len, uint32_t *ret) {
       if (0x2 != (i >> 6))
         return -1;
       v = (v << 6) | (i & 0x3f);
+    }
+    // Reject overlong forms and anything above the last Unicode scalar
+    // value. This also rejects the 0xF5..0xF7 lead bytes, which can only
+    // encode code points past U+10FFFF.
+    if (v < 0x10000 || v > 0x10FFFF) {
+      return -1;
     }
     return *ret = v, (const char *)buf - orig;
   }
@@ -3250,10 +3305,10 @@ static int ucs_to_utf8(uint32_t code, char buf[4]) {
     return 3;
   }
 
-  /* 0x00010000 - 0x001FFFFF:
+  /* 0x00010000 - 0x0010FFFF:
      11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
   */
-  if (code <= 0x001FFFFF) {
+  if (code <= 0x0010FFFF) {
     buf[0] = (unsigned char)(0xf0 | (code >> 18));
     buf[1] = (unsigned char)(0x80 | ((code >> 12) & 0x3f));
     buf[2] = (unsigned char)(0x80 | ((code >> 6) & 0x3f));
