@@ -279,7 +279,6 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
 
     FUNC_ENTER_API(H5I_INVALID_HID)
 
-    /* Check arguments */
     if (H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else if (true != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
@@ -302,8 +301,9 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Create the dataset */
     if (NULL ==
