@@ -427,7 +427,7 @@ main(void)
     CHECK_VERS_T(H5E_auto, 2);
     CHECK_VERS_T(H5O_info, 2);
     CHECK_VERS_T(H5O_iterate, 2);
-    CHECK_VERS_T(H5Z_class, 2);
+    CHECK_VERS_T(H5Z_class, 3);
 
 #else
 #error "TEST_API_VERSION not set to a valid value"

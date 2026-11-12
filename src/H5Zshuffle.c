@@ -27,19 +27,44 @@ static size_t H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsign
                                   size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-H5_ATTR_VISIBILITY_HIDDEN const H5Z_class3_t H5Z_SHUFFLE[1] = {{
-    H5Z_CLASS3_T_VERS,                                              /* H5Z_class3_t version */
-    H5Z_FILTER_SHUFFLE,                                             /* Filter id number */
-    1,                                                              /* encoder_present flag (set to true) */
-    1,                                                              /* decoder_present flag (set to true) */
-    "shuffle",                                                      /* name */
-    NULL,                                                           /* The "can apply" callback */
-    H5Z__set_local_shuffle,                                         /* The "set local" callback */
-    H5Z__filter_shuffle,                                            /* The actual filter function */
-    H5Z__no_params_set_config,                                      /* String config setter */
-    NULL,                                                           /* No string config getter */
+static const H5Z_class4_t H5Z_SHUFFLE[1] = {{
+    H5Z_CLASS_T_VERS_4,     /* H5Z_class4_t version */
+    H5Z_FILTER_SHUFFLE,     /* Filter id number */
+    1,                      /* encoder_present flag (set to true) */
+    1,                      /* decoder_present flag (set to true) */
+    "shuffle",              /* name */
+    NULL,                   /* The "can apply" callback */
+    H5Z__set_local_shuffle, /* The "set local" callback */
+    H5Z__filter_shuffle,    /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    H5Z__no_params_set_config,       /* String config setter */
+    NULL,                            /* No string config getter */
     "Byte shuffle preprocessing to improve downstream compression", /* description */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__shuffle_register
+ *
+ * Purpose:     Register the shuffle filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__shuffle_register(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register4(H5Z_SHUFFLE) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register shuffle filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__shuffle_register() */
 
 /* Local macros */
 #define H5Z_SHUFFLE_PARM_SIZE 0 /* "Local" parameter for shuffling size */

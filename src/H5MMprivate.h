@@ -33,6 +33,7 @@
  */
 /* #define H5MM_DEBUG */
 
+/* H5MM_calloc, H5MM_free, and H5MM_malloc must be thread-safe whenever H5_HAVE_THREADS is defined */
 #define H5MM_calloc(Z) calloc(1, Z)
 #define H5MM_free(Z)   free(Z)
 #define H5MM_malloc(Z) malloc(Z)
