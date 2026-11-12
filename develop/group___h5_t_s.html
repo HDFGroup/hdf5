@@ -47,7 +47,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-11</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2026-11-12</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -183,7 +183,7 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>This function is only present when the library is built with thread support, i.e. when <code>H5_HAVE_THREADS</code> is defined. This is the usual case; the exceptions are builds without a threading package and static libraries on Windows.</dd>
 <dd>
 Use of this function may increase memory usage during concurrent operations due to the need to maintain state for each thread simultaneously.</dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>Errors that are printed inside the threaded area, for example by the data filters, do not currently respect non-default error settings, and print their errors to stderr upon thread completion.</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Errors that are printed inside the threaded area, for example by the data filters, do not currently respect non-default error settings, except that if errors are disabled on the parent thread, for example by <a class="el" href="_h5_epublic_8h.html#aec70809990a203fe2e6b044437f74551">H5E_BEGIN_TRY</a> or <a class="el" href="group___h5_e.html#ga4c0064d86c4ce9b0ddef832dcc4158ed" title="Pause pushing errors on an error stack">H5Epause_stack()</a>, they will also be disabled in the child threads.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>2.3.0 </dd></dl>
 
 </div>
