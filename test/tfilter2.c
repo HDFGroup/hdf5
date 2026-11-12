@@ -806,7 +806,7 @@ static int
 test_canonical_name_display(void)
 {
     static const H5Z_class4_t title_cls = {
-        H5Z_CLASS_T_VERS_4,                   /* version        */
+        H5Z_CLASS_T_VERS_4,  /* version        */
         TITLE_FILTER_ID,     /* id             */
         1,                   /* encoder_present */
         1,                   /* decoder_present */
@@ -814,6 +814,7 @@ test_canonical_name_display(void)
         NULL,                /* can_apply      */
         NULL,                /* set_local      */
         title_filter_func,   /* filter         */
+        0,                   /* feature_flags */
         NULL,                /* set_config     */
         NULL,                /* get_config     */
         NULL,                /* description    */
@@ -887,17 +888,18 @@ test_class4_name(void)
     TESTING("H5Z_class4_t: NULL name rejected by H5Zregister");
     {
         static const H5Z_class4_t null_name_cls = {
-            H5Z_CLASS_T_VERS_4,                /* version        */
-            NAME_FILTER_ID,   /* id             */
-            1,                /* encoder_present */
-            1,                /* decoder_present */
-            NULL,             /* canonical_name - intentionally NULL to trigger error */
-            NULL,             /* can_apply      */
-            NULL,             /* set_local      */
-            name_filter_func, /* filter         */
-            NULL,             /* set_config     */
-            NULL,             /* get_config     */
-            NULL,             /* description    */
+            H5Z_CLASS_T_VERS_4, /* version        */
+            NAME_FILTER_ID,     /* id             */
+            1,                  /* encoder_present */
+            1,                  /* decoder_present */
+            NULL,               /* canonical_name - intentionally NULL to trigger error */
+            NULL,               /* can_apply      */
+            NULL,               /* set_local      */
+            name_filter_func,   /* filter         */
+            0,                  /* feature_flags */
+            NULL,               /* set_config     */
+            NULL,               /* get_config     */
+            NULL,               /* description    */
         };
         H5E_BEGIN_TRY
         {
@@ -912,7 +914,7 @@ test_class4_name(void)
     TESTING("H5Z_class4_t: valid name accepted by H5Zregister");
     {
         static const H5Z_class4_t valid_cls = {
-            H5Z_CLASS_T_VERS_4,                  /* version        */
+            H5Z_CLASS_T_VERS_4, /* version        */
             NAME_FILTER_ID,     /* id             */
             1,                  /* encoder_present */
             1,                  /* decoder_present */
@@ -920,6 +922,7 @@ test_class4_name(void)
             NULL,               /* can_apply      */
             NULL,               /* set_local      */
             name_filter_func,   /* filter         */
+            0,                  /* feature_flags */
             NULL,               /* set_config     */
             NULL,               /* get_config     */
             NULL,               /* description    */
@@ -1008,7 +1011,7 @@ test_canonical_name_length_limit(void)
                   "AAAAAAAAAAAAAAAAAAAA"
                   /*  56 */ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; /* 256 'A's + NUL */
     H5Z_class4_t long_cls = {
-        H5Z_CLASS_T_VERS_4,                     /* version         */
+        H5Z_CLASS_T_VERS_4,    /* version         */
         LONGTITLE_FILTER_ID,   /* id              */
         1,                     /* encoder_present */
         1,                     /* decoder_present */
@@ -1016,6 +1019,7 @@ test_canonical_name_length_limit(void)
         NULL,                  /* can_apply       */
         NULL,                  /* set_local       */
         longtitle_filter_func, /* filter          */
+        0,                     /* feature_flags */
         NULL,                  /* set_config      */
         NULL,                  /* get_config      */
         NULL,                  /* description     */
@@ -1056,8 +1060,18 @@ test_canonical_name_length_limit(void)
         size_t i;
 
         for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
-            H5Z_class4_t c = {H5Z_CLASS_T_VERS_4,    LONGTITLE_FILTER_ID,   1,    1,    bad[i], NULL,
-                              NULL, longtitle_filter_func, NULL, NULL, NULL};
+            H5Z_class4_t c = {H5Z_CLASS_T_VERS_4,
+                              LONGTITLE_FILTER_ID,
+                              1,
+                              1,
+                              bad[i],
+                              NULL,
+                              NULL,
+                              longtitle_filter_func,
+                              0,
+                              NULL,
+                              NULL,
+                              NULL};
             H5E_BEGIN_TRY
             {
                 ret = H5Zregister(&c);
@@ -1071,8 +1085,18 @@ test_canonical_name_length_limit(void)
         }
 
         for (i = 0; i < sizeof(good) / sizeof(good[0]); i++) {
-            H5Z_class4_t c = {H5Z_CLASS_T_VERS_4,    LONGTITLE_FILTER_ID,   1,    1,    good[i], NULL,
-                              NULL, longtitle_filter_func, NULL, NULL, NULL};
+            H5Z_class4_t c = {H5Z_CLASS_T_VERS_4,
+                              LONGTITLE_FILTER_ID,
+                              1,
+                              1,
+                              good[i],
+                              NULL,
+                              NULL,
+                              longtitle_filter_func,
+                              0,
+                              NULL,
+                              NULL,
+                              NULL};
             if (H5Zregister(&c) < 0) {
                 fprintf(stderr, "\n   rejected valid name \"%s\"\n", good[i]);
                 TEST_ERROR;
@@ -1097,13 +1121,31 @@ error:
 static int
 test_canonical_name_uniqueness(void)
 {
-    H5Z_class4_t cls_a = {
-        H5Z_CLASS_T_VERS_4, UNIQUENAME_FILTER_ID_A, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
-        NULL};
-    H5Z_class4_t cls_b = {
-        H5Z_CLASS_T_VERS_4, UNIQUENAME_FILTER_ID_B, 1, 1, "test-unique-name", NULL, NULL, longtitle_filter_func, NULL, NULL,
-        NULL};
-    herr_t ret;
+    H5Z_class4_t cls_a = {H5Z_CLASS_T_VERS_4,
+                          UNIQUENAME_FILTER_ID_A,
+                          1,
+                          1,
+                          "test-unique-name",
+                          NULL,
+                          NULL,
+                          longtitle_filter_func,
+                          0,
+                          NULL,
+                          NULL,
+                          NULL};
+    H5Z_class4_t cls_b = {H5Z_CLASS_T_VERS_4,
+                          UNIQUENAME_FILTER_ID_B,
+                          1,
+                          1,
+                          "test-unique-name",
+                          NULL,
+                          NULL,
+                          longtitle_filter_func,
+                          0,
+                          NULL,
+                          NULL,
+                          NULL};
+    herr_t       ret;
 
     TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
 
@@ -1281,7 +1323,18 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 }
 
 static const H5Z_class4_t ctxpass_cls = {
-    H5Z_CLASS_T_VERS_4, CTXPASS_FILTER_ID, 1, 1, "test_ctxpass_filter", NULL, NULL, ctxpass_filter_cb, NULL, NULL, NULL,
+    H5Z_CLASS_T_VERS_4,
+    CTXPASS_FILTER_ID,
+    1,
+    1,
+    "test_ctxpass_filter",
+    NULL,
+    NULL,
+    ctxpass_filter_cb,
+    0,
+    NULL,
+    NULL,
+    NULL,
 };
 
 static int

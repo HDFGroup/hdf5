@@ -31,7 +31,7 @@ jobs:
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
       - name: Install oneAPI (Linux)
-        uses: fortran-lang/setup-fortran@be037f0a45b1160f139d4ccd0b96f9e9bfd6a682 # v1
+        uses: fortran-lang/setup-fortran@4b0d970b3801207ebcef014f759c435985c53486 # main, fixes apt-key removal on ubuntu-26.04 (fortran-lang/setup-fortran#301)
         id: setup-fortran
         with:
           compiler: intel
@@ -80,7 +80,7 @@ jobs:
         run: choco install ninja
 
       - name: install oneAPI (Windows)
-        uses: fortran-lang/setup-fortran@be037f0a45b1160f139d4ccd0b96f9e9bfd6a682 # v1
+        uses: fortran-lang/setup-fortran@4b0d970b3801207ebcef014f759c435985c53486 # main, fixes apt-key removal on ubuntu-26.04 (fortran-lang/setup-fortran#301)
         id: setup-fortran
         with:
           compiler: intel

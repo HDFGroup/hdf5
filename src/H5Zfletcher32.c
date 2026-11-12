@@ -23,19 +23,44 @@ static size_t H5Z__filter_fletcher32(unsigned flags, size_t cd_nelmts, const uns
                                      size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-H5_ATTR_VISIBILITY_HIDDEN const H5Z_class4_t H5Z_FLETCHER32[1] = {{
-    H5Z_CLASS_T_VERS_4,                                   /* H5Z_class4_t version */
-    H5Z_FILTER_FLETCHER32,                               /* Filter id number */
-    1,                                                   /* encoder_present flag (set to true) */
-    1,                                                   /* decoder_present flag (set to true) */
-    "fletcher32",                                        /* name */
-    NULL,                                                /* The "can apply" callback */
-    NULL,                                                /* The "set local" callback */
-    H5Z__filter_fletcher32,                              /* The actual filter function */
-    NULL,                                                /* String config setter */
-    NULL,                                                /* String config getter */
+static const H5Z_class4_t H5Z_FLETCHER32[1] = {{
+    H5Z_CLASS_T_VERS_4,     /* H5Z_class4_t version */
+    H5Z_FILTER_FLETCHER32,  /* Filter id number */
+    1,                      /* encoder_present flag (set to true) */
+    1,                      /* decoder_present flag (set to true) */
+    "fletcher32",           /* name */
+    NULL,                   /* The "can apply" callback */
+    NULL,                   /* The "set local" callback */
+    H5Z__filter_fletcher32, /* The actual filter function */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    NULL,                            /* String config setter */
+    NULL,                            /* String config getter */
     "Fletcher32 checksum for end-to-end data integrity", /* description */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__fletcher32_register
+ *
+ * Purpose:     Register the fletcher32 filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__fletcher32_register(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register4(H5Z_FLETCHER32) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register fletcher32 filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__fletcher32_register() */
 
 #define FLETCHER_LEN 4
 
@@ -68,13 +93,14 @@ H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
     assert(sizeof(uint32_t) >= 4);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
-        /* A Fletcher32-filtered buffer must contain at least the trailing
-         * checksum.  Reject anything smaller to avoid a size_t underflow
-         * when computing the data length.
+        /* The checksum is stored at the end of the chunk, so anything shorter
+         * than the checksum itself makes the length arithmetic below wrap.  A
+         * chunk of exactly FLETCHER_LEN bytes holds no data and would return a
+         * filtered size of zero, which the pipeline reports as a filter failure,
+         * so reject it here where the reason can be stated.
          */
-        if (nbytes < FLETCHER_LEN)
-            HGOTO_ERROR(H5E_STORAGE, H5E_OVERFLOW, 0,
-                        "fletcher32 filter input buffer too small to contain checksum");
+        if (nbytes <= FLETCHER_LEN)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
         /* Do checksum if it's enabled for read; otherwise skip it
          * to save performance. */
