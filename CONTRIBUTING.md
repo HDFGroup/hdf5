@@ -251,6 +251,7 @@ Use HDF5's internal memory management instead of direct `malloc`/`free`:
 5. **Submit a pull request (PR)**
    - Address any formatting or testing issues reported by CI.
    - Make sure to include the issue that the PR addresses in the description.
+   - Describe how you verified the change: which tests or checks you ran and their results.
    - Work with HDF Group developers to meet acceptance criteria.
 
 ### Acceptance Criteria
@@ -262,6 +263,9 @@ For a pull request to be accepted, it must satisfy:
 * **Testing:** Must pass HDF5 regression testing and include appropriate tests.
   - We do not expect you to perform comprehensive testing across multiple platforms
     before we accept the pull request.
+* **Verification:** For bug fixes and new features, the pull request description must state what
+  you verified, which tests or checks you ran, and the results. Maintainers may return a pull
+  request that is missing this, or is otherwise incomplete, before reviewing it in detail.
 * **Compatibility:** Must not compromise HDF5's core principles:
   - 100% backward compatibility (any HDF5 file must remain readable).
     - If your patch's purpose is to modify the HDF5 data model or file format, **please** discuss
@@ -321,10 +325,10 @@ Disclosure is optional and carries no stigma. `Co-authored-by:` is reserved for 
 be used for AI tools. Deterministic tools such as compilers, sanitizers, fuzzers, and static
 analyzers do not need to be disclosed, but naming the tool that found a bug is helpful.
 
-Do not promote AI companies or products. Any statement about AI use, in commit messages, pull request
-descriptions, comments, or code, must be generic and must not name a company, product, or model.
-Remove the "generated with" footers, badges, links, session URLs, and `Co-authored-by:` trailers that
-some tools add automatically.
+Do not promote AI companies or products. If you mention AI use in commit messages, pull request
+descriptions, comments, or code, keep it generic, as in the `Assisted-by: AI tool` trailer above,
+and do not name a company, product, or model. Remove the "generated with" footers, badges, links,
+session URLs, and `Co-authored-by:` trailers that some tools add automatically.
 
 #### Licensing
 
@@ -338,8 +342,9 @@ approval or as the required maintainer review, and they cannot authorize a merge
 
 #### Security Reports
 
-Do not file vulnerability reports based only on unverified AI output. Reproduce the problem against
-the current `develop` branch and include a minimal reproducer. See [SECURITY.md](SECURITY.md).
+Do not file vulnerability reports based only on unverified AI output. Reproduce the problem on the
+current `develop` branch or on a supported release, and include a minimal reproducer. See
+"Supported Versions" in [SECURITY.md](SECURITY.md#supported-versions).
 
 ---
 

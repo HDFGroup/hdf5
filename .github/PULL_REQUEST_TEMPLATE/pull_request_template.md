@@ -2,6 +2,10 @@
 
 ## Issue ticket number (GitHub or JIRA)
 
+## Testing
+
+<!-- Bug fixes and new features: state what you verified, which tests or checks you ran, and the results. -->
+
 ## Checklist before requesting a review
 - [ ] My code conforms to the guidelines in CONTRIBUTING.md
 - [ ] I made an entry in release_docs/CHANGELOG.md (bug fixes, new features)
