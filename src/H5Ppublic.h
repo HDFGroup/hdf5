@@ -67,7 +67,7 @@
  */
 #define H5P_DATASET_XFER (H5OPEN H5P_CLS_DATASET_XFER_ID_g)
 /**
- * File mount property list class
+ * File mount property list class \since 1.8.0
  */
 #define H5P_FILE_MOUNT (H5OPEN H5P_CLS_FILE_MOUNT_ID_g)
 /**
@@ -87,15 +87,15 @@
  */
 #define H5P_DATATYPE_ACCESS (H5OPEN H5P_CLS_DATATYPE_ACCESS_ID_g)
 /**
- * Map creation property list class
+ * Map creation property list class \since 1.12.0
  */
 #define H5P_MAP_CREATE (H5OPEN H5P_CLS_MAP_CREATE_ID_g)
 /**
- * Map access property list class
+ * Map access property list class \since 1.12.0
  */
 #define H5P_MAP_ACCESS (H5OPEN H5P_CLS_MAP_ACCESS_ID_g)
 /**
- * String creation property list class, is not user-accessible
+ * String creation property list class, is not user-accessible \since 1.8.0
  */
 #define H5P_STRING_CREATE (H5OPEN H5P_CLS_STRING_CREATE_ID_g)
 /**
@@ -103,27 +103,27 @@
  */
 #define H5P_ATTRIBUTE_CREATE (H5OPEN H5P_CLS_ATTRIBUTE_CREATE_ID_g)
 /**
- * Attribute access property list class
+ * Attribute access property list class \since 1.10.0
  */
 #define H5P_ATTRIBUTE_ACCESS (H5OPEN H5P_CLS_ATTRIBUTE_ACCESS_ID_g)
 /**
- * Object copy property list class
+ * Object copy property list class \since 1.8.0
  */
 #define H5P_OBJECT_COPY (H5OPEN H5P_CLS_OBJECT_COPY_ID_g)
 /**
- * Link creation property list class
+ * Link creation property list class \since 1.8.0
  */
 #define H5P_LINK_CREATE (H5OPEN H5P_CLS_LINK_CREATE_ID_g)
 /**
- * Link access property list class
+ * Link access property list class \since 1.8.0
  */
 #define H5P_LINK_ACCESS (H5OPEN H5P_CLS_LINK_ACCESS_ID_g)
 /**
- * VOL initialization property list class
+ * VOL initialization property list class \since 1.12.0
  */
 #define H5P_VOL_INITIALIZE (H5OPEN H5P_CLS_VOL_INITIALIZE_ID_g)
 /**
- * Reference access property list class
+ * Reference access property list class \since 1.12.0
  */
 #define H5P_REFERENCE_ACCESS (H5OPEN H5P_CLS_REFERENCE_ACCESS_ID_g)
 
@@ -131,15 +131,15 @@
  * The library's default property lists
  */
 /**
- * File creation default property list
+ * File creation default property list \since 1.6.0
  */
 #define H5P_FILE_CREATE_DEFAULT (H5OPEN H5P_LST_FILE_CREATE_ID_g)
 /**
- * File access default property list
+ * File access default property list \since 1.6.0
  */
 #define H5P_FILE_ACCESS_DEFAULT (H5OPEN H5P_LST_FILE_ACCESS_ID_g)
 /**
- * Dataset creation default property list
+ * Dataset creation default property list \since 1.6.0
  */
 #define H5P_DATASET_CREATE_DEFAULT (H5OPEN H5P_LST_DATASET_CREATE_ID_g)
 /**
@@ -147,11 +147,11 @@
  */
 #define H5P_DATASET_ACCESS_DEFAULT (H5OPEN H5P_LST_DATASET_ACCESS_ID_g)
 /**
- * Dataset transfer default property list
+ * Dataset transfer default property list \since 1.6.0
  */
 #define H5P_DATASET_XFER_DEFAULT (H5OPEN H5P_LST_DATASET_XFER_ID_g)
 /**
- * File mount default property list
+ * File mount default property list \since 1.8.0
  */
 #define H5P_FILE_MOUNT_DEFAULT (H5OPEN H5P_LST_FILE_MOUNT_ID_g)
 /**
@@ -171,11 +171,11 @@
  */
 #define H5P_DATATYPE_ACCESS_DEFAULT (H5OPEN H5P_LST_DATATYPE_ACCESS_ID_g)
 /**
- * Map creation default property list
+ * Map creation default property list \since 1.12.0
  */
 #define H5P_MAP_CREATE_DEFAULT (H5OPEN H5P_LST_MAP_CREATE_ID_g)
 /**
- * Map access default property list
+ * Map access default property list \since 1.12.0
  */
 #define H5P_MAP_ACCESS_DEFAULT (H5OPEN H5P_LST_MAP_ACCESS_ID_g)
 /**
@@ -183,35 +183,35 @@
  */
 #define H5P_ATTRIBUTE_CREATE_DEFAULT (H5OPEN H5P_LST_ATTRIBUTE_CREATE_ID_g)
 /**
- * Attribute access default property list
+ * Attribute access default property list \since 1.10.0
  */
 #define H5P_ATTRIBUTE_ACCESS_DEFAULT (H5OPEN H5P_LST_ATTRIBUTE_ACCESS_ID_g)
 /**
- * Object copy default property list
+ * Object copy default property list \since 1.8.0
  */
 #define H5P_OBJECT_COPY_DEFAULT (H5OPEN H5P_LST_OBJECT_COPY_ID_g)
 /**
- * Link creation default property list
+ * Link creation default property list \since 1.8.0
  */
 #define H5P_LINK_CREATE_DEFAULT (H5OPEN H5P_LST_LINK_CREATE_ID_g)
 /**
- * Link access default property list
+ * Link access default property list \since 1.8.0
  */
 #define H5P_LINK_ACCESS_DEFAULT (H5OPEN H5P_LST_LINK_ACCESS_ID_g)
 /**
- * VOL initialization default property list
+ * VOL initialization default property list \since 1.12.0
  */
 #define H5P_VOL_INITIALIZE_DEFAULT (H5OPEN H5P_LST_VOL_INITIALIZE_ID_g)
 /**
- * Reference access default property list
+ * Reference access default property list \since 1.12.0
  */
 #define H5P_REFERENCE_ACCESS_DEFAULT (H5OPEN H5P_LST_REFERENCE_ACCESS_ID_g)
 /**
- * Attribute creation order is tracked but not necessarily indexed
+ * Attribute creation order is tracked but not necessarily indexed \since 1.8.0
  */
 #define H5P_CRT_ORDER_TRACKED 0x0001
 /**
- * Attribute creation order is indexed (requires #H5P_CRT_ORDER_TRACKED)
+ * Attribute creation order is indexed (requires #H5P_CRT_ORDER_TRACKED) \since 1.8.0
  */
 #define H5P_CRT_ORDER_INDEXED 0x0002
 /**
@@ -493,40 +493,49 @@ typedef enum H5D_mpio_no_collective_cause_t {
  * Causes for H5Pget_no_selection_io_cause() property
  */
 
-/** Selection I/O was not performed because the feature was disabled by the API */
+/** Selection I/O was not performed because the feature was disabled by the API
+    \since 1.14.1 */
 #define H5D_SEL_IO_DISABLE_BY_API (0x0001u)
 
-/** Selection I/O was not performed because the dataset was neither contiguous nor chunked */
+/** Selection I/O was not performed because the dataset was neither contiguous nor chunked
+    \since 1.14.1 */
 #define H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET (0x0002u)
 
-/** Selection I/O was not performed because of sieve buffer for contiguous dataset */
+/** Selection I/O was not performed because of sieve buffer for contiguous dataset
+    \since 1.14.1 */
 #define H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER (0x0004u)
 
-/** Selection I/O was not performed because the VFD does not have vector or selection I/O callback */
+/** Selection I/O was not performed because the VFD does not have vector or selection
+    I/O callback \since 1.14.1 */
 #define H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB (0x0008u)
 
-/** Selection I/O was not performed because of page buffer */
+/** Selection I/O was not performed because of page buffer \since 1.14.1 */
 #define H5D_SEL_IO_PAGE_BUFFER (0x0010u)
 
-/** Selection I/O was not performed because of dataset filters */
+/** Selection I/O was not performed because of dataset filters \since 1.14.1 */
 #define H5D_SEL_IO_DATASET_FILTER (0x0020u)
 
-/** Selection I/O was not performed because of chunk cache */
+/** Selection I/O was not performed because of chunk cache \since 1.14.1 */
 #define H5D_SEL_IO_CHUNK_CACHE (0x0040u)
 
-/** Selection I/O was not performed because the type conversion buffer is too small */
+/** Selection I/O was not performed because the type conversion buffer is too small
+    \since 1.14.1 */
 #define H5D_SEL_IO_TCONV_BUF_TOO_SMALL (0x0080u)
 
-/** Selection I/O was not performed because the type conversion background buffer is too small */
+/** Selection I/O was not performed because the type conversion background buffer is
+    too small \since 1.14.1 */
 #define H5D_SEL_IO_BKG_BUF_TOO_SMALL (0x0100u)
 
 /**
  * Selection I/O was not performed because the selection I/O mode is DEFAULT
  * and the library chose it to be off for this case
+ * \since 1.14.1
  */
 #define H5D_SEL_IO_DEFAULT_OFF (0x0200u)
 
-/* Causes for H5D_MPIO_NO_SELECTION_IO */
+/**
+ * Causes for H5D_MPIO_NO_SELECTION_IO \since 1.14.1
+ */
 #define H5D_MPIO_NO_SELECTION_IO_CAUSES                                                                      \
     (H5D_SEL_IO_DISABLE_BY_API | H5D_SEL_IO_TCONV_BUF_TOO_SMALL | H5D_SEL_IO_BKG_BUF_TOO_SMALL |             \
      H5D_SEL_IO_DATASET_FILTER | H5D_SEL_IO_CHUNK_CACHE)
@@ -552,9 +561,9 @@ typedef enum H5D_selection_io_mode_t {
 /**
  * Causes for H5Pget_actual_selection_io_mode() property
  */
-#define H5D_SCALAR_IO    (0x0001u) /**< Scalar (or legacy MPIO) I/O was performed */
-#define H5D_VECTOR_IO    (0x0002u) /**< Vector I/O was performed */
-#define H5D_SELECTION_IO (0x0004u) /**< Selection I/O was performed */
+#define H5D_SCALAR_IO    (0x0001u) /**< Scalar (or legacy MPIO) I/O was performed \since 1.14.3 */
+#define H5D_VECTOR_IO    (0x0002u) /**< Vector I/O was performed \since 1.14.3 */
+#define H5D_SELECTION_IO (0x0004u) /**< Selection I/O was performed \since 1.14.3 */
 
 /********************/
 /* Public Variables */
@@ -10114,7 +10123,9 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
 
 /* Macros */
 
-/* We renamed the "root" of the property list class hierarchy */
+/**
+ * The "root" of the property list class hierarchy \since 1.6.0
+ */
 #define H5P_NO_CLASS H5P_ROOT
 
 /* Typedefs */

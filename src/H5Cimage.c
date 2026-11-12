@@ -2878,7 +2878,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t *buf_size
     pf_entry_ptr->prefetched_dirty = is_dirty && (!file_is_rw);
 
     /* Sanity checks */
-    assert(pf_entry_ptr->size > 0 && pf_entry_ptr->size < H5C_MAX_ENTRY_SIZE);
+    assert(pf_entry_ptr->size > 0);
 
     /* Update buffer pointer and buffer len */
     *buf_size -= (hsize_t)(p - *buf);

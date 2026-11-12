@@ -57,23 +57,11 @@ jobs:
   # A workflow that builds the library and runs all the tests
   Build_and_test:
     strategy:
-      # The current matrix has one dimensions:
-      #
-      # * config name
-      #
-      # Most configuration information is added via the 'include' mechanism,
-      # which will append the key-value pairs in the configuration where the
-      # names match.
+      # Each 'include' entry is one configuration, and so one job. Its name
+      # and settings are listed only there.
       matrix:
-        name:
-          - "Windows MSVC"
-          - "Ubuntu gcc"
-          - "MacOS Clang"
-
-        # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake
         # configure values, so be aware of that.
-
         include:
 
           # Windows w/ MSVC
@@ -99,7 +87,7 @@ jobs:
 
           # Linux (Ubuntu) w/ gcc
           #
-          - name: "Ubuntu gcc"
+          - name: "Ubuntu 24.04 gcc"
             ostype: ubuntu
             os: ubuntu-24.04
             shared: ON
@@ -119,9 +107,9 @@ jobs:
 
           # MacOS w/ Clang
           #
-          - name: "MacOS Clang"
+          - name: "MacOS 26 Clang"
             ostype: macos
-            os: macos-15
+            os: macos-26
             shared: ON
             cpp: ON
             fortran: OFF

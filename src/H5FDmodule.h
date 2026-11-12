@@ -106,7 +106,7 @@
  *     #H5Pset_fapl_mirror.
  *
  * \li \Bold{ROS3 Driver}: Read-only driver for accessing HDF5 files in S3-compatible object storage.
- *     Set with #H5Pset_fapl_ros3.
+ *     Set with #H5Pset_fapl_ros3. See \ref ros3_vfd for how it is configured.
  *
  * \li \Bold{HDFS Driver}: Read-only driver for accessing HDF5 files in Hadoop Distributed File System.
  *     Set with #H5Pset_fapl_hdfs.
