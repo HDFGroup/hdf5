@@ -2011,7 +2011,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
     CHECK(fapl, FAIL, "H5Pcreate");
 
     /* Use the 'core' VFD for this test */
-    ret = H5Pset_fapl_core(fapl, (size_t)(1024 * 1024), false);
+    ret = H5Pset_fapl_core(fapl, 0, (size_t)(1024 * 1024), false);
     CHECK(ret, FAIL, "H5Pset_fapl_core");
 
     /* Create file */
@@ -2996,7 +2996,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     CHECK(fapl, FAIL, "H5Pcreate");
 
     /* Use the 'core' VFD for this test */
-    ret = H5Pset_fapl_core(fapl, (size_t)(1024 * 1024), false);
+    ret = H5Pset_fapl_core(fapl, 0, (size_t)(1024 * 1024), false);
     CHECK(ret, FAIL, "H5Pset_fapl_core");
 
     /* Create file */
