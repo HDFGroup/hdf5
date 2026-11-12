@@ -578,8 +578,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__splitter_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-                    size_t size, void *buf)
+H5FD__splitter_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *buf)
 {
     H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
     herr_t           ret_value = SUCCEED;
@@ -1351,6 +1350,10 @@ H5FD__splitter_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
         if (H5FDquery(file->rw_file, flags) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to query R/W file");
+
+        /* Unset H5FD_FEAT_READWRITE_NO_H5_CALLS, since this VFD calls the public H5FD API in the read() and
+         * write() callbacks */
+        *flags &= ~((unsigned long)H5FD_FEAT_READWRITE_NO_H5_CALLS);
     }
     else {
         /* There is no file. Because this is a pure passthrough VFD,

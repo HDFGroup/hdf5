@@ -1278,6 +1278,7 @@ H5FD__hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
     if (flags) {
         *flags = 0;
         *flags |= H5FD_FEAT_DATA_SIEVE;
+        *flags |= H5FD_FEAT_READWRITE_NO_H5_CALLS;
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)

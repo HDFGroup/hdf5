@@ -70,7 +70,11 @@ jobs:
     secrets:
         APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
         APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+        KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        SIGNER: ${{ secrets.SIGNER }}
+        NOTARY_USER: ${{ secrets.NOTARY_USER }}
+        NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
