@@ -72,6 +72,7 @@ H5_DLLVAR htri_t H5FD_ignore_disabled_file_locks_p;
 H5_DLL haddr_t H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *align_addr,
                                 hsize_t *align_size);
 H5_DLL herr_t  H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size);
+H5_DLL herr_t  H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
 
 /* Internal VFD init/term routines */
 H5_DLL herr_t H5FD__core_register(void);

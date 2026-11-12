@@ -23,9 +23,21 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # Docker 29.4.2 (ubuntu-26.04 image) ships moby seccomp/v0.2.2, whose
+      # default profile denies socketcall(2). Debian's i386 glibc makes every
+      # socket call through socketcall, so the container has no network and
+      # apt-get fails with "Temporary failure resolving". seccomp/v0.2.3 (Docker
+      # 29.4.3+) reverts the deny; use that profile until the runner image
+      # catches up. See actions/runner-images#14790.
+      - name: Fetch seccomp profile that allows socketcall
+        run: |
+          curl -fsSL -o "${{ runner.temp }}/seccomp.json" \
+            https://raw.githubusercontent.com/moby/profiles/seccomp/v0.2.3/seccomp/default.json
+
       - name: Start i386 container
         run: |
           docker run -d --name i386_build --platform linux/386 \
+            --security-opt seccomp="${{ runner.temp }}/seccomp.json" \
             -e CTEST_OUTPUT_ON_FAILURE=1 \
             -v "${{ github.workspace }}:/workspace" \
             i386/debian:bookworm sleep infinity
