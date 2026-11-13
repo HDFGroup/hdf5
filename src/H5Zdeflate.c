@@ -28,8 +28,8 @@
 
 /* Local function prototypes */
 static size_t H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
-                                  const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
-                                  size_t *buf_size, void **buf);
+                                  const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size,
+                                  void **buf);
 static herr_t H5Z__deflate_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts,
                                       unsigned cd_values[], size_t cd_values_size);
 static herr_t H5Z__deflate_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
@@ -173,8 +173,7 @@ done:
 static size_t
 H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                     hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                    size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
-                    void **buf)
+                    size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     void  *outbuf = NULL; /* Pointer to new buffer */
     int    status;        /* Status from zlib operation */

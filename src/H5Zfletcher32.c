@@ -19,8 +19,8 @@
 
 /* Local function prototypes */
 static size_t H5Z__filter_fletcher32(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                                     hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state,
-                                     size_t nbytes, size_t *buf_size, void **buf);
+                                     hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                                     size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 static const H5Z_class4_t H5Z_FLETCHER32[1] = {{
@@ -77,8 +77,8 @@ done:
 static size_t
 H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
                        const unsigned H5_ATTR_UNUSED cd_values[], hid_t H5_ATTR_UNUSED dxpl_id,
-                       const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
-                       void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size, void **buf)
+                       const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                       size_t *buf_size, void **buf)
 {
     void          *outbuf = NULL; /* Pointer to new buffer */
     unsigned char *src    = (unsigned char *)(*buf);
