@@ -1450,8 +1450,7 @@ error:
 static size_t
 title_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                   hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                  size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
-                  void **buf)
+                  size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1528,8 +1527,7 @@ error:
 static size_t
 name_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                  hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                 size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
-                 void **buf)
+                 size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1633,8 +1631,7 @@ fastpath_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelm
 static size_t
 fastpath_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                      hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                     size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
-                     void **buf)
+                     size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1782,8 +1779,7 @@ error:
 static size_t
 cdvals_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                    hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                   size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
-                   void **buf)
+                   size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1908,8 +1904,7 @@ cdvals_clean_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_
 static size_t
 cdvals_clean_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                          hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                         size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
-                         size_t *buf_size, void **buf)
+                         size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -1985,8 +1980,7 @@ error:
 static size_t
 persist_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                     hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                    size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
-                    void **buf)
+                    size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -2095,8 +2089,7 @@ error:
 static size_t
 longtitle_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                       hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                      size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
-                      size_t *buf_size, void **buf)
+                      size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -2447,8 +2440,7 @@ callback_get_config(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 static size_t
 callback_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                      hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                     size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size,
-                     void **buf)
+                     size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -2709,7 +2701,7 @@ error:
 }
 
 /* -----------------------------------------------------------------------
- * H5Z_func2_t receives the right dxpl_id, scaled and ndims, and NULL state
+ * H5Z_func2_t receives the right dxpl_id, scaled and ndims
  * ---------------------------------------------------------------------- */
 
 #define CTXPASS_FILTER_ID 520
@@ -2721,7 +2713,6 @@ typedef struct {
     bool   dxpl_ok;
     bool   ndims_ok;
     bool   scaled_ok;
-    bool   state_ok;
     bool   scaled_seen[2][2]; /* [row_chunk][col_chunk] */
 } ctxpass_state_t;
 
@@ -2729,8 +2720,7 @@ static ctxpass_state_t g_ctxpass;
 
 static size_t
 ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, hid_t dxpl_id,
-                  const hsize_t *scaled, size_t ndims, void *state, size_t nbytes, size_t *buf_size,
-                  void **buf)
+                  const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     (void)flags;
     (void)cd_nelmts;
@@ -2745,9 +2735,6 @@ ctxpass_filter_cb(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 
     if (ndims != 2)
         g_ctxpass.ndims_ok = false;
-
-    if (state != NULL)
-        g_ctxpass.state_ok = false;
 
     if (scaled == NULL || scaled[0] > 1 || scaled[1] > 1)
         g_ctxpass.scaled_ok = false;
@@ -2782,8 +2769,6 @@ check_ctxpass_state(void)
     if (!g_ctxpass.ndims_ok)
         return -1;
     if (!g_ctxpass.scaled_ok)
-        return -1;
-    if (!g_ctxpass.state_ok)
         return -1;
     if (!g_ctxpass.scaled_seen[0][0] || !g_ctxpass.scaled_seen[0][1] || !g_ctxpass.scaled_seen[1][0] ||
         !g_ctxpass.scaled_seen[1][1])
@@ -2830,14 +2815,13 @@ test_filter2_context_passthrough(hid_t file)
     if ((dset = H5Dcreate2(file, "ctxpass_dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
         TEST_ERROR;
 
-    TESTING("filter2 context passthrough: dxpl_id/scaled/ndims/state on write");
+    TESTING("filter2 context passthrough: dxpl_id/scaled/ndims on write");
 
     memset(&g_ctxpass, 0, sizeof(g_ctxpass));
     g_ctxpass.expected_dxpl = dxpl;
     g_ctxpass.dxpl_ok       = true;
     g_ctxpass.ndims_ok      = true;
     g_ctxpass.scaled_ok     = true;
-    g_ctxpass.state_ok      = true;
 
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         TEST_ERROR;
@@ -2846,14 +2830,13 @@ test_filter2_context_passthrough(hid_t file)
 
     PASSED();
 
-    TESTING("filter2 context passthrough: dxpl_id/scaled/ndims/state on read");
+    TESTING("filter2 context passthrough: dxpl_id/scaled/ndims on read");
 
     memset(&g_ctxpass, 0, sizeof(g_ctxpass));
     g_ctxpass.expected_dxpl = dxpl;
     g_ctxpass.dxpl_ok       = true;
     g_ctxpass.ndims_ok      = true;
     g_ctxpass.scaled_ok     = true;
-    g_ctxpass.state_ok      = true;
 
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         TEST_ERROR;
@@ -2933,9 +2916,8 @@ cfgstr_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigne
 static size_t
 cfgstr_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                    const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
-                   void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
-                   void H5_ATTR_UNUSED **buf)
+                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                   size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes; /* pass-through */
 }
@@ -4082,8 +4064,8 @@ mixv2_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static size_t
 mixv4_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
-                  void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void **buf)
+                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                  size_t H5_ATTR_UNUSED *buf_size, void **buf)
 {
     unsigned char *p = (unsigned char *)*buf;
     size_t         i;
@@ -4464,9 +4446,8 @@ canon_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned
 static size_t
 canon_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
-                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
-                  void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
-                  void H5_ATTR_UNUSED **buf)
+                  const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                  size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes; /* pass-through */
 }
