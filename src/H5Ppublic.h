@@ -10566,9 +10566,10 @@ H5_DLL herr_t H5Pencode1(hid_t plist_id, void *buf, size_t *nalloc);
  *
  *          If \p name is a pointer to an array of at least \p namelen
  *          bytes, the filter name will be copied into that array. The name
- *          will be null terminated if \p namelen is large enough. The
- *          filter name returned will be the name appearing in the file, the
- *          name registered for the filter, or an empty string.
+ *          is always null-terminated, and truncated if \p namelen is too
+ *          small. The name returned is the canonical name of the filter: the
+ *          name appearing in the file, the name registered for the filter,
+ *          or, if neither is available, the decimal filter ID as a string.
  *
  * \version 1.8.5 Function extended to work with group creation property
  *                lists.
@@ -10622,8 +10623,9 @@ H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter, unsigned int
  *
  *          On input, the \p namelen parameter indicates the number of
  *          characters allocated for the filter name by the calling program
- *          in the array \p name[]. On exit \p name[] contains the name of the
- *          filter with one character of the name in each element of the array.
+ *          in the array \p name[]. On exit \p name[] contains the
+ *          canonical name of the filter, as for H5Pget_filter1(), always
+ *          null-terminated and truncated if \p namelen is too small.
  *
  *          If the filter specified in \p id is not set for the property
  *          list, an error will be returned and this function will fail.

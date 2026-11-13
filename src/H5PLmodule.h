@@ -158,7 +158,7 @@
  *     major: File accessibility
  *     minor: Unable to close file
  *  ...
- *   #026: H5Z.c line **** in H5Z_find(): required filter is not registered
+ *   #026: H5Z.c line **** in H5Z_find_entry(): required filter 307 is not registered
  *     major: Data filters
  *     minor: Object not found
  * \endcode
