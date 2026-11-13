@@ -1389,7 +1389,7 @@ H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buff
     FUNC_ENTER_PACKAGE
 
     /* The datatype class and its size are read before the walk begins */
-    if (!H5Z_NBIT_PARMS_AVAIL(0, 5, parms_nelmts))
+    if (parms_nelmts < 5)
         HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL,
                     "parameter list is shorter than the datatype it describes");
 
@@ -1402,7 +1402,7 @@ H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buff
 
     switch (parms[3]) {
         case H5Z_NBIT_ATOMIC:
-            if (!H5Z_NBIT_PARMS_AVAIL(0, 8, parms_nelmts))
+            if (parms_nelmts < 8)
                 HGOTO_ERROR(H5E_PLINE, H5E_OVERFLOW, FAIL,
                             "parameter list is shorter than the datatype it describes");
 
