@@ -1948,6 +1948,7 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
     char           *fi_config_heap      = NULL; /* Freed if H5P_poke fails */
     size_t          cd_nelmts           = 0;
     herr_t          ret_value           = SUCCEED;
+    herr_t          cb_ret              = SUCCEED; /* Return value from a filter callback */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2013,7 +2014,12 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
 
         {
             /* Pass 1: determine cd_nelmts (size-query; cd_values is NULL) */
-            if (entry->set_config(cfg, &flags, &cd_nelmts, NULL, 0) < 0)
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    cb_ret = entry->set_config(cfg, &flags, &cd_nelmts, NULL, 0);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (cb_ret < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config size-query call failed");
 
             if (cd_nelmts > H5Z_MAX_CD_NELMTS)
@@ -2029,7 +2035,12 @@ H5Pappend_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, const 
             cd_nelmts2 = cd_nelmts;
 
             /* Pass 2: populate cd_values */
-            if (entry->set_config(cfg, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    cb_ret = entry->set_config(cfg, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (cb_ret < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config populate call failed");
 
             if (cd_nelmts2 != cd_nelmts)
@@ -2139,6 +2150,7 @@ H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, con
     size_t             cd_nelmts           = 0;
     H5Z_filter_t       filter;
     herr_t             ret_value = SUCCEED;
+    herr_t             cb_ret    = SUCCEED; /* Return value from a filter callback */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2207,7 +2219,12 @@ H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, con
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't parse filter parameter string");
 
             /* Pass 1: determine cd_nelmts (size-query; cd_values is NULL) */
-            if (entry->set_config(cfg, &flags, &cd_nelmts, NULL, 0) < 0)
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    cb_ret = entry->set_config(cfg, &flags, &cd_nelmts, NULL, 0);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (cb_ret < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config size-query call failed");
 
             if (cd_nelmts > H5Z_MAX_CD_NELMTS)
@@ -2223,7 +2240,12 @@ H5Pmodify_filter_by_idx(hid_t plist_id, unsigned filter_idx, unsigned flags, con
             cd_nelmts2 = cd_nelmts;
 
             /* Pass 2: populate cd_values */
-            if (entry->set_config(cfg, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts) < 0)
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    cb_ret = entry->set_config(cfg, &flags, &cd_nelmts2, allocated_cd_values, alloc_nelmts);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (cb_ret < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "set_config populate call failed");
 
             if (cd_nelmts2 != cd_nelmts)
@@ -2312,6 +2334,7 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
     H5Z_entry_t             *entry     = NULL;
     char                    *tmp_buf   = NULL;
     herr_t                   ret_value = SUCCEED;
+    herr_t                   cb_ret    = SUCCEED; /* Return value from a filter callback */
 
     FUNC_ENTER_API(FAIL)
 
@@ -2366,7 +2389,13 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
         size_t out_size;
 
         /* Pass 1: size query */
-        if (entry->get_config(filter->flags, filter->cd_nelmts, filter->cd_values, NULL, &needed) < 0)
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                cb_ret =
+                    entry->get_config(filter->flags, filter->cd_nelmts, filter->cd_values, NULL, &needed);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (cb_ret < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "get_config size-query call failed");
 
         if (params_len)
@@ -2377,8 +2406,13 @@ H5Pget_filter_params_by_idx(hid_t plist_id, unsigned idx, char *params_buf, size
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
             out_size = needed + 1;
-            if (entry->get_config(filter->flags, filter->cd_nelmts, filter->cd_values, tmp_buf, &out_size) <
-                0)
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    cb_ret = entry->get_config(filter->flags, filter->cd_nelmts, filter->cd_values, tmp_buf,
+                                               &out_size);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (cb_ret < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "get_config populate call failed");
 
             /* Don't trust the callback's length */
