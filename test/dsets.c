@@ -400,11 +400,11 @@ static size_t filter_bad_buf_size(unsigned int flags, size_t cd_nelmts, const un
 static size_t filter_error_msg(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_threads_required4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                       hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state,
-                                       size_t nbytes, size_t *buf_size, void **buf);
+                                       hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                                       size_t *buf_size, void **buf);
 static size_t filter_non_threadsafe4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
-                                     hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state,
-                                     size_t nbytes, size_t *buf_size, void **buf);
+                                     hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                                     size_t *buf_size, void **buf);
 static size_t filter_threads_required(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                                       size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_non_threadsafe(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
@@ -20941,8 +20941,7 @@ const H5Z_class4_t H5Z_NON_THREADSAFE4[1] = {{
 static size_t
 filter_threads_required4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                          hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                         size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
-                         size_t *buf_size, void **buf)
+                         size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     return filter_threads_required(flags, cd_nelmts, cd_values, nbytes, buf_size, buf);
 }
@@ -20950,8 +20949,7 @@ filter_threads_required4(unsigned int flags, size_t cd_nelmts, const unsigned in
 static size_t
 filter_non_threadsafe4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values,
                        hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
-                       size_t H5_ATTR_UNUSED ndims, void H5_ATTR_UNUSED *state, size_t nbytes,
-                       size_t *buf_size, void **buf)
+                       size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     return filter_non_threadsafe(flags, cd_nelmts, cd_values, nbytes, buf_size, buf);
 }
