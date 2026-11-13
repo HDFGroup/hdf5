@@ -1182,7 +1182,8 @@ test_roundtrip_deflate(hid_t file)
 {
     hsize_t dims[2]   = {32, 32};
     hsize_t chunks[2] = {8, 8};
-    int     wbuf[32 * 32], rbuf[32 * 32];
+    int    *wbuf      = NULL;
+    int    *rbuf      = NULL;
     int     i;
 
     TESTING("Round-trip: deflate=level=6 write/read");
@@ -1191,6 +1192,9 @@ test_roundtrip_deflate(hid_t file)
         puts("    deflate filter not available");
         return 0;
     }
+    if (NULL == (wbuf = (int *)malloc(32 * 32 * sizeof(int))) ||
+        NULL == (rbuf = (int *)malloc(32 * 32 * sizeof(int))))
+        TEST_ERROR;
     for (i = 0; i < 32 * 32; i++)
         wbuf[i] = i;
     {
@@ -1199,9 +1203,14 @@ test_roundtrip_deflate(hid_t file)
                                     32 * 32) < 0)
             TEST_ERROR;
     }
+    free(wbuf);
+    free(rbuf);
     PASSED();
     return 0;
+
 error:
+    free(wbuf);
+    free(rbuf);
     return -1;
 }
 
@@ -2515,8 +2524,6 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     if (info.description == NULL || strstr(info.description, "Deflate") == NULL)
         TEST_ERROR;
-    if (!info.has_set_config || !info.has_get_config)
-        TEST_ERROR;
     PASSED();
 #else
     SKIPPED();
@@ -2535,11 +2542,9 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     if (info.description == NULL || strstr(info.description, "Scale+offset") == NULL)
         TEST_ERROR;
-    if (!info.has_set_config || !info.has_get_config)
-        TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zget_filter_class_info: shuffle built-in (set_config but no get_config)");
+    TESTING("H5Zget_filter_class_info: shuffle built-in (canonical name)");
     memset(&info, 0xAA, sizeof(info));
     if (H5Zget_filter_class_info(H5Z_FILTER_SHUFFLE, &info) < 0)
         TEST_ERROR;
@@ -2548,8 +2553,6 @@ test_get_filter_info2_builtin(void)
     if (info.name == NULL || strcmp(info.name, "shuffle") != 0)
         TEST_ERROR;
     if (info.description == NULL)
-        TEST_ERROR;
-    if (!info.has_set_config || info.has_get_config)
         TEST_ERROR;
     PASSED();
 

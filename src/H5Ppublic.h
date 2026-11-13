@@ -2120,12 +2120,12 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  *          \p cd_nelmts contains the number of values defined by the filter.
  *
  *          If \p name is a pointer to an array of at least \p namelen bytes,
- *          the filter name will be copied into that array. The name will be
- *          null terminated if \p namelen is large enough. The name returned
- *          is the canonical name of the filter: the value stored in the file
- *          when the filter was added, the \p name registered with
- *          H5Zregister(), or, if neither is available, the decimal filter ID
- *          as a string.
+ *          the filter name will be copied into that array. The name is
+ *          always null-terminated, and truncated if \p namelen is too
+ *          small. The name returned is the canonical name of the filter:
+ *          the value stored in the file when the filter was added, the
+ *          \p name registered with H5Zregister(), or, if neither is
+ *          available, the decimal filter ID as a string.
  *
  *          \p filter_config is the bit field described in
  *          H5Zget_filter_info().
@@ -2176,8 +2176,8 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  *          On input, the \p namelen parameter indicates the number of
  *          characters allocated for the filter name by the calling program
  *          in the array \p name[]. On exit \p name[] contains the
- *          canonical name of the filter, null-terminated if \p namelen is
- *          large enough.
+ *          canonical name of the filter, always null-terminated and
+ *          truncated if \p namelen is too small.
  *
  *          \p filter_config is the bit field described in
  *          H5Zget_filter_info().
