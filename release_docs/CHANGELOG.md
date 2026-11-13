@@ -166,6 +166,8 @@ We would like to thank the many HDF5 community members who contributed to this r
    - The recorded compiler and linker flags leave out `-ffile-prefix-map=`, `-fdebug-prefix-map=`,
      `-fmacro-prefix-map=` and `-fprofile-prefix-map=` options. The flags used to compile are
      not changed
+   - "Module Directory" is now the directory the Fortran modules are installed in, not the
+     build tree's module directory
    - Removed the "Build HDF5 Tests" line from the settings. It describes the build tree, not
      the library, and differs between builds that do and do not build the tests
 
