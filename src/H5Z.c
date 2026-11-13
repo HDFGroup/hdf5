@@ -1823,7 +1823,7 @@ H5Z__call_filter(const H5Z_entry_t *entry, unsigned flags, const H5Z_filter_info
 
     if (entry->filter2)
         ret_value = (entry->filter2)(flags, filter->cd_nelmts, filter->cd_values, dxpl_id, scaled, ndims,
-                                     NULL, nbytes, buf_size, buf);
+                                     nbytes, buf_size, buf);
     else
         ret_value = (entry->base.filter)(flags, filter->cd_nelmts, filter->cd_values, nbytes, buf_size, buf);
 
