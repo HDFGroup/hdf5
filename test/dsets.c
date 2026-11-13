@@ -2866,15 +2866,15 @@ test_get_filter_info(void)
 
 #ifdef H5_HAVE_FILTER_SZIP
     {
-        H5Z_class3_t *szip_cls;
+        H5Z_entry_t *szip_entry;
 
         if (H5Zget_filter_info(H5Z_FILTER_SZIP, &flags) < 0)
             TEST_ERROR;
 
-        if (H5Z_find(false, H5Z_FILTER_SZIP, &szip_cls) < 0)
+        if (H5Z_find_entry(false, H5Z_FILTER_SZIP, &szip_entry) < 0)
             TEST_ERROR;
 
-        if (szip_cls->encoder_present) {
+        if (szip_entry->base.encoder_present) {
             if (((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
                 ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
                 TEST_ERROR;

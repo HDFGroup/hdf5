@@ -373,18 +373,33 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
 H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 
 /**
+ * Current version of #H5Z_class_info_t; set \c version to this before calling
+ * #H5Zget_filter_class_info \since 3.0.0
+ */
+#define H5Z_CLASS_INFO_VERSION 1u
+
+/**
+ * \ingroup H5Z
+ *
  * \brief Registry-level information about a filter (output of
  *        #H5Zget_filter_class_info).
+ *
+ * \details The caller sets \c version, so that later library versions can
+ *          add fields without breaking applications built against this one.
  *
  * \since 3.0.0
  */
 typedef struct H5Z_class_info_t {
-    H5Z_filter_t id;           /**< Numeric filter identifier         */
+    unsigned     version;      /**< Set by the caller to #H5Z_CLASS_INFO_VERSION */
+    H5Z_filter_t id;           /**< Numeric filter identifier                   */
     unsigned int config_flags; /**< Bitwise OR of
                                     #H5Z_FILTER_CONFIG_ENCODE_ENABLED and
-                                    #H5Z_FILTER_CONFIG_DECODE_ENABLED   */
-    const char *name;          /**< Filter name; may be \c NULL         */
-    const char *description;   /**< Filter description; may be \c NULL  */
+                                    #H5Z_FILTER_CONFIG_DECODE_ENABLED             */
+    const char *name;          /**< Filter name; may be \c NULL for a filter not
+                                    registered with H5Z_class4_t                */
+    const char *description;   /**< Filter description; may be \c NULL          */
+    uint64_t    feature_flags; /**< \c H5Z_FEAT_* flags (H5Zdevelop.h); 0 for
+                                    H5Z_class1_t and H5Z_class2_t filters       */
 } H5Z_class_info_t;
 
 /**
@@ -392,16 +407,21 @@ typedef struct H5Z_class_info_t {
  *
  * \brief Retrieves registry-level information about a registered filter
  *
- * \param[in]  filter Filter identifier
- * \param[out] info   Filled with the filter's class-level information
+ * \param[in]     filter Filter identifier
+ * \param[in,out] info   On input, \c info->version must be
+ *                       #H5Z_CLASS_INFO_VERSION; on output, the filter's
+ *                       class-level information
  *
  * \return \herr_t
  *
- * \details Like #H5Zget_filter_info, but also returns the filter's name and
- *          description.  Loads the filter plugin if needed.
+ * \details Like #H5Zget_filter_info, but also returns the filter's name,
+ *          description and feature flags.  Loads the filter plugin if
+ *          needed.  Fails if \p filter is not a valid filter ID or no such
+ *          filter is registered or loadable.
  *
- *          The strings in \p info belong to the library and remain valid
- *          until the filter is unregistered.
+ *          The strings in \p info are the library's copies, made when the
+ *          filter was registered, and remain valid until the filter is
+ *          unregistered or the library is closed.
  *
  * \since 3.0.0
  */

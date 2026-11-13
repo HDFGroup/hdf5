@@ -62,8 +62,8 @@
  */
 #define H5Z_FEAT_FILTER_NO_H5_CALLS 0x0000000000000002
 /**
- * Latest version of the H5Z_class_t struct, used in conjunction with
- * H5Z_class4_t \since 3.0.0
+ * Version of the H5Z_class_t struct used in conjunction with H5Z_class4_t
+ * \since 3.0.0
  */
 #define H5Z_CLASS_T_VERS_4 (4)
 
@@ -317,9 +317,19 @@ typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const 
  *
  * Like \c H5Z_func_t, plus the data transfer property list \p dxpl_id and
  * the chunk's scaled coordinates \p scaled of rank \p ndims.  \p scaled is
- * NULL and \p ndims is 0 for data with no chunk position, such as a fill
- * value template or a fractal heap block.  \p state is reserved and is
- * always NULL.
+ * NULL and \p ndims is 0 for data with no chunk position, such as a fractal
+ * heap block, or the fill-value chunk that the library filters once and
+ * writes to every chunk it allocates early; such a chunk is later decoded
+ * with its real coordinates.  \p state is
+ * reserved: the library passes NULL, and a filter must not use it.
+ *
+ * \p dxpl_id is the transfer property list of the operation that runs the
+ * filter.  Chunks written through the chunk cache are filtered when they
+ * are flushed, which may happen during a later call (another H5Dwrite(),
+ * H5Dclose(), H5Fflush() or H5Fclose()), so the list may not be the one
+ * passed to the H5Dwrite() that wrote the data.  This matches the other
+ * transfer properties that affect filters, such as H5Pset_edc_check() and
+ * H5Pset_filter_callback().  Keep per-dataset settings in \p cd_values.
  *
  * As for \c H5Z_func_t, the \c H5Z_FEAT_* flags in the class's
  * \c feature_flags tell the library whether the callback may run concurrently
@@ -564,13 +574,19 @@ H5_DLL htri_t H5Zconfig_get_str(const H5Z_config_t *config, const char *key, cha
  *          \snippet this H5Z_class4_t_snip
  *          For #H5Z_class4_t, \c version is #H5Z_CLASS_T_VERS_4 and \c name
  *          is required: at most #H5Z_FILTER_NAME_MAX_LEN bytes from
- *          <tt>[A-Za-z0-9_.-]</tt>, and unique among #H5Z_class4_t filters.
+ *          <tt>[A-Za-z0-9_.-]</tt>, starting with a letter, and unique among
+ *          #H5Z_class4_t filters.  The names of the library's filters
+ *          ("deflate", "shuffle", "fletcher32", "szip", "nbit" and
+ *          "scaleoffset") are reserved, even in builds without them.  The
+ *          library copies \c name and \c description, so they need not
+ *          outlive the call.  \c filter has the #H5Z_func2_t signature, and
+ *          \c description, \c set_config and \c get_config may be NULL.
  *          The \c version and \c name descriptions below apply to
  *          #H5Z_class1_t, #H5Z_class2_t and #H5Z_class3_t.
  *
  *          \c version is a library-defined value reporting the version number
  *          of the #H5Z_class_t struct. This must be set to #H5Z_CLASS_T_VERS_2
- *          of H5Z_CLASS_T_VERS if using H5Z_class2_t or #H5Z_CLASS_T_VERS_3 if
+ *          or H5Z_CLASS_T_VERS if using H5Z_class2_t or #H5Z_CLASS_T_VERS_3 if
  *          using H5Z_class3_t.
  *
  *          \c id is the identifier for the new filter. This is a user-defined

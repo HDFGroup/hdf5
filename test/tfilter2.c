@@ -1123,14 +1123,14 @@ title_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_v
 }
 
 static int
-test_canonical_name_display(void)
+test_filter_name_display(void)
 {
     static const H5Z_class4_t title_cls = {
         H5Z_CLASS_T_VERS_4,  /* version        */
         TITLE_FILTER_ID,     /* id             */
         1,                   /* encoder_present */
         1,                   /* decoder_present */
-        "test_title_filter", /* canonical_name */
+        "test_title_filter", /* name */
         NULL,                /* can_apply      */
         NULL,                /* set_local      */
         title_filter_func,   /* filter         */
@@ -1146,7 +1146,7 @@ test_canonical_name_display(void)
     char     name[64];
     unsigned config;
 
-    TESTING("canonical_name: returned by H5Pget_filter_by_id2 as filter name");
+    TESTING("name: returned by H5Pget_filter_by_id2 as filter name");
 
     if (H5Zregister(&title_cls) < 0)
         TEST_ERROR;
@@ -1212,7 +1212,7 @@ test_class4_name(void)
             NAME_FILTER_ID,     /* id             */
             1,                  /* encoder_present */
             1,                  /* decoder_present */
-            NULL,               /* canonical_name - intentionally NULL to trigger error */
+            NULL,               /* name - intentionally NULL to trigger error */
             NULL,               /* can_apply      */
             NULL,               /* set_local      */
             name_filter_func,   /* filter         */
@@ -1238,7 +1238,7 @@ test_class4_name(void)
             NAME_FILTER_ID,     /* id             */
             1,                  /* encoder_present */
             1,                  /* decoder_present */
-            "test_name_filter", /* canonical_name */
+            "test_name_filter", /* name */
             NULL,               /* can_apply      */
             NULL,               /* set_local      */
             name_filter_func,   /* filter         */
@@ -1264,7 +1264,7 @@ error:
     return -1;
 }
 
-/* 6. When canonical_name is absent and plugin is not loaded, name falls back to decimal ID */
+/* 6. When a filter has no name and plugin is not loaded, name falls back to decimal ID */
 static int
 test_name_id_fallback(void)
 {
@@ -1303,7 +1303,7 @@ error:
     return -1;
 }
 
-/* 7. H5Zregister rejects a canonical_name longer than 255 bytes */
+/* 7. H5Zregister rejects a name longer than 255 bytes */
 #define LONGTITLE_FILTER_ID 518
 
 static size_t
@@ -1321,9 +1321,9 @@ longtitle_filter_func(unsigned int flags, size_t cd_nelmts, const unsigned int *
 }
 
 static int
-test_canonical_name_length_limit(void)
+test_filter_name_length_limit(void)
 {
-    /* A 256-byte canonical_name (one byte over the 255-byte limit) */
+    /* A 256-byte name (one byte over the 255-byte limit) */
     static const char long_title[257] =
         /* 100 */ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                   "AAAAAAAAAA"
@@ -1335,7 +1335,7 @@ test_canonical_name_length_limit(void)
         LONGTITLE_FILTER_ID,   /* id              */
         1,                     /* encoder_present */
         1,                     /* decoder_present */
-        long_title,            /* canonical_name  */
+        long_title,            /* name            */
         NULL,                  /* can_apply       */
         NULL,                  /* set_local       */
         longtitle_filter_func, /* filter          */
@@ -1346,7 +1346,7 @@ test_canonical_name_length_limit(void)
     };
     herr_t ret;
 
-    TESTING("H5Zregister: canonical_name > 255 bytes is rejected");
+    TESTING("H5Zregister: name > 255 bytes is rejected");
     H5E_BEGIN_TRY
     {
         ret = H5Zregister(&long_cls);
@@ -1358,7 +1358,7 @@ test_canonical_name_length_limit(void)
     }
     PASSED();
 
-    TESTING("H5Zregister: canonical_name syntax is enforced");
+    TESTING("H5Zregister: name syntax is enforced");
     {
         static const char *const bad[] = {
             "",                 /* empty                                  */
@@ -1372,10 +1372,18 @@ test_canonical_name_length_limit(void)
             "nonascii\xc3\xa9", /* UTF-8 e-acute: outside the declared class */
             "slash/path",       /* path-like, unsafe as an identifier     */
             "equals=sign",      /* the key/value separator                */
+            "0",                /* must start with a letter: a decimal ID */
+            "32000",            /* likewise                               */
+            "9lives",           /* likewise                               */
+            "_lead",            /* likewise                               */
+            "-lead",            /* likewise                               */
+            ".lead",            /* likewise                               */
+            "deflate",          /* reserved library filter names, even in */
+            "szip",             /*   builds without those filters         */
+            "scaleoffset",      /*                                        */
         };
-        /* Not "deflate", which is taken by the built-in filter */
         static const char *const good[] = {
-            "zfp", "not-deflate", "blosc2.lz4", "my_filter-2", "A", "0", "aA0_.-",
+            "zfp", "not-deflate", "blosc2.lz4", "my_filter-2", "A", "a0", "aA0_.-",
         };
         size_t i;
 
@@ -1429,6 +1437,11 @@ test_canonical_name_length_limit(void)
     return 0;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Zunregister(LONGTITLE_FILTER_ID);
+    }
+    H5E_END_TRY
     return -1;
 }
 
@@ -1439,7 +1452,7 @@ error:
 #define UNIQUENAME_FILTER_ID_B 537
 
 static int
-test_canonical_name_uniqueness(void)
+test_filter_name_uniqueness(void)
 {
     H5Z_class4_t cls_a = {H5Z_CLASS_T_VERS_4,
                           UNIQUENAME_FILTER_ID_A,
@@ -1467,7 +1480,7 @@ test_canonical_name_uniqueness(void)
                           NULL};
     herr_t       ret;
 
-    TESTING("H5Zregister: canonical_name collision across different filter ids is rejected");
+    TESTING("H5Zregister: name collision across different filter ids is rejected");
 
     if (H5Zregister(&cls_a) < 0)
         TEST_ERROR;
@@ -1502,24 +1515,40 @@ test_canonical_name_uniqueness(void)
     return 0;
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Zunregister(UNIQUENAME_FILTER_ID_A);
+        H5Zunregister(UNIQUENAME_FILTER_ID_B);
+    }
+    H5E_END_TRY
     return -1;
 }
 
 /* -----------------------------------------------------------------------
  * H5Zget_filter_class_info: registry-level info incl. name + description
  * ---------------------------------------------------------------------- */
+#define CLASSINFO_FILTER_ID 538
+
 static int
-test_get_filter_info2_builtin(void)
+test_filter_class_info(void)
 {
     H5Z_class_info_t info;
+    char            *name = NULL;
+    char            *desc = NULL;
     herr_t           ret;
 
-    TESTING("H5Zget_filter_class_info: deflate built-in (canonical name + description)");
+#define RESET_INFO()                                                                                         \
+    do {                                                                                                     \
+        memset(&info, 0xAA, sizeof(info));                                                                   \
+        info.version = H5Z_CLASS_INFO_VERSION;                                                               \
+    } while (0)
+
+    TESTING("H5Zget_filter_class_info: deflate built-in (name + description)");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    memset(&info, 0xAA, sizeof(info));
+    RESET_INFO();
     if (H5Zget_filter_class_info(H5Z_FILTER_DEFLATE, &info) < 0)
         TEST_ERROR;
-    if (info.id != H5Z_FILTER_DEFLATE)
+    if (info.version != H5Z_CLASS_INFO_VERSION || info.id != H5Z_FILTER_DEFLATE)
         TEST_ERROR;
     if ((info.config_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0)
         TEST_ERROR;
@@ -1533,12 +1562,10 @@ test_get_filter_info2_builtin(void)
 #else
     SKIPPED();
     puts("    deflate filter not built");
-    (void)info;
-    (void)ret;
 #endif
 
-    TESTING("H5Zget_filter_class_info: scaleoffset built-in (canonical name + description)");
-    memset(&info, 0xAA, sizeof(info));
+    TESTING("H5Zget_filter_class_info: scaleoffset built-in (name + description)");
+    RESET_INFO();
     if (H5Zget_filter_class_info(H5Z_FILTER_SCALEOFFSET, &info) < 0)
         TEST_ERROR;
     if (info.id != H5Z_FILTER_SCALEOFFSET)
@@ -1549,8 +1576,8 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zget_filter_class_info: shuffle built-in (canonical name)");
-    memset(&info, 0xAA, sizeof(info));
+    TESTING("H5Zget_filter_class_info: shuffle built-in (name)");
+    RESET_INFO();
     if (H5Zget_filter_class_info(H5Z_FILTER_SHUFFLE, &info) < 0)
         TEST_ERROR;
     if (info.id != H5Z_FILTER_SHUFFLE)
@@ -1571,7 +1598,43 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     PASSED();
 
-    TESTING("H5Zget_filter_class_info: unknown filter ID fails with H5E_NOFILTER");
+    TESTING("H5Zget_filter_class_info: unset or unknown version rejected");
+    memset(&info, 0, sizeof(info));
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zget_filter_class_info(H5Z_FILTER_SHUFFLE, &info);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    info.version = H5Z_CLASS_INFO_VERSION + 1;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zget_filter_class_info(H5Z_FILTER_SHUFFLE, &info);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zget_filter_class_info: out-of-range and unknown filter IDs fail");
+    RESET_INFO();
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zget_filter_class_info((H5Z_filter_t)-1, &info);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    RESET_INFO();
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zget_filter_class_info((H5Z_filter_t)(H5Z_FILTER_MAX + 1), &info);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    RESET_INFO();
     H5E_BEGIN_TRY
     {
         ret = H5Zget_filter_class_info((H5Z_filter_t)0x6FFE /*unregistered*/, &info);
@@ -1581,9 +1644,72 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     PASSED();
 
+    TESTING("H5Zregister: name and description are copied; class info reports them");
+    {
+        H5Z_class4_t c = {H5Z_CLASS_T_VERS_4,    CLASSINFO_FILTER_ID,        1,    0,    NULL, NULL, NULL,
+                          longtitle_filter_func, H5Z_FEAT_FILTER_THREADSAFE, NULL, NULL, NULL};
+
+        /* Heap strings, freed and overwritten right after registering */
+        if (NULL == (name = strdup("classinfo-test")) || NULL == (desc = strdup("Class info test filter")))
+            TEST_ERROR;
+        c.name        = name;
+        c.description = desc;
+        if (H5Zregister(&c) < 0)
+            TEST_ERROR;
+        memset(name, 'X', strlen(name));
+        memset(desc, 'X', strlen(desc));
+        free(name);
+        free(desc);
+        name = desc = NULL;
+
+        RESET_INFO();
+        if (H5Zget_filter_class_info(CLASSINFO_FILTER_ID, &info) < 0)
+            TEST_ERROR;
+        if (info.name == NULL || strcmp(info.name, "classinfo-test") != 0)
+            TEST_ERROR;
+        if (info.description == NULL || strcmp(info.description, "Class info test filter") != 0)
+            TEST_ERROR;
+        if (info.feature_flags != H5Z_FEAT_FILTER_THREADSAFE)
+            TEST_ERROR;
+        if (info.config_flags != H5Z_FILTER_CONFIG_ENCODE_ENABLED)
+            TEST_ERROR;
+
+        /* Registering another class4 filter compares names with the copy */
+        c.id   = UNIQUENAME_FILTER_ID_A;
+        c.name = "classinfo-test";
+        H5E_BEGIN_TRY
+        {
+            ret = H5Zregister(&c);
+        }
+        H5E_END_TRY
+        if (ret >= 0)
+            TEST_ERROR;
+
+        if (H5Zunregister(CLASSINFO_FILTER_ID) < 0)
+            TEST_ERROR;
+        RESET_INFO();
+        H5E_BEGIN_TRY
+        {
+            ret = H5Zget_filter_class_info(CLASSINFO_FILTER_ID, &info);
+        }
+        H5E_END_TRY
+        if (ret >= 0)
+            TEST_ERROR;
+    }
+    PASSED();
+
+#undef RESET_INFO
     return 0;
 
 error:
+    free(name);
+    free(desc);
+    H5E_BEGIN_TRY
+    {
+        H5Zunregister(CLASSINFO_FILTER_ID);
+        H5Zunregister(UNIQUENAME_FILTER_ID_A);
+    }
+    H5E_END_TRY
     return -1;
 }
 
@@ -1799,12 +1925,12 @@ main(void)
     nerrors += test_config_locale() < 0 ? 1 : 0;
 
     /* H5Z_class4_t registration and canonical names */
-    nerrors += test_canonical_name_display() < 0 ? 1 : 0;
+    nerrors += test_filter_name_display() < 0 ? 1 : 0;
     nerrors += test_class4_name() < 0 ? 1 : 0;
     nerrors += test_name_id_fallback() < 0 ? 1 : 0;
-    nerrors += test_canonical_name_length_limit() < 0 ? 1 : 0;
-    nerrors += test_canonical_name_uniqueness() < 0 ? 1 : 0;
-    nerrors += test_get_filter_info2_builtin() < 0 ? 1 : 0;
+    nerrors += test_filter_name_length_limit() < 0 ? 1 : 0;
+    nerrors += test_filter_name_uniqueness() < 0 ? 1 : 0;
+    nerrors += test_filter_class_info() < 0 ? 1 : 0;
 
     /* Round-trip tests through the built-in filters */
     nerrors += test_roundtrip_deflate(file) < 0 ? 1 : 0;
