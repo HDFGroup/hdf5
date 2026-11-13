@@ -1529,8 +1529,6 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     if (info.description == NULL || strstr(info.description, "Deflate") == NULL)
         TEST_ERROR;
-    if (info.has_set_config || info.has_get_config)
-        TEST_ERROR;
     PASSED();
 #else
     SKIPPED();
@@ -1549,8 +1547,6 @@ test_get_filter_info2_builtin(void)
         TEST_ERROR;
     if (info.description == NULL || strstr(info.description, "Scale+offset") == NULL)
         TEST_ERROR;
-    if (info.has_set_config || info.has_get_config)
-        TEST_ERROR;
     PASSED();
 
     TESTING("H5Zget_filter_class_info: shuffle built-in (canonical name)");
@@ -1562,8 +1558,6 @@ test_get_filter_info2_builtin(void)
     if (info.name == NULL || strcmp(info.name, "shuffle") != 0)
         TEST_ERROR;
     if (info.description == NULL)
-        TEST_ERROR;
-    if (info.has_set_config || info.has_get_config)
         TEST_ERROR;
     PASSED();
 

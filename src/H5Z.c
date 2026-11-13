@@ -2368,10 +2368,8 @@ H5Zget_filter_class_info(H5Z_filter_t filter, H5Z_class_info_t *info /*out*/)
     if (entry->base.decoder_present)
         info->config_flags |= H5Z_FILTER_CONFIG_DECODE_ENABLED;
 
-    info->name           = entry->base.name;
-    info->description    = entry->description;
-    info->has_set_config = (entry->set_config != NULL);
-    info->has_get_config = (entry->get_config != NULL);
+    info->name        = entry->base.name;
+    info->description = entry->description;
 
 done:
     FUNC_LEAVE_API(ret_value)

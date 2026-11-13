@@ -201,7 +201,7 @@ We would like to thank the many HDF5 community members who contributed to this r
 
    `H5Z_class_t` never selects `H5Z_class4_t` by default (under the `v300` API it selects `H5Z_class3_t`); an application can map it to `H5Z_class4_t` by defining `H5Z_class_t_vers` to 4. `H5Zregister()` and the plugin loader accept all four class versions.
 
-   The new `H5Zget_filter_class_info()` function returns a registered filter's encode/decode configuration flags, canonical name and description in an `H5Z_class_info_t` structure, along with whether the filter provides `set_config` and `get_config` callbacks. Like `H5Zfilter_avail()`, it loads the filter plugin if the filter is not yet registered.
+   The new `H5Zget_filter_class_info()` function returns a registered filter's encode/decode configuration flags, canonical name and description in an `H5Z_class_info_t` structure. Like `H5Zfilter_avail()`, it loads the filter plugin if the filter is not yet registered.
 
 ### Changed the filter name reported for filters with no known name
 
