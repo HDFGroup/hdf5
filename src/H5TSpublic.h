@@ -98,7 +98,9 @@ extern "C" {
  *
  * \warning Errors that are printed inside the threaded area, for example by the
  *          data filters, do not currently respect non-default error settings,
- *          and print their errors to stderr upon thread completion.
+ *          except that if errors are disabled on the parent thread, for example
+ *          by #H5E_BEGIN_TRY or H5Epause_stack(), they will also be disabled in
+ *          the child threads.
  *
  * \since 2.3.0
  *

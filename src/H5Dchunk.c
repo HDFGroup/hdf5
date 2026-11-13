@@ -342,6 +342,7 @@ typedef struct H5D_threaded_io_info_t {
     H5TS_cond_t                cond;          /* Condition variable for waiting on threads */
     H5TS_mutex_t               cond_mutex;    /* Mutex associated with cond */
     bool                       failed;        /* Whether any threads failed */
+    bool                       pause_errors;  /* Whether to pause the error stack on worker threads */
     hid_t                      dxpl_id;       /* Dataset transfer property list ID */
     H5Z_EDC_t                  err_detect;    /* Error detection setting for the filter pipeline */
     H5Z_cb_t                   filter_cb;     /* Filter callback for the filter pipeline */
@@ -3460,6 +3461,10 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 assert(do_threading);
                 assert(H5TS_pool_g);
 
+                /* Check if errors are disabled */
+                if (H5E_errors_disabled())
+                    threaded_io_info->pause_errors = true;
+
                 /* Create condition variable for signaling task completion */
                 if (H5_UNLIKELY(H5TS_cond_init(&threaded_io_info->cond) < 0))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -3677,6 +3682,10 @@ H5D__chunk_thread_read(void *_threaded_chunk_info)
 
     FUNC_ENTER_PACKAGE
 
+    /* Pause error stack if requested */
+    if (threaded_chunk_info->threaded_io_info->pause_errors)
+        H5E_pause_stack();
+
     /* Set API context */
     if (H5CX_push(&api_ctx) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set API context");
@@ -3857,10 +3866,22 @@ done:
     assert(!mutex_held);
     assert(!api_ctx_pushed);
 
-    /* Release cond_mutex. A failure here can't be reported, since the main thread may already be going on
-     * using the library. */
+    /* Resume error stack if it was paused */
+    if (threaded_chunk_info->threaded_io_info->pause_errors)
+        H5E_resume_stack();
+
+    /* Clear threaded_chunk_info->chk_dset_io_info.store so we're not accidentally leaking the address of a
+     * local variable that is out of scope */
+    threaded_chunk_info->chk_dset_io_info.store = NULL;
+
+    /* Release cond_mutex. A failure here can't be reported, since the main thread may already be going
+     * on using the library. */
     if (H5_LIKELY(cond_mutex_held))
         (void)H5TS_mutex_unlock(&threaded_chunk_info->threaded_io_info->cond_mutex);
+
+    /*
+     * Do not access threaded_chunk_info after unlocking cond_mutex
+     */
 
     FUNC_LEAVE_NOAPI((H5TS_thread_ret_t)0);
 } /* end H5D__chunk_thread_read() */
