@@ -77,8 +77,10 @@
  *
  * Applications can create and register custom filters:
  *
- * \li Define a filter function with signature matching #H5Z_func_t
- * \li Create a #H5Z_class_t structure describing the filter
+ * \li Define a filter function with signature matching #H5Z_func_t, or
+ *     #H5Z_func2_t for an #H5Z_class4_t filter, which also receives the
+ *     transfer property list and the chunk's coordinates
+ * \li Create a #H5Z_class_t (or #H5Z_class4_t) structure describing the filter
  * \li Register the filter using #H5Zregister
  * \li Apply the filter using #H5Pset_filter with the filter ID
  *
@@ -91,6 +93,8 @@
  *
  * \li #H5Zfilter_avail checks if a filter is available
  * \li #H5Zget_filter_info retrieves information about a filter's capabilities
+ * \li #H5Zget_filter_class_info also retrieves its name, description and
+ *     feature flags
  * \li #H5Zunregister removes a filter from the pipeline
  *
  * \subsection subsec_filter_plugins Filter Plugins

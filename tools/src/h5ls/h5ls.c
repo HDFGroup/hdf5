@@ -1968,6 +1968,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     size_t            cd_nelmts;                   /* filter client number of values */
     size_t            cd_num;                      /* filter client data counter */
     char              f_name[256];                 /* filter/file name */
+    char              id_str[16];                  /* filter ID as a string */
     char              s[64];                       /* temporary string buffer */
     HDoff_t           f_offset;                    /* offset in external file */
     hsize_t           f_size;                      /* bytes used in external file */
@@ -2136,7 +2137,10 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                                            sizeof(f_name), f_name, NULL);
                 f_name[sizeof(f_name) - 1] = '\0';
                 snprintf(s, sizeof(s), "Filter-%d:", i);
-                h5tools_str_append(&buffer, "    %-10s %s-%u %s {", s, (f_name[0] ? f_name : "method"),
+                /* A filter with no name reports its decimal ID as the name */
+                snprintf(id_str, sizeof(id_str), "%d", (int)filt_id);
+                h5tools_str_append(&buffer, "    %-10s %s-%u %s {", s,
+                                   (f_name[0] && strcmp(f_name, id_str) != 0 ? f_name : "method"),
                                    (unsigned)filt_id, ((filt_flags & H5Z_FLAG_OPTIONAL) ? "OPT" : ""));
                 for (cd_num = 0; cd_num < cd_nelmts; cd_num++)
                     h5tools_str_append(&buffer, "%s%u", (cd_num ? ", " : ""), cd_values[cd_num]);
