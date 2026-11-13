@@ -106,11 +106,11 @@ set (HDF5_INCLUDES_BUILD_TIME
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_JAVA)
   if (HDF5_ENABLE_MAVEN_DEPLOY AND HDF5_MAVEN_SNAPSHOT)
-    set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}-SNAPSHOT.jar")
-    set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}-SNAPSHOT.jar")
+    set (HDF5_JARHDF5_JAR_NAME "${HDF5_JARHDF5_JAR_BASENAME}-SNAPSHOT.jar")
+    set (HDF5_JAVAHDF5_JAR_NAME "${HDF5_JAVAHDF5_JAR_BASENAME}-SNAPSHOT.jar")
   else ()
-    set (HDF5_JARHDF5_JAR_NAME "jarhdf5-${HDF5_PACKAGE_VERSION}.jar")
-    set (HDF5_JAVAHDF5_JAR_NAME "javahdf5-${HDF5_PACKAGE_VERSION}.jar")
+    set (HDF5_JARHDF5_JAR_NAME "${HDF5_JARHDF5_JAR_BASENAME}.jar")
+    set (HDF5_JAVAHDF5_JAR_NAME "${HDF5_JAVAHDF5_JAR_BASENAME}.jar")
   endif ()
   # slf4j JAR names derived from configured paths so overrides are reflected in the exported config
   get_filename_component (HDF5_SLF4J_API_JAR_NAME ${HDF5_JAVA_LOGGING_JAR} NAME)
@@ -123,11 +123,24 @@ endif ()
 set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_INSTALL_CMAKE_DIR}" )
 set (CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
+# In the build tree each HDF5 jar is in the folder of the add_jar call that
+# created it, and the slf4j jars are used from where they were configured
+set (JARHDF5_JAR_FILE "")
+set (JAVAHDF5_JAR_FILE "")
+if (TARGET ${HDF5_JAVA_HDF5_LIB_TARGET})
+  get_target_property (JARHDF5_JAR_FILE ${HDF5_JAVA_HDF5_LIB_TARGET} JAR_FILE)
+endif ()
+if (TARGET ${HDF5_JAVA_JSRC_LIB_TARGET})
+  get_target_property (JAVAHDF5_JAR_FILE ${HDF5_JAVA_JSRC_LIB_TARGET} JAR_FILE)
+endif ()
+set (SLF4J_API_JAR_FILE "${HDF5_JAVA_LOGGING_JAR}")
+set (SLF4J_NOP_JAR_FILE "${HDF5_JAVA_LOGGING_NOP_JAR}")
 configure_package_config_file (
     ${HDF_CONFIG_DIR}/install/hdf5-config.cmake.in
     "${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
     INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+        JARHDF5_JAR_FILE JAVAHDF5_JAR_FILE SLF4J_API_JAR_FILE SLF4J_NOP_JAR_FILE
     INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
@@ -137,11 +150,16 @@ configure_package_config_file (
 set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
 set (SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_CMAKE_DIR}" )
 set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
+set (JARHDF5_JAR_FILE "${HDF5_INSTALL_JAR_DIR}/${HDF5_JARHDF5_JAR_NAME}")
+set (JAVAHDF5_JAR_FILE "${HDF5_INSTALL_JAR_DIR}/${HDF5_JAVAHDF5_JAR_NAME}")
+set (SLF4J_API_JAR_FILE "${HDF5_INSTALL_JAR_DIR}/${HDF5_SLF4J_API_JAR_NAME}")
+set (SLF4J_NOP_JAR_FILE "${HDF5_INSTALL_JAR_DIR}/${HDF5_SLF4J_NOP_JAR_NAME}")
 configure_package_config_file (
     ${HDF_CONFIG_DIR}/install/hdf5-config.cmake.in
     "${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
     INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+        JARHDF5_JAR_FILE JAVAHDF5_JAR_FILE SLF4J_API_JAR_FILE SLF4J_NOP_JAR_FILE
 )
 
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -190,13 +208,17 @@ if (H5_WORDS_BIGENDIAN)
 else ()
   set (BYTESEX little-endian)
 endif ()
+H5_SET_LANG_SETTINGS ()
 configure_file (
     ${HDF5_SOURCE_DIR}/src/libhdf5.settings.in
     ${HDF5_SRC_BINARY_DIR}/libhdf5.settings ESCAPE_QUOTES @ONLY
 )
+# Named after the library, so builds with different HDF5_LIB_INFIX values can
+# be installed in the same directory
 install (
     FILES ${HDF5_SRC_BINARY_DIR}/libhdf5.settings
     DESTINATION ${HDF5_INSTALL_LIB_DIR}
+    RENAME libhdf5${HDF5_LIB_INFIX}.settings
     COMPONENT libraries
 )
 
@@ -531,6 +553,59 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
 
   set (CPACK_INSTALL_CMAKE_PROJECTS "${HDF5_BINARY_DIR};HDF5;ALL;/")
 
+  # Windows has no system aws-c-s3, so a packaged ROS3 VFD build bundles the
+  # shared aws-c-s3 DLL and the aws-* DLLs it depends on. The rules are
+  # EXCLUDE_FROM_ALL, so a normal "cmake --install" never installs them; only
+  # CPack (or an explicit "--component awslibraries" install) does.
+  set (HDF5_PACKAGE_AWS_LIBS OFF)
+  if (WIN32 AND HDF5_PACKAGE_EXTLIBS AND ${HDF_PREFIX}_HAVE_ROS3_VFD)
+    get_target_property (_aws_c_s3_type AWS::aws-c-s3 TYPE)
+    if (_aws_c_s3_type STREQUAL "SHARED_LIBRARY")
+      set (HDF5_PACKAGE_AWS_LIBS ON)
+      install (
+          IMPORTED_RUNTIME_ARTIFACTS AWS::aws-c-s3
+          RUNTIME_DEPENDENCY_SET hdf5_aws_c_s3_deps
+          RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT awslibraries EXCLUDE_FROM_ALL
+          LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT awslibraries EXCLUDE_FROM_ALL
+      )
+      install (
+          RUNTIME_DEPENDENCY_SET hdf5_aws_c_s3_deps
+          PRE_INCLUDE_REGEXES "^[Aa][Ww][Ss]-"
+          PRE_EXCLUDE_REGEXES ".*"
+          POST_EXCLUDE_REGEXES ".*[Ss][Yy][Ss][Tt][Ee][Mm]32/.*"
+          DIRECTORIES $<TARGET_FILE_DIR:AWS::aws-c-s3>
+          RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT awslibraries EXCLUDE_FROM_ALL
+          LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT awslibraries EXCLUDE_FROM_ALL
+      )
+      # Optional license files for the bundled aws-* DLLs: one <library>-LICENSE
+      # per library plus a merged NOTICE. Set HDF5_AWS_LICENSE_DIR (as a CMake
+      # or environment variable) to a directory holding them; the CI release
+      # job (ctest.yml build_and_test_s3_win) fetches and sets it.
+      if (NOT DEFINED HDF5_AWS_LICENSE_DIR AND DEFINED ENV{HDF5_AWS_LICENSE_DIR})
+        set (HDF5_AWS_LICENSE_DIR "$ENV{HDF5_AWS_LICENSE_DIR}")
+      endif ()
+      if (HDF5_AWS_LICENSE_DIR)
+        file (TO_CMAKE_PATH "${HDF5_AWS_LICENSE_DIR}" _aws_license_dir)
+        file (GLOB _aws_license_files "${_aws_license_dir}/*-LICENSE")
+        if (NOT _aws_license_files OR NOT EXISTS "${_aws_license_dir}/NOTICE")
+          message (FATAL_ERROR "HDF5_AWS_LICENSE_DIR (${HDF5_AWS_LICENSE_DIR}) must contain <library>-LICENSE files and a NOTICE file")
+        endif ()
+        install (
+            FILES ${_aws_license_files} "${_aws_license_dir}/NOTICE"
+            DESTINATION ${HDF5_INSTALL_DATA_DIR}
+            COMPONENT awslibraries EXCLUDE_FROM_ALL
+        )
+        unset (_aws_license_files)
+        unset (_aws_license_dir)
+      endif ()
+      # Monolithic generators (ZIP) do a full install for "ALL", which skips
+      # EXCLUDE_FROM_ALL rules, so request the component explicitly.
+      # Component generators (WIX) already pick it up via "ALL".
+      set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${HDF5_BINARY_DIR};HDF5;awslibraries;/")
+    endif ()
+    unset (_aws_c_s3_type)
+  endif ()
+
   if (HDF5_PACKAGE_EXTLIBS AND (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT|TGZ"))
     if (H5_ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
       if (WIN32)
@@ -589,6 +664,14 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
       GROUP Runtime
       INSTALL_TYPES Full Developer User
   )
+  if (HDF5_PACKAGE_AWS_LIBS)
+    cpack_add_component (awslibraries
+        DISPLAY_NAME "aws-c-s3 Libraries (ROS3 VFD)"
+        DEPENDS libraries
+        GROUP Runtime
+        INSTALL_TYPES Full Developer User
+    )
+  endif ()
   cpack_add_component (headers
       DISPLAY_NAME "HDF5 Headers"
       DEPENDS libraries

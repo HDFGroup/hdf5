@@ -1046,10 +1046,15 @@ H5C__load_entry(H5F_t *f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size");
     assert(len > 0);
 
-    /* Check for possible speculative read off the end of the file */
-    if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
-        if (H5C__verify_len_eoa(f, type, addr, &len, false) < 0)
+    /* A SWMR reader's EOA can lag behind the writer's flushed metadata.
+     * For other readers, clamp speculative loads to EOA and strictly validate
+     * non-speculative loads before allocating the image buffer. */
+    if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ)) {
+        bool actual = !(type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG);
+
+        if (H5C__verify_len_eoa(f, type, addr, &len, actual) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid len with respect to EOA");
+    }
 
     /* Allocate the buffer for reading the on-disk entry image */
     if (NULL == (image = (uint8_t *)H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))
@@ -1143,8 +1148,9 @@ H5C__load_entry(H5F_t *f,
 
                 /* Check for the length changing */
                 if (actual_len != len) {
-                    /* Verify that the length isn't past the EOA for the file */
-                    if (H5C__verify_len_eoa(f, type, addr, &actual_len, true) < 0)
+                    /* A SWMR reader may also resolve a size beyond its stale EOA. */
+                    if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ) &&
+                        H5C__verify_len_eoa(f, type, addr, &actual_len, true) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "actual_len exceeds EOA");
 
                     /* Verify that the length isn't 0  */
@@ -1919,10 +1925,9 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
 
     assert((dirty == false) || (type->id == 5 || type->id == 6));
 
-    ds_entry_ptr->cache_ptr = f->shared->cache;
-    ds_entry_ptr->addr      = addr;
-    ds_entry_ptr->size      = len;
-    assert(ds_entry_ptr->size < H5C_MAX_ENTRY_SIZE);
+    ds_entry_ptr->cache_ptr        = f->shared->cache;
+    ds_entry_ptr->addr             = addr;
+    ds_entry_ptr->size             = len;
     ds_entry_ptr->image_ptr        = pf_entry_ptr->image_ptr;
     ds_entry_ptr->image_up_to_date = !dirty;
     ds_entry_ptr->type             = type;
@@ -2205,7 +2210,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     /* Retrieve the size of the thing */
     if ((type->image_len)(thing, &(entry_ptr->size)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, FAIL, "can't get size of thing");
-    assert(entry_ptr->size > 0 && entry_ptr->size < H5C_MAX_ENTRY_SIZE);
+    assert(entry_ptr->size > 0);
 
     entry_ptr->in_slist = false;
 
@@ -2299,7 +2304,6 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
         else
             write_permitted = cache_ptr->write_permitted;
 
-        assert(entry_ptr->size <= H5C_MAX_ENTRY_SIZE);
         space_needed = entry_ptr->size;
         if (space_needed > cache_ptr->max_cache_size)
             space_needed = cache_ptr->max_cache_size;
@@ -3203,7 +3207,6 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
                 have_write_permitted = true;
             } /* end else */
 
-            assert(entry_ptr->size <= H5C_MAX_ENTRY_SIZE);
             space_needed = entry_ptr->size;
             if (space_needed > cache_ptr->max_cache_size)
                 space_needed = cache_ptr->max_cache_size;

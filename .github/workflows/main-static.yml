@@ -36,23 +36,11 @@ jobs:
   # A workflow that builds the library and runs all the tests
   Static_build_and_test:
     strategy:
-      # The current matrix has one dimensions:
-      #
-      # * config name
-      #
-      # Most configuration information is added via the 'include' mechanism,
-      # which will append the key-value pairs in the configuration where the
-      # names match.
+      # Each 'include' entry is one configuration, and so one job. Its name
+      # and settings are listed only there.
       matrix:
-        name:
-          - "Windows Static MSVC"
-          - "Ubuntu Static gcc"
-          - "MacOS Static Clang"
-
-        # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake
         # configure values, so be aware of that.
-
         include:
 
           - name: "Windows Static MSVC"
@@ -142,7 +130,7 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install CMake
-        uses: lukka/get-cmake@4a7d025fc60f00db0c7b44ebf783d19b52444830 # latest
+        uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # latest
         with:
             cmakeVersion: ${{ inputs.cmake_version }}
             ninjaVersion: latest

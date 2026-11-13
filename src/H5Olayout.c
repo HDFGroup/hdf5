@@ -23,6 +23,7 @@
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Opkg.h"      /* Object headers                           */
+#include "H5Sprivate.h"  /* Dataspaces                               */
 
 /* Local macros */
 
@@ -558,6 +559,37 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5D_NLAYOUTS:
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "Invalid layout class");
+        }
+    }
+
+    /* For a chunked layout, the stored dimensionality includes an extra
+     * element-size dimension, so it must be exactly one greater than the
+     * dataspace rank.  Validate that here
+     * to reject malformed files before the inconsistent
+     * ranks can cause problems during chunk I/O.
+     */
+    if (mesg->type == H5D_CHUNKED && open_oh != NULL) {
+        htri_t space_exists; /* Whether the dataspace message exists */
+
+        if ((space_exists = H5O_msg_exists_oh(open_oh, H5O_SDSPACE_ID)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't check for dataspace message");
+        if (space_exists) {
+            H5S_extent_t *extent; /* Dataspace extent from the sibling message */
+            int           rank;   /* Dataspace rank */
+
+            if (NULL == (extent = (H5S_extent_t *)H5O_msg_read_oh(f, open_oh, H5O_SDSPACE_ID, NULL)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't read dataspace message");
+
+            rank = H5S_extent_get_dims(extent, NULL, NULL);
+
+            /* Done with the sibling dataspace message */
+            H5O_msg_free(H5O_SDSPACE_ID, extent);
+
+            if (rank < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't get dataspace rank");
+            if (mesg->u.chunk.ndims != (unsigned)rank + 1)
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                            "dimensionality of chunks doesn't match the dataspace");
         }
     }
 

@@ -150,6 +150,15 @@ H5_init_library(void)
     if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
         HGOTO_DONE(SUCCEED);
 
+#ifdef H5_HAVE_THREADS
+    /* Set up the per-thread API context and error stack before anything
+     * uses them.  The error stack depends on this, so a failure is returned
+     * without pushing an error here.
+     */
+    if (H5_UNLIKELY(H5TS_first_thread_init() < 0))
+        HGOTO_DONE(FAIL);
+#endif /* H5_HAVE_THREADS */
+
     /* Check library version */
     /* (Will abort() on failure) */
     H5_check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
@@ -224,14 +233,14 @@ H5_init_library(void)
      */
     if (!H5_dont_atexit_g) {
 
-#ifdef H5_HAVE_THREADSAFE_API
+#ifdef H5_HAVE_THREADS
         /* Clean up thread resources.
          *
          * This must be pushed before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
         (void)atexit(H5TS_term_package);
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
 
         /* Normal library termination code */
         (void)atexit(H5_term_library);
@@ -400,6 +409,9 @@ H5_term_library(void)
             pending += DOWN(M_top);
             pending += DOWN(S_top);
             pending += DOWN(T_top);
+#ifdef H5_HAVE_THREADS
+            pending += DOWN(TS_top);
+#endif    /* H5_HAVE_THREADS */
         } /* end if */
 
         /* Don't shut down the file code until objects in files are shut down */
@@ -1129,6 +1141,9 @@ H5close(void)
  *              use the same memory allocator. It is not intended for
  *              use as a general memory allocator in applications.
  *
+ *              This function is thread-safe and does not take the API
+ *              lock.
+ *
  * Parameters:
  *
  *      size:   The size of the buffer.
@@ -1149,7 +1164,7 @@ H5allocate_memory(size_t size, bool clear)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_NOINIT_NOERR_NOLOCK
 
     if (0 == size)
         HGOTO_DONE(NULL);
@@ -1160,7 +1175,7 @@ H5allocate_memory(size_t size, bool clear)
         ret_value = H5MM_malloc(size);
 
 done:
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API_NOERR_NOLOCK(ret_value)
 } /* end H5allocate_memory() */
 
 /*-------------------------------------------------------------------------
@@ -1172,6 +1187,9 @@ done:
  *              plugins so that all allocation and free operations
  *              use the same memory allocator. It is not intended for
  *              use as a general memory allocator in applications.
+ *
+ *              This function is thread-safe and does not take the API
+ *              lock.
  *
  * Parameters:
  *
@@ -1192,11 +1210,11 @@ H5resize_memory(void *mem, size_t size)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_NOINIT_NOERR_NOLOCK
 
     ret_value = H5MM_realloc(mem, size);
 
-    FUNC_LEAVE_API_NOINIT(ret_value)
+    FUNC_LEAVE_API_NOERR_NOLOCK(ret_value)
 } /* end H5resize_memory() */
 
 /*-------------------------------------------------------------------------
@@ -1207,6 +1225,9 @@ H5resize_memory(void *mem, size_t size)
  *              that was used to allocate the memory frees it.  Passing
  *              NULL pointers is allowed.
  *
+ *              This function is thread-safe and does not take the API
+ *              lock.
+ *
  * Return:        SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
@@ -1214,12 +1235,12 @@ H5resize_memory(void *mem, size_t size)
 herr_t
 H5free_memory(void *mem)
 {
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_NOINIT_NOERR_NOLOCK
 
     /* At this time, it is impossible for this to fail. */
     H5MM_xfree(mem);
 
-    FUNC_LEAVE_API_NOINIT(SUCCEED)
+    FUNC_LEAVE_API_NOERR_NOLOCK(SUCCEED)
 } /* end H5free_memory() */
 
 /*-------------------------------------------------------------------------

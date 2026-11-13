@@ -171,6 +171,160 @@ error:
 } /* end test_cont() */
 
 /*
+ * Verify that malformed object header continuation chunk sizes are rejected
+ * before the metadata cache attempts to allocate a buffer for them.
+ */
+static herr_t
+test_bad_cont_chunk_size(char *filename, hid_t fapl)
+{
+    hid_t     file     = H5I_INVALID_HID;
+    hid_t     reopened = H5I_INVALID_HID;
+    H5F_t    *f        = NULL;
+    H5O_t    *oh       = NULL;
+    H5O_loc_t oh_loc;
+    H5O_loc_t block_loc;
+    time_t    time_new;
+    haddr_t   size_addr   = HADDR_UNDEF;
+    uint8_t   size_buf[8] = {0};
+    uint8_t  *p           = size_buf;
+    uint64_t  bad_size;
+    size_t    sizeof_size;
+    int       fd             = -1;
+    bool      found_cont_msg = false;
+    herr_t    ret;
+
+    TESTING("object header continuation chunk size validation");
+
+    memset(&oh_loc, 0, sizeof(oh_loc));
+    memset(&block_loc, 0, sizeof(block_loc));
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+    if (NULL == (f = (H5F_t *)H5VL_object(file)))
+        FAIL_STACK_ERROR;
+    if (H5AC_ignore_tags(f) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5O_create(f, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc /*out*/) < 0)
+        FAIL_STACK_ERROR;
+    if (H5O_create(f, (size_t)H5O_MIN_SIZE, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &block_loc /*out*/) < 0)
+        FAIL_STACK_ERROR;
+
+    for (unsigned u = 0; u < 40; u++) {
+        time_new = (time_t)((u + 1) * 1000 + 1000000);
+        if (H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    if (H5AC_prep_for_file_flush(f) < 0)
+        FAIL_STACK_ERROR;
+    if (H5AC_flush(f) < 0)
+        FAIL_STACK_ERROR;
+    if (H5AC_secure_from_file_flush(f) < 0)
+        FAIL_STACK_ERROR;
+    if (1 != H5O_link(&oh_loc, 1))
+        FAIL_STACK_ERROR;
+    if (1 != H5O_link(&block_loc, 1))
+        FAIL_STACK_ERROR;
+
+    if (NULL == (oh = H5O_protect(&oh_loc, H5AC__READ_ONLY_FLAG, false)))
+        FAIL_STACK_ERROR;
+
+    for (unsigned u = 0; u < oh->nmesgs; u++) {
+        if (oh->mesg[u].type == H5O_MSG_CONT) {
+            unsigned chunkno = oh->mesg[u].chunkno;
+            size_t   raw_offset;
+
+            if (chunkno >= oh->nchunks)
+                TEST_ERROR;
+            if (oh->mesg[u].raw < oh->chunk[chunkno].image)
+                TEST_ERROR;
+
+            raw_offset = (size_t)(oh->mesg[u].raw - oh->chunk[chunkno].image);
+            if (H5_addr_overflow(oh->chunk[chunkno].addr, raw_offset + H5F_SIZEOF_ADDR(f)))
+                TEST_ERROR;
+
+            size_addr      = oh->chunk[chunkno].addr + (haddr_t)raw_offset + (haddr_t)H5F_SIZEOF_ADDR(f);
+            found_cont_msg = true;
+            break;
+        }
+    }
+
+    if (!found_cont_msg)
+        TEST_ERROR;
+
+    sizeof_size = H5F_SIZEOF_SIZE(f);
+    if (sizeof_size > sizeof(size_buf))
+        TEST_ERROR;
+    bad_size = (sizeof_size >= sizeof(uint64_t)) ? (UINT64_C(1) << 40) : UINT32_MAX;
+    H5F_ENCODE_LENGTH(f, p, bad_size);
+
+    if (H5O_unprotect(&oh_loc, oh, H5AC__NO_FLAGS_SET) < 0)
+        FAIL_STACK_ERROR;
+    oh = NULL;
+    if (H5O_close(&oh_loc, NULL) < 0)
+        FAIL_STACK_ERROR;
+    if (H5O_close(&block_loc, NULL) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR;
+    file = H5I_INVALID_HID;
+
+    if ((fd = HDopen(filename, O_RDWR, H5_POSIX_CREATE_MODE_RW)) < 0)
+        FAIL_STACK_ERROR;
+    if (HDlseek(fd, (HDoff_t)size_addr, SEEK_SET) < 0)
+        FAIL_STACK_ERROR;
+    if (HDwrite(fd, size_buf, sizeof_size) != (ssize_t)sizeof_size)
+        FAIL_STACK_ERROR;
+    if (HDclose(fd) < 0)
+        FAIL_STACK_ERROR;
+    fd = -1;
+
+    H5E_BEGIN_TRY
+    {
+        reopened = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+    }
+    H5E_END_TRY
+    if (reopened < 0)
+        FAIL_STACK_ERROR;
+    if (NULL == (f = (H5F_t *)H5VL_object(reopened)))
+        FAIL_STACK_ERROR;
+    oh_loc.file         = f;
+    oh_loc.holding_file = false;
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5O_msg_exists(&oh_loc, H5O_MTIME_ID);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    if (H5Fclose(reopened) < 0)
+        FAIL_STACK_ERROR;
+    reopened = H5I_INVALID_HID;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (reopened >= 0)
+            H5Fclose(reopened);
+        if (oh)
+            H5O_unprotect(&oh_loc, oh, H5AC__NO_FLAGS_SET);
+        H5O_close(&oh_loc, NULL);
+        H5O_close(&block_loc, NULL);
+        H5Fclose(file);
+        if (fd >= 0)
+            HDclose(fd);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+} /* end test_bad_cont_chunk_size() */
+
+/*
  *  Verify that object headers are held in the cache until they are linked
  *      to a location in the graph, or assigned an ID.  This is done by
  *      creating an object header, then forcing it out of the cache by creating
@@ -506,6 +660,132 @@ error:
     H5E_BEGIN_TRY
     {
         H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+}
+
+/* Base name for the file used by test_ohdr_message_bounds() */
+#define MSG_BOUNDS_BASENAME "ohdr_msg_bounds"
+
+/*
+ * Tests that a message whose body runs past the end of its chunk is rejected.
+ *
+ * The message header is decoded before the body, so the size stored in the
+ * header has to be checked against what is left of the chunk after the
+ * header, not against what was left before it. The file is rejected either
+ * way, so running this under a sanitizer or valgrind is what catches the
+ * read past the end of the chunk image.
+ */
+static herr_t
+test_ohdr_message_bounds(hid_t fapl)
+{
+    hid_t       fid     = H5I_INVALID_HID;
+    hid_t       gid     = H5I_INVALID_HID;
+    hid_t       my_fapl = H5I_INVALID_HID;
+    FILE       *fp      = NULL;
+    H5O_info2_t oinfo;
+    haddr_t     addr;
+    char        filename[1024];
+    uint8_t     pfx[16];
+    uint8_t     msg[9];
+
+    TESTING("rejection of a message that runs off the end of a chunk");
+
+    /* Version 1 object headers carry no chunk checksum, so a header of that
+     * version can be modified in place
+     */
+    if ((my_fapl = H5Pcopy(fapl)) < 0)
+        TEST_ERROR;
+    if (H5Pset_libver_bounds(my_fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_V18) < 0)
+        TEST_ERROR;
+
+    if (NULL == h5_fixname(MSG_BOUNDS_BASENAME, my_fapl, filename, sizeof(filename)))
+        TEST_ERROR;
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
+        TEST_ERROR;
+
+    /* Give the file some content past the root group's object header */
+    if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Gclose(gid) < 0)
+        TEST_ERROR;
+    gid = H5I_INVALID_HID;
+
+    if (H5Oget_info_by_name3(fid, "/", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (H5VLnative_token_to_addr(fid, oinfo.token, &addr) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+    fid = H5I_INVALID_HID;
+
+    /* Rewrite the root group's object header as a single mtime message that
+     * declares an 8 byte body, in a chunk with only 4 bytes left after the
+     * 8 byte message header
+     */
+    if (NULL == (fp = fopen(filename, "rb+")))
+        TEST_ERROR;
+    if (fseek(fp, (long)addr, SEEK_SET) != 0)
+        TEST_ERROR;
+    if (fread(pfx, 1, sizeof(pfx), fp) != sizeof(pfx))
+        TEST_ERROR;
+    if (pfx[0] != H5O_VERSION_1)
+        FAIL_PUTS_ERROR("root group does not have a version 1 object header");
+
+    /* Number of messages */
+    pfx[2] = 1;
+    pfx[3] = 0;
+    /* Chunk 0 data size */
+    pfx[8]  = 12;
+    pfx[9]  = 0;
+    pfx[10] = 0;
+    pfx[11] = 0;
+
+    memset(msg, 0, sizeof(msg));
+    msg[0] = (uint8_t)H5O_MTIME_NEW_ID; /* Message type */
+    msg[2] = 8;                         /* Message size */
+    msg[8] = 1;                         /* Version of the mtime message body */
+
+    if (fseek(fp, (long)addr, SEEK_SET) != 0)
+        TEST_ERROR;
+    if (fwrite(pfx, 1, sizeof(pfx), fp) != sizeof(pfx))
+        TEST_ERROR;
+    if (fwrite(msg, 1, sizeof(msg), fp) != sizeof(msg))
+        TEST_ERROR;
+    if (fclose(fp) != 0)
+        TEST_ERROR;
+    fp = NULL;
+
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDONLY, my_fapl);
+    }
+    H5E_END_TRY
+
+    if (fid >= 0)
+        FAIL_PUTS_ERROR("should not have been able to open a file with a message past the chunk end");
+
+    h5_delete_test_file(MSG_BOUNDS_BASENAME, my_fapl);
+
+    if (H5Pclose(my_fapl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    if (fp)
+        fclose(fp);
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(gid);
+        H5Fclose(fid);
+        H5Pclose(my_fapl);
     }
     H5E_END_TRY
 
@@ -1881,6 +2161,15 @@ main(void)
             /* test on object continuation block */
             if (test_cont(filename, fapl) < 0)
                 TEST_ERROR;
+            if (single_file_vfd) {
+                if (test_bad_cont_chunk_size(filename, fapl) < 0)
+                    TEST_ERROR;
+            }
+            else {
+                TESTING("object header continuation chunk size validation");
+                SKIPPED();
+                puts("    Test not supported with the current VFD.");
+            }
 
             /* Create the file to operate on */
             if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2126,6 +2415,16 @@ main(void)
 
     /* Verify bad ohdr message fixes work */
     test_ohdr_badness(fapl);
+
+    if (single_file_vfd) {
+        if (test_ohdr_message_bounds(fapl) < 0)
+            TEST_ERROR;
+    }
+    else {
+        TESTING("rejection of a message that runs off the end of a chunk");
+        SKIPPED();
+        puts("    Message bounds test not supported with the current VFD.");
+    }
 
     /* Verify symbol table messages are cached */
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)

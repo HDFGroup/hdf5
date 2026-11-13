@@ -43,7 +43,7 @@
     {                                                                                                        \
         if (!((HDR)->checked_filters)) {                                                                     \
             if ((HDR)->pline.nused)                                                                          \
-                if (H5Z_can_apply_direct(&((HDR)->pline)) < 0)                                               \
+                if (H5Z_can_apply_direct(&((HDR)->pline), &(HDR)->universal_filter_mask) < 0)                \
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "I/O filters can't operate on this heap");     \
                                                                                                              \
             (HDR)->checked_filters = true;                                                                   \

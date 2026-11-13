@@ -67,6 +67,7 @@ set (test_hl_CLEANFILES
     test_ds10.h5
     test_ds_class_prefix.h5
     test_ds_reserved_prefix.h5
+    test_ds_id_leak.h5
     test_image1.h5
     test_image2.h5
     test_image3.h5

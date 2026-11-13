@@ -1,6 +1,6 @@
 ---
-name: Blank issue
-about: Create a new issue from scratch
+name: Blank NON-SECURITY issue
+about: Create a new NON-SECURITY issue from scratch (see 'Report a security vulnerability' option for security vulnerabilities)
 title: ''
 labels: ''
 assignees: ''

@@ -87,7 +87,6 @@ set (LIST_OTHER_TEST_FILES
     tdset-1.ls
     tdset2-1.ls
     tdset_idx-1.ls
-    tdset_idx-2.ls
     tempty.ls
     textlink-1.ls
     textlinksrc-1.ls
@@ -142,9 +141,12 @@ set (LIST_OTHER_TEST_FILES
     tvldtypes2be.ls
 )
 
-set (LIST_OTHER_TEST_FILES_LE
+# Expected output that depends on the host byte order; a big-endian host
+# uses <name>BE.ls instead of <name>.ls
+set (LIST_OTHER_TEST_FILES_END
     tall-3
     tdset2-2
+    tdset_idx-2
 )
 
 set (H5LS_S3PROXY_TEST_FILES
@@ -247,6 +249,9 @@ add_custom_target (h5ls_vol_files ALL COMMENT "Copying files needed by h5ls test
 # OPTIONAL KEYWORD ARGUMENTS:
 # RESULT_ERRCHECK <string> - value to pass to test script as TEST_ERRREF
 #                            Ignored if memchecker is enabled.
+# FILTER_IN <regex>        - text in the output and reference to replace before
+#                            comparing them. Ignored if memchecker is enabled.
+# FILTER_OUT <string>      - replacement text for FILTER_IN
 #
 # OPTIONAL FLAGS:
 # WILL_FAIL - indicates that the test is expected to fail. Defaults to false
@@ -256,7 +261,7 @@ add_custom_target (h5ls_vol_files ALL COMMENT "Copying files needed by h5ls test
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments (ARG
       "WILL_FAIL;SKIP_TEST;NATIVE_ONLY" # flags
-      "RESULT_CODE;RESULT_ERRCHECK" # one-value args
+      "RESULT_CODE;RESULT_ERRCHECK;FILTER_IN;FILTER_OUT" # one-value args
       "" # multi-value args
       ${ARGN}
   )
@@ -307,6 +312,8 @@ macro (ADD_H5_TEST testname)
               -D "TEST_EXPECT=${ARG_RESULT_CODE}"
               -D "TEST_ERRREF=${ARG_RESULT_ERRCHECK}"
               -D "TEST_REFERENCE=${testname}.ls"
+              -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
+              -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -562,7 +569,12 @@ ADD_H5_TEST (tmultifile RESULT_CODE 0 -w80 thlink.h5 tslink.h5)
 ADD_H5_TEST (thlink-1 RESULT_CODE 0 -w80 thlink.h5)
 
 # test printing characters in ASCII instead of decimal
-ADD_H5_TEST (tintascii RESULT_CODE 0 -w80 -vldrs tintascii.h5)
+# mask the type name to avoid endian-related disagreements between machines
+# over a 1-byte type
+ADD_H5_TEST (tintascii RESULT_CODE 0
+    FILTER_IN "Type:      (native signed char|8-bit integer)"
+    FILTER_OUT "Type:      XXXX"
+    -w80 -vldrs tintascii.h5)
 
 # tests for compound data types
 ADD_H5_TEST (tcomp-1 RESULT_CODE 0 -w80 -r -d tcompound.h5)

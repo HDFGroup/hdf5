@@ -265,6 +265,9 @@
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
 
+/* Define to 1 if the RtlDllShutdownInProgress function is available */
+#cmakedefine H5_HAVE_RTLDLLSHUTDOWNINPROGRESS @H5_HAVE_RTLDLLSHUTDOWNINPROGRESS@
+
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
 
@@ -310,21 +313,20 @@
 /* Define to 1 if you have the <szlib.h> header file. */
 #cmakedefine H5_HAVE_SZLIB_H @H5_HAVE_SZLIB_H@
 
+#if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
+/* Thread support is not supported on WIN32 platforms with static linking:
+ * per-thread library state can't be released when a thread exits without
+ * DllMain */
+/* #undef H5_HAVE_THREADS */
+/* #undef H5_HAVE_THREADSAFE */
+/* #undef H5_HAVE_CONCURRENCY */
+#else
 /* Define if we have thread support */
 # cmakedefine H5_HAVE_THREADS @H5_HAVE_THREADS@
 
-#if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
-/* Not supported on WIN32 platforms with static linking */
-/* #undef H5_HAVE_THREADSAFE */
-#else
 /* Define if we have thread safe support */
 # cmakedefine H5_HAVE_THREADSAFE @H5_HAVE_THREADSAFE@
-#endif
 
-#if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
-/* Not supported on WIN32 platforms with static linking */
-/* #undef H5_HAVE_CONCURRENCY */
-#else
 /* Define if we have multi-threaded concurrency support */
 # cmakedefine H5_HAVE_CONCURRENCY @H5_HAVE_CONCURRENCY@
 #endif

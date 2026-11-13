@@ -28,8 +28,8 @@
  *              (See "Skip Lists: A Probabilistic Alternative to Balanced Trees"
  *               by William Pugh for additional information)
  *
- *              (This implementation has the optimization for reducing key
- *               key comparisons mentioned in section 3.5 of "A Skip List
+ *              (This implementation had the optimization for reducing key
+ *               comparisons mentioned in section 3.5 of "A Skip List
  *               Cookbook" by William Pugh
  *              -Removed as our implementation of this was useless for a 1-2-3
  *               skip list.  The implementation in that document hurts
@@ -152,7 +152,7 @@
     }
 
 /* Macro used to grow a node by 1.  Does not update pointers. LVL is the current
- * level of X.  Does not update LVL but does update X->lvl. */
+ * level of X.  Does not update LVL but does update X->level. */
 #define H5SL_GROW(X, LVL, ERR)                                                                               \
     {                                                                                                        \
         /* Check if we need to increase allocation of forward pointers */                                    \
@@ -388,7 +388,7 @@
                 if (_llast == _last) {                                                                       \
                     /* We are in the first gap, count the number of nodes */                                 \
                     /* of height _i in the next gap.  We need only check */                                  \
-                    /* onenode to see if we should promote the first node */                                 \
+                    /* one node to see if we should promote the first node */                                \
                     /* in the next gap */                                                                    \
                     _llast = _next->forward[_i + 1];                                                         \
                                                                                                              \
@@ -875,8 +875,7 @@ done:
     the skip list have the 'op' routine called for each.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    If the 'op' routine returns non-zero, only the nodes up to that
-    point in the list are released and the list is still valid.
+    The return value from the 'op' routine is ignored.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
@@ -1297,13 +1296,13 @@ done:
     Search for object in a skip list
  USAGE
     void *H5SL_search(slist,key)
-        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        H5SL_t *slist;          IN: Pointer to skip list
         void *key;              IN: Key for item to search for
 
  RETURNS
     Returns pointer to item on success, NULL on failure
  DESCRIPTION
-    Search for an object in a skip list, according to it's key
+    Search for an object in a skip list, according to its key
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -1325,10 +1324,10 @@ H5SL_search(H5SL_t *slist, const void *key)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Insert item into skip list */
+    /* Search for item in skip list */
 
     /* Work through the forward pointers for a node, finding the node at each
-     * level that is before the location to insert
+     * level that is before the location of the key
      */
     x = slist->header;
     switch (slist->type) {
@@ -1386,15 +1385,15 @@ done:
     Search for object in a skip list that is less than or equal to 'key'
  USAGE
     void *H5SL_less(slist,key)
-        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        H5SL_t *slist;          IN: Pointer to skip list
         void *key;              IN: Key for item to search for
 
  RETURNS
     Returns pointer to item who key is less than or equal to 'key' on success,
         NULL on failure
  DESCRIPTION
-    Search for an object in a skip list, according to it's key, returning the
-    object itself (for an exact match), or the object with the next highest
+    Search for an object in a skip list, according to its key, returning the
+    object itself (for an exact match), or the object with the largest
     key that is less than 'key'
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1417,10 +1416,10 @@ H5SL_less(H5SL_t *slist, const void *key)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Insert item into skip list */
+    /* Search for item in skip list */
 
     /* Work through the forward pointers for a node, finding the node at each
-     * level that is before the location to insert
+     * level that is before the location of the key
      */
     x = slist->header;
     switch (slist->type) {
@@ -1491,15 +1490,15 @@ done:
     Search for object in a skip list that is greater than or equal to 'key'
  USAGE
     void *H5SL_greater(slist, key)
-        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        H5SL_t *slist;          IN: Pointer to skip list
         void *key;              IN: Key for item to search for
 
  RETURNS
     Returns pointer to item who key is greater than or equal to 'key' on success,
         NULL on failure
  DESCRIPTION
-    Search for an object in a skip list, according to it's key, returning the
-    object itself (for an exact match), or the object with the next lowest
+    Search for an object in a skip list, according to its key, returning the
+    object itself (for an exact match), or the object with the smallest
     key that is greater than 'key'
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1522,10 +1521,10 @@ H5SL_greater(H5SL_t *slist, const void *key)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Insert item into skip list */
+    /* Search for item in skip list */
 
     /* Work through the forward pointers for a node, finding the node at each
-     * level that is before the location to insert
+     * level that is before the location of the key
      */
     x = slist->header;
     switch (slist->type) {
@@ -1586,14 +1585,14 @@ done:
  PURPOSE
     Search for _node_ in a skip list
  USAGE
-    H5SL_node_t *H5SL_node(slist,key)
-        H5SL_t *slist;          IN/OUT: Pointer to skip list
+    H5SL_node_t *H5SL_find(slist,key)
+        H5SL_t *slist;          IN: Pointer to skip list
         void *key;              IN: Key for item to search for
 
  RETURNS
     Returns pointer to _node_ matching key on success, NULL on failure
  DESCRIPTION
-    Search for an object in a skip list, according to it's key and returns
+    Search for an object in a skip list, according to its key and returns
     the node that the object is attached to
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1617,10 +1616,10 @@ H5SL_find(H5SL_t *slist, const void *key)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Insert item into skip list */
+    /* Search for item in skip list */
 
     /* Work through the forward pointers for a node, finding the node at each
-     * level that is before the location to insert
+     * level that is before the location of the key
      */
     x = slist->header;
     switch (slist->type) {
@@ -1678,16 +1677,16 @@ done:
     Search for _node_ in a skip list whose object is less than or equal to 'key'
  USAGE
     H5SL_node_t *H5SL_below(slist, key)
-        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        H5SL_t *slist;          IN: Pointer to skip list
         void *key;              IN: Key for item to search for
 
  RETURNS
     Returns pointer to _node_ who key is less than or equal to 'key' on success,
         NULL on failure
  DESCRIPTION
-    Search for a node with an object in a skip list, according to it's key,
-    returning the node itself (for an exact match), or the node with the next
-    highest key that is less than 'key'
+    Search for a node with an object in a skip list, according to its key,
+    returning the node itself (for an exact match), or the node with the
+    largest key that is less than 'key'
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -1709,10 +1708,10 @@ H5SL_below(H5SL_t *slist, const void *key)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Insert item into skip list */
+    /* Search for item in skip list */
 
     /* Work through the forward pointers for a node, finding the node at each
-     * level that is before the location to insert
+     * level that is before the location of the key
      */
     x = slist->header;
     switch (slist->type) {
@@ -1783,16 +1782,16 @@ done:
     Search for _node_ in a skip list whose object is greater than or equal to 'key'
  USAGE
     H5SL_node_t *H5SL_above(slist, key)
-        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        H5SL_t *slist;          IN: Pointer to skip list
         void *key;              IN: Key for item to search for
 
  RETURNS
     Returns pointer to _node_ with object that has a key is greater than or
         equal to 'key' on success, NULL on failure
  DESCRIPTION
-    Search for a node with an object in a skip list, according to it's key,
-    returning the node itself (for an exact match), or the node with the next
-    lowest key that is greater than 'key'
+    Search for a node with an object in a skip list, according to its key,
+    returning the node itself (for an exact match), or the node with the
+    smallest key that is greater than 'key'
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -1814,10 +1813,10 @@ H5SL_above(H5SL_t *slist, const void *key)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Insert item into skip list */
+    /* Search for item in skip list */
 
     /* Work through the forward pointers for a node, finding the node at each
-     * level that is before the location to insert
+     * level that is before the location of the key
      */
     x = slist->header;
     switch (slist->type) {
@@ -1968,7 +1967,7 @@ H5SL_prev(H5SL_node_t *slist_node)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Walk backward, detecting the header node (which has it's key set to NULL) */
+    /* Walk backward, detecting the header node (which has its key set to NULL) */
     FUNC_LEAVE_NOAPI(slist_node->backward->key == NULL ? NULL : slist_node->backward)
 } /* end H5SL_prev() */
 
@@ -2057,11 +2056,11 @@ H5SL_item(H5SL_node_t *slist_node)
     Iterate over all the nodes in a skip list, calling an application callback
     with the item, key and any operator data.
 
-    The operator callback receives a pointer to the item and key for the list
-    being iterated over ('mesg'), and the pointer to the operator data passed
+    The operator callback receives pointers to the item and key of each node
+    in the list, and the pointer to the operator data passed
     in to H5SL_iterate ('op_data').  The return values from an operator are:
         A. Zero causes the iterator to continue, returning zero when all
-            nodes of that type have been processed.
+            nodes have been processed.
         B. Positive causes the iterator to immediately return that positive
             value, indicating short-circuit success.
         C. Negative causes the iterator to immediately return that value,
@@ -2086,10 +2085,10 @@ H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     /* Check internal consistency */
     /* (Pre-condition) */
 
-    /* Free skip list nodes */
+    /* Iterate over skip list nodes */
     node = slist->header->forward[0];
     while (node != NULL) {
-        /* Protect against the node being deleted by the callback */
+        /* Protect against the current node being deleted by the callback */
         next = node->forward[0];
 
         /* Call the iterator callback

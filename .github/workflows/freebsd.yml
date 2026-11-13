@@ -54,7 +54,7 @@ jobs:
           persist-credentials: false
 
       - name: Build and test on FreeBSD
-        uses: vmactions/freebsd-vm@77ed28d336d03fe19a3f4f7266c1d2c4714dd79d # v1
+        uses: vmactions/freebsd-vm@a2f9a41fa97f6848b8c3b791087dfcdaa5b473ff # v1
         with:
           release: ${{ matrix.freebsd-version }}
           usesh: true

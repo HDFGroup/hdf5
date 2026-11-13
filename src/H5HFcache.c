@@ -1726,9 +1726,11 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, boo
             /* Copy compressed image into buffer */
             H5MM_memcpy(read_buf, image, len);
 
-            /* Push direct block data through I/O filter pipeline */
+            /* Set other parameters for filter pipeline */
             nbytes      = len;
             filter_mask = udata->filter_mask;
+
+            /* Push direct block data through I/O filter pipeline */
             if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb,
                              &nbytes, &len, &read_buf) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed");
@@ -2072,9 +2074,9 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
 
     /* Check for I/O filters on this heap */
     if (hdr->filter_len > 0) {
-        H5Z_cb_t filter_cb;       /* Filter callback structure */
-        size_t   nbytes;          /* Number of bytes used */
-        unsigned filter_mask = 0; /* Filter mask for block */
+        H5Z_cb_t filter_cb;                                /* Filter callback structure */
+        size_t   nbytes;                                   /* Number of bytes used */
+        unsigned filter_mask = hdr->universal_filter_mask; /* Filter mask for block */
 
         /* Initialize the filter callback struct */
         filter_cb.op_data = NULL;
