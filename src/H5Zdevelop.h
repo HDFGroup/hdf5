@@ -242,7 +242,8 @@ typedef struct H5Z_class2_t {
  * string once and passes the handle to a filter's set_config callback; read
  * it with the H5Zconfig_*() functions.  That handle is owned by the library
  * and is valid only for the duration of the callback.  H5Zconfig_parse()
- * creates one outside a callback.
+ * creates one outside a callback.  Keys passed to the H5Zconfig_*()
+ * functions may be at most 255 characters long.
  *
  * \since 3.0.0
  */
@@ -363,13 +364,25 @@ extern "C" {
  * \param[in] params  TOML key=value parameter string, with or without outer
  *                    braces; NULL or "" gives a config with no keys
  *
- * \return Parsed config, or NULL on failure (e.g. invalid TOML)
+ * \return Parsed config, or NULL on failure
  *
  * \details Filters receive an already-parsed config in their set_config
  *          callback and do not need this function.  It is for code that
  *          reads a parameter string outside a callback, such as a test that
  *          checks a filter's get_config output.  Free the result with
  *          H5Zconfig_close().
+ *
+ *          \p params is the body of a TOML inline table, such as
+ *          "level = 6, mode = \"fast\"".  Float literals use '.' as the
+ *          decimal separator whatever the application's LC_NUMERIC locale.
+ *          Parsing fails if:
+ *          - the string is not valid TOML, or opens with '{' without a
+ *            closing '}';
+ *          - it is longer than #H5Z_CONFIG_STRING_MAX bytes, or has more
+ *            than #H5Z_CONFIG_MAX_PARAMS leaf keys (keys in nested tables
+ *            count individually; an array or empty table counts as one);
+ *          - a quoted key contains '.' or NUL (use a nested table or dotted
+ *            key instead), or a string value contains NUL.
  *
  * \since 3.0.0
  */
@@ -403,7 +416,8 @@ H5_DLL herr_t H5Zconfig_close(H5Z_config_t *config);
  *
  * \details Fails if \p config contains a key that is not in \p known_keys.
  *          Nested keys are matched by dotted path, so "a = {b = 1}" and
- *          "a.b = 1" both match "a.b".
+ *          "a.b = 1" both match "a.b".  An empty table, "a = {}", is
+ *          matched as "a".  Paths longer than 255 characters are rejected.
  *
  * \since 3.0.0
  */
@@ -454,8 +468,7 @@ H5_DLL htri_t H5Zconfig_get_int(const H5Z_config_t *config, const char *key, int
  * \return Positive if found, 0 if not found, negative on error.
  *
  * \details Returns negative (H5E_BADVALUE) if the value is not a TOML float,
- *          or is inf or nan.  The decimal separator is always '.', as TOML
- *          requires, whatever the application's LC_NUMERIC locale.
+ *          or is inf or nan.
  *
  * \since 3.0.0
  */
@@ -492,8 +505,12 @@ H5_DLL htri_t H5Zconfig_get_bool(const H5Z_config_t *config, const char *key, bo
  *
  * \return Positive if found, 0 if not found, negative on error.
  *
- * \details Returns negative (H5E_BADVALUE) if the value is not a TOML string,
- *          and pushes H5E_OVERFLOW if \p buf is too small.
+ * \details Returns negative (H5E_BADVALUE) if the value is not a TOML string.
+ *          If \p buf is too small, returns negative and pushes H5E_OVERFLOW;
+ *          \p buf_size still receives the length, and \p buf holds a
+ *          truncated, NUL-terminated copy when its capacity is at least 1.
+ *          With both \p buf and \p buf_size NULL, only checks that the key
+ *          is a string.
  *
  * \since 3.0.0
  */

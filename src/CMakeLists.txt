@@ -1001,37 +1001,19 @@ if (H5_ZLIB_HEADER)
   )
 endif ()
 
-list (APPEND H5Z_SOURCES ${HDF5_SRC_DIR}/tomlc17/tomlc17.c)
-# Keep the vendored tomlc17 symbols from colliding with an application's own
-# copy by renaming them via a force-included h5_toml_prefix.h (so the vendored
-# files stay unmodified).  Vendored code is also exempt from HDF5's
-# warnings-as-errors.
-include (CheckCCompilerFlag)
-
+# The vendored tomlc17 is compiled through h5_tomlc17.c, which includes
+# h5_toml_prefix.h before tomlc17.c.  That renames its symbols so they cannot
+# collide with an application's own copy, without modifying the vendored
+# files.  All compiler warnings are disabled for the vendored code.
+set (H5Z_TOMLC17_SOURCE ${HDF5_SRC_DIR}/tomlc17/h5_tomlc17.c)
+list (APPEND H5Z_SOURCES ${H5Z_TOMLC17_SOURCE})
 if (MSVC)
-  set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS
-    "/FI${HDF5_SRC_DIR}/tomlc17/h5_toml_prefix.h"
-  )
+  set_property (SOURCE ${H5Z_TOMLC17_SOURCE} APPEND PROPERTY COMPILE_OPTIONS "/W0")
 else ()
-  check_c_compiler_flag ("-include ${HDF5_SRC_DIR}/tomlc17/h5_toml_prefix.h" HDF5_C_HAS_INCLUDE_FLAG)
-  if (HDF5_C_HAS_INCLUDE_FLAG)
-    set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS
-      "-include" "${HDF5_SRC_DIR}/tomlc17/h5_toml_prefix.h"
-    )
-  else ()
-    message (WARNING
-      "Compiler does not support -include; the vendored tomlc17 symbols will "
-      "NOT be prefixed and may collide with an application's own copy of "
-      "tomlc17 when statically linked. See src/CMakeLists.txt.")
-  endif ()
-endif ()
-
-if (MSVC)
-  set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "/W0")
-else ()
+  include (CheckCCompilerFlag)
   check_c_compiler_flag ("-w" HDF5_C_HAS_W)
   if (HDF5_C_HAS_W)
-    set_property (SOURCE ${HDF5_SRC_DIR}/tomlc17/tomlc17.c APPEND PROPERTY COMPILE_OPTIONS "-w")
+    set_property (SOURCE ${H5Z_TOMLC17_SOURCE} APPEND PROPERTY COMPILE_OPTIONS "-w")
   endif ()
 endif ()
 

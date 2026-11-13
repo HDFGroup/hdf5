@@ -15,6 +15,7 @@
  *   - H5Pappend_filter / H5Pmodify_filter_by_idx / H5Pget_filter_params_by_idx
  *   - Typed TOML accessor functions (H5Zconfig_get_int, _get_str, etc.)
  *   - Built-in filter set_config / get_config round-trips
+ *   - The parsed-config handle, key validation, input limits and locale
  *   - H5Z_class4_t registration, canonical names and H5Zget_filter_class_info
  *   - The H5Z_func2_t extended filter callback
  *   - Regression: existing H5Pset_filter still works
@@ -565,25 +566,335 @@ error:
     return -1;
 }
 
-/* Floats parse with '.' even when LC_NUMERIC uses a comma decimal point */
+/* True if PARAMS fails to parse */
+static bool
+parse_fails(const char *params)
+{
+    H5Z_config_t *cfg = NULL;
+
+    H5E_BEGIN_TRY
+    {
+        cfg = H5Zconfig_parse(params);
+    }
+    H5E_END_TRY
+    if (cfg) {
+        H5Zconfig_close(cfg);
+        return false;
+    }
+    return true;
+}
+
+/* Input the wrapper must reject, and edge cases it must accept */
+static int
+test_config_strict_input(void)
+{
+    H5Z_config_t *cfg  = NULL;
+    int64_t       ival = 0;
+
+    TESTING("H5Zconfig_parse: '}' cannot close the table early");
+    if (!parse_fails("a = 1}\nevil = 2\n#"))
+        TEST_ERROR;
+    if (!parse_fails("a = 1}\n[evil]\nx = 1\n#"))
+        TEST_ERROR;
+    if (!parse_fails("a = 1} # junk"))
+        TEST_ERROR;
+    if (!parse_fails("a = 1}, b = {"))
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_parse: '{' without a closing '}' is rejected");
+    if (!parse_fails("{a = 1"))
+        TEST_ERROR;
+    if (!parse_fails("{"))
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_parse: trailing comment is allowed");
+    if (cfg_get_int("a = 1 # comment", "a", &ival) <= 0 || ival != 1)
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_parse: quoted key with '.' or NUL is rejected");
+    if (!parse_fails("\"a.b\" = 1"))
+        TEST_ERROR;
+    if (!parse_fails("t = {\"a.b\" = 1}"))
+        TEST_ERROR;
+    if (!parse_fails("\"a\\u0000b\" = 1"))
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_parse: string value with NUL is rejected");
+    if (!parse_fails("s = \"ok\\u0000hidden\""))
+        TEST_ERROR;
+    if (!parse_fails("s = [\"ok\", \"x\\u0000y\"]"))
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_parse: NULL, braces only and blanks give no keys");
+    {
+        const char *empties[] = {"{}", "{ }", "   ", " { } "};
+        size_t      i;
+
+        if (NULL == (cfg = H5Zconfig_parse(NULL)))
+            TEST_ERROR;
+        if (H5Zconfig_has_key(cfg, "a") != 0)
+            TEST_ERROR;
+        H5Zconfig_close(cfg);
+        cfg = NULL;
+        for (i = 0; i < sizeof(empties) / sizeof(empties[0]); i++) {
+            if (NULL == (cfg = H5Zconfig_parse(empties[i])))
+                TEST_ERROR;
+            if (H5Zconfig_has_key(cfg, "a") != 0)
+                TEST_ERROR;
+            H5Zconfig_close(cfg);
+            cfg = NULL;
+        }
+        if (H5Zconfig_close(NULL) < 0)
+            TEST_ERROR;
+    }
+    PASSED();
+
+    return 0;
+
+error:
+    H5Zconfig_close(cfg);
+    return -1;
+}
+
+/* H5Z_CONFIG_STRING_MAX, H5Z_CONFIG_MAX_PARAMS and the 255-character key limit */
+static int
+test_config_limits(void)
+{
+    const char   *known[] = {"k", NULL};
+    char         *buf     = NULL;
+    char          key[300];
+    H5Z_config_t *cfg = NULL;
+    size_t        len;
+    int           i;
+    herr_t        ret;
+
+    if (NULL == (buf = (char *)malloc(H5Z_CONFIG_STRING_MAX + 2)))
+        TEST_ERROR;
+
+    TESTING("H5Zconfig_parse: H5Z_CONFIG_STRING_MAX bytes parse, one more fails");
+    /* k = "xxx...x" with the total length exactly H5Z_CONFIG_STRING_MAX */
+    strcpy(buf, "k = \"");
+    len = strlen(buf);
+    memset(buf + len, 'x', H5Z_CONFIG_STRING_MAX - len - 1);
+    buf[H5Z_CONFIG_STRING_MAX - 1] = '"';
+    buf[H5Z_CONFIG_STRING_MAX]     = '\0';
+    if (strlen(buf) != H5Z_CONFIG_STRING_MAX || NULL == (cfg = H5Zconfig_parse(buf)))
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg                            = NULL;
+    buf[H5Z_CONFIG_STRING_MAX - 1] = 'x';
+    buf[H5Z_CONFIG_STRING_MAX]     = '"';
+    buf[H5Z_CONFIG_STRING_MAX + 1] = '\0';
+    if (!parse_fails(buf))
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_parse: H5Z_CONFIG_MAX_PARAMS keys parse, one more fails");
+    buf[0] = '\0';
+    for (i = 0; i < H5Z_CONFIG_MAX_PARAMS; i++)
+        snprintf(buf + strlen(buf), H5Z_CONFIG_STRING_MAX - strlen(buf), "%sk%d = %d", i ? ", " : "", i, i);
+    if (NULL == (cfg = H5Zconfig_parse(buf)))
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    snprintf(buf + strlen(buf), H5Z_CONFIG_STRING_MAX - strlen(buf), ", extra = 1");
+    if (!parse_fails(buf))
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_parse: keys in nested tables count toward the limit");
+    strcpy(buf, "t = {");
+    for (i = 0; i < H5Z_CONFIG_MAX_PARAMS; i++)
+        snprintf(buf + strlen(buf), H5Z_CONFIG_STRING_MAX - strlen(buf), "%sk%d = %d", i ? ", " : "", i, i);
+    strcat(buf, "}");
+    if (NULL == (cfg = H5Zconfig_parse(buf)))
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    strcat(buf, ", u = {v = 1}");
+    if (!parse_fails(buf))
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_*: keys longer than 255 characters are errors");
+    if (NULL == (cfg = H5Zconfig_parse("k = 1")))
+        TEST_ERROR;
+    memset(key, 'k', 255);
+    key[255] = '\0';
+    if (H5Zconfig_has_key(cfg, key) != 0)
+        TEST_ERROR;
+    key[255] = 'k';
+    key[256] = '\0';
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zconfig_has_key(cfg, key);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+
+    /* A 300-character key parses but cannot be validated */
+    memset(key, 'k', 299);
+    key[299] = '\0';
+    snprintf(buf, H5Z_CONFIG_STRING_MAX, "%s = 1", key);
+    if (NULL == (cfg = H5Zconfig_parse(buf)))
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zconfig_validate_keys(cfg, known);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    PASSED();
+
+    free(buf);
+    return 0;
+
+error:
+    H5Zconfig_close(cfg);
+    free(buf);
+    return -1;
+}
+
+/* H5Zconfig_validate_keys with dotted keys and empty tables */
+static int
+test_config_validate_more(void)
+{
+    const char   *dotted[] = {"opt.fast", NULL};
+    const char   *level[]  = {"level", NULL};
+    const char   *opt[]    = {"opt", NULL};
+    H5Z_config_t *cfg      = NULL;
+    herr_t        ret;
+
+    TESTING("H5Zconfig_validate_keys: dotted form matches a dotted path");
+    if (NULL == (cfg = H5Zconfig_parse("opt.fast = true")))
+        TEST_ERROR;
+    if (H5Zconfig_validate_keys(cfg, dotted) < 0)
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    PASSED();
+
+    TESTING("H5Zconfig_validate_keys: unknown empty table is rejected");
+    if (NULL == (cfg = H5Zconfig_parse("level = 1, unknown = {}")))
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        ret = H5Zconfig_validate_keys(cfg, level);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    PASSED();
+
+    TESTING("H5Zconfig_validate_keys: known empty table is accepted");
+    if (NULL == (cfg = H5Zconfig_parse("opt = {}")))
+        TEST_ERROR;
+    if (H5Zconfig_validate_keys(cfg, opt) < 0)
+        TEST_ERROR;
+    H5Zconfig_close(cfg);
+    cfg = NULL;
+    PASSED();
+
+    return 0;
+
+error:
+    H5Zconfig_close(cfg);
+    return -1;
+}
+
+/* H5Zconfig_get_str at and around the exact buffer size */
+static int
+test_config_get_str_sizes(void)
+{
+    const char *params = "name = \"hello\"";
+    char        buf[8];
+    size_t      sz;
+    htri_t      ret;
+
+    TESTING("H5Zconfig_get_str: buffer of exactly length+1 succeeds");
+    sz = 6;
+    memset(buf, 'X', sizeof(buf));
+    if (cfg_get_str(params, "name", buf, &sz) <= 0 || sz != 5 || strcmp(buf, "hello") != 0)
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_get_str: buffer of length fails and truncates");
+    sz = 5;
+    memset(buf, 'X', sizeof(buf));
+    H5E_BEGIN_TRY
+    {
+        ret = cfg_get_str(params, "name", buf, &sz);
+    }
+    H5E_END_TRY
+    if (ret >= 0 || sz != 5 || strcmp(buf, "hell") != 0)
+        TEST_ERROR;
+    PASSED();
+
+    TESTING("H5Zconfig_get_str: buf and buf_size both NULL checks the type");
+    if (cfg_get_str(params, "name", NULL, NULL) <= 0)
+        TEST_ERROR;
+    PASSED();
+
+    return 0;
+
+error:
+    return -1;
+}
+
+/* Floats parse with '.' under a comma-decimal locale, and the caller's locale
+ * is left as it was.  Set HDF5_REQUIRE_LOCALE_TEST to fail rather than skip
+ * when no comma-decimal locale is installed. */
 static int
 test_config_locale(void)
 {
-    char  *saved = NULL;
-    double dval  = 0.0;
+    const char *names[] = {"de_DE.UTF-8", "de_DE.utf8", "de_DE",          "fr_FR.UTF-8",
+                           "fr_FR.utf8",  "fr_FR",      "German_Germany", "French_France"};
+    const char *cur;
+    char       *saved = NULL;
+    double      dval  = 0.0;
+    bool        found = false;
+    size_t      i;
 
     TESTING("H5Zconfig_get_double: '.' parses under a comma-decimal locale");
 
-    if (NULL == (saved = strdup(setlocale(LC_NUMERIC, NULL))))
+    if (NULL == (cur = setlocale(LC_NUMERIC, NULL)) || NULL == (saved = strdup(cur)))
         TEST_ERROR;
-    if (!setlocale(LC_NUMERIC, "de_DE.UTF-8") && !setlocale(LC_NUMERIC, "de_DE")) {
+    for (i = 0; i < sizeof(names) / sizeof(names[0]) && !found; i++)
+        if (setlocale(LC_NUMERIC, names[i]) && strcmp(localeconv()->decimal_point, ",") == 0)
+            found = true;
+    if (!found) {
+        setlocale(LC_NUMERIC, saved);
         free(saved);
+        if (getenv("HDF5_REQUIRE_LOCALE_TEST")) {
+            H5_FAILED();
+            puts("    no comma-decimal locale installed (HDF5_REQUIRE_LOCALE_TEST is set)");
+            return -1;
+        }
         SKIPPED();
-        puts("    de_DE locale not installed");
+        puts("    no comma-decimal locale installed");
         return 0;
     }
 
     if (cfg_get_double("rate = 1.5", "rate", &dval) <= 0 || !dbl_same(dval, 1.5))
+        TEST_ERROR;
+    if (strcmp(localeconv()->decimal_point, ",") != 0)
+        TEST_ERROR;
+    if (!parse_fails("rate = 1,5"))
+        TEST_ERROR;
+    if (strcmp(localeconv()->decimal_point, ",") != 0)
         TEST_ERROR;
 
     setlocale(LC_NUMERIC, saved);
@@ -3565,6 +3876,10 @@ main(void)
     nerrors += test_parser() < 0 ? 1 : 0;
     nerrors += test_config_get_str_null_buf_size() < 0 ? 1 : 0;
     nerrors += test_config_handle() < 0 ? 1 : 0;
+    nerrors += test_config_strict_input() < 0 ? 1 : 0;
+    nerrors += test_config_limits() < 0 ? 1 : 0;
+    nerrors += test_config_validate_more() < 0 ? 1 : 0;
+    nerrors += test_config_get_str_sizes() < 0 ? 1 : 0;
     nerrors += test_config_locale() < 0 ? 1 : 0;
 
     /* H5Pappend_filter / H5Pget_filter_params_by_idx callback contracts */
