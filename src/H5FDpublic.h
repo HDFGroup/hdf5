@@ -178,8 +178,9 @@
 /**
  * Defining H5FD_FEAT_READWRITE_NO_H5_CALLS for a VFL driver means that the
  * driver read() and write() callbacks never makes any HDF5 API calls, excluding
- * H5open(). Does not apply to read_vector(), write_vector(), read_selection(),
- * or write_selection().
+ * #H5OPEN, H5allocate_memory(), H5resize_memory(), H5free_memory(), and all
+ * H5E functions. Does not apply to read_vector(), write_vector(),
+ * read_selection(), or write_selection().
  */
 #define H5FD_FEAT_READWRITE_NO_H5_CALLS 0x00020000
 

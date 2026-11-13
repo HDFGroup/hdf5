@@ -55,7 +55,7 @@ Additional Release Information
 <td style="background-color:#F5F5F5">
 </td>
 <td>
-ABI/API Compatibility Reports [tar file](https://github.com/HDFGroup/hdf5/releases/download/\PREVIOUS_VER/hdf5-\PREVIOUS_VER.html.abi.reports.tar.gz) or [individual html files](https://\RELURL/\PREVIOUS_VER/documentation/compat_reports/index.html)
+ABI/API Compatibility Reports [tar file](https://github.com/HDFGroup/hdf5/releases/download/\PREVIOUS_VER/hdf5-\PREVIOUS_VER.html.abi.reports.tar.gz)
 </td>
 </tr>
 <tr>
@@ -114,6 +114,18 @@ This section highlights some changes that might affect migrating to HDF5 2.x, pl
 \section sec_rel_spec_2x_feat New Features in HDF5 Release 2.x
 
 This section includes the new features introduced in the HDF5 2.x series:
+
+\subsection subsubsec_in230 In 2.3.0
+
+Following are some new features in 2.3.0. They are described in more detail in <a href="https://\SRCURLALL/hdf5_2.3.0/release_docs/CHANGELOG.md">CHANGELOG.md</a>.
+
+\li Concurrent multithreaded access to H5allocate_memory(), H5resize_memory(), and H5free_memory()
+
+\li Addition of the new Virtual File Driver (VFD) feature flag, H5FD_FEAT_READWRITE_NO_H5_CALLS
+
+\li Addition of the new version of H5Z_class_t, H5Z_class3_t, to include feature flags for H5Z_FEAT_FILTER_THREADSAFE and H5Z_FEAT_FILTER_NO_H5_CALLS
+
+\li Support for internally concurrent multithreaded reads of chunked datasets: H5TSset_internal_threads(), H5Pset_io_threads(), and H5Pget_io_threads()
 
 \subsection subsubsec_in220 In 2.2.0
 

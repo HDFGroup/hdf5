@@ -20,10 +20,7 @@ jobs:
       # Let jobs run to completion even if one fails
       fail-fast: false
       matrix:
-        os_name: ["Ubuntu"]
-#        os_name: ["Ubuntu", "MacOS"]
-        mpi_lib: ["OpenMPI"]
-#        mpi_lib: ["OpenMPI", "MPICH"]
+        # Each 'include' entry is one job. Uncomment entries to add jobs.
         include:
           - os_name: "Ubuntu"
             os: ubuntu-latest

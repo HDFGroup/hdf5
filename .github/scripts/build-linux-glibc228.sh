@@ -22,12 +22,15 @@ dnf install -y java-21-openjdk-devel
 pipx install ninja==1.13.2
 export PATH="${HOME}/.local/bin:${PATH}"
 
+# Use sed rather than head to take the first line: head exits early, and a
+# tool still writing (ldd is a shell script) then dies of SIGPIPE, which
+# pipefail turns into a failed build.
 echo "=== Toolchain ==="
-cat /etc/os-release | head -2
-ldd --version | head -1
-gcc --version | head -1
-gfortran --version | head -1
-cmake --version | head -1
+sed -n 1,2p /etc/os-release
+ldd --version | sed -n 1p
+gcc --version | sed -n 1p
+gfortran --version | sed -n 1p
+cmake --version | sed -n 1p
 ninja --version
 
 cd "/work/${SRC_DIR}"
