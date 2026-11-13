@@ -27,56 +27,69 @@
 
 #include <locale.h>
 
-/* The prefix headers rename the vendored symbols and must come first */
+/* The prefix header renames the vendored symbols and must come first */
 #include "tomlc17/h5_toml_prefix.h"
 #include "tomlc17/tomlc17.h"
 
 /*
- * Wrap PARAMS, with or without its outer braces, as the TOML document
- * "__p__ = {...}".  User keys live inside the inline table, so they cannot
- * collide with "__p__".  Caller frees with H5MM_xfree().
+ * Find the body of PARAMS: surrounding spaces and tabs and one pair of outer
+ * braces removed.  Returns false if PARAMS opens with '{' but does not close
+ * with '}'.
  */
-static char *
-H5Z__toml_wrap(const char *params)
+static bool
+H5Z__params_body(const char *params, const char **begin, const char **end)
 {
     const char *p = params ? params : "";
     const char *e;
-    size_t      content_len;
-    size_t      wlen;
-    char       *buf;
 
     while (*p == ' ' || *p == '\t')
         p++;
+    e = p + strlen(p);
+    while (e > p && (*(e - 1) == ' ' || *(e - 1) == '\t'))
+        e--;
 
     if (*p == '{') {
+        if (e - p < 2 || *(e - 1) != '}')
+            return false;
         p++;
-        e = p + strlen(p);
-        while (e > p && (*(e - 1) == ' ' || *(e - 1) == '\t'))
-            e--;
-        if (e > p && *(e - 1) == '}')
-            e--;
+        e--;
     }
-    else {
-        e = p + strlen(p);
-    }
-    content_len = (size_t)(e - p);
 
-    wlen = content_len + sizeof("__p__ = {}");
-    buf  = (char *)H5MM_malloc(wlen);
-    if (buf)
-        snprintf(buf, wlen, "__p__ = {%.*s}", (int)content_len, p);
+    *begin = p;
+    *end   = e;
+    return true;
+}
+
+/*
+ * Wrap the body [BEGIN, END) as the TOML document "__p__ = {...\n}".  User
+ * keys live inside the inline table, so they cannot collide with "__p__".
+ * The closing brace goes on its own line so that neither a '#' comment nor a
+ * '}' in the body can end the table early without a parse error.  Caller
+ * frees with H5MM_xfree().
+ */
+static char *
+H5Z__toml_wrap(const char *begin, const char *end)
+{
+    size_t content_len = (size_t)(end - begin);
+    size_t wlen        = content_len + sizeof("__p__ = {\n}");
+    char  *buf;
+
+    if (NULL != (buf = (char *)H5MM_malloc(wlen)))
+        snprintf(buf, wlen, "__p__ = {%.*s\n}", (int)content_len, begin);
     return buf;
 }
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_canonicalize_params
  *
- * Purpose:     Return a copy of PARAMS in the form stored in pipeline v3:
- *              outer braces and surrounding whitespace removed, everything
- *              else unchanged.
+ * Purpose:     Return a copy of PARAMS with outer braces and surrounding
+ *              whitespace removed, everything else unchanged.  This is the
+ *              form stored with the filter.  A string with an unbalanced
+ *              opening brace is only trimmed; H5Z_config_parse() rejects it.
  *
  * Return:      Success:    Heap-allocated NUL-terminated string, freed by
- *                          the caller with H5MM_xfree().
+ *                          the caller with H5MM_xfree().  NULL PARAMS
+ *                          gives NULL without an error.
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
@@ -88,162 +101,218 @@ H5Z_canonicalize_params(const char *params)
     size_t      len;
     char       *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI(NULL)
 
     if (params == NULL)
         HGOTO_DONE(NULL);
 
-    p = params;
-    while (*p == ' ' || *p == '\t')
-        p++;
-    if (*p == '{') {
-        p++;
-        e = p + strlen(p);
-        while (e > p && (*(e - 1) == ' ' || *(e - 1) == '\t'))
-            e--;
-        if (e > p && *(e - 1) == '}')
-            e--;
+    if (!H5Z__params_body(params, &p, &e)) {
+        p = params;
+        e = params + strlen(params);
     }
-    else
-        e = p + strlen(p);
-
     while (p < e && (*p == ' ' || *p == '\t'))
         p++;
     while (e > p && (*(e - 1) == ' ' || *(e - 1) == '\t'))
         e--;
 
     len = (size_t)(e - p);
-    if (NULL != (ret_value = (char *)H5MM_malloc(len + 1))) {
-        H5MM_memcpy(ret_value, p, len);
-        ret_value[len] = '\0';
-    }
+    if (NULL == (ret_value = (char *)H5MM_malloc(len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate filter parameter string");
+    H5MM_memcpy(ret_value, p, len);
+    ret_value[len] = '\0';
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_canonicalize_params() */
 
-/* Count leaf keys, including those in nested tables */
-static H5_ATTR_PURE size_t
-H5Z__count_table_keys(toml_datum_t tab)
+/*
+ * Check a parsed value and count its leaf parameters into *NLEAVES.
+ *
+ * H5Zconfig_*() lookups split the key on '.' and compare NUL-terminated
+ * strings, so a quoted key containing '.' or NUL could be validated but
+ * never read; such keys are rejected.  String values may not contain NUL.
+ * An empty table counts as a leaf, so H5Zconfig_validate_keys() checks its
+ * key.  An array counts as one leaf; its elements are checked but not
+ * counted.
+ */
+static herr_t
+H5Z__check_datum(toml_datum_t d, size_t *nleaves)
 {
-    size_t  count = 0;
+    size_t  ignored = 0;
     int32_t i;
+    herr_t  ret_value = SUCCEED;
 
-    for (i = 0; i < tab.u.tab.size; i++) {
-        toml_datum_t v = tab.u.tab.value[i];
+    FUNC_ENTER_PACKAGE
 
-        if (v.type == TOML_TABLE)
-            count += H5Z__count_table_keys(v);
-        else
-            count++;
+    if (d.type == TOML_TABLE) {
+        if (d.u.tab.size == 0)
+            (*nleaves)++;
+        for (i = 0; i < d.u.tab.size; i++) {
+            const char *k    = d.u.tab.key[i];
+            size_t      klen = (size_t)d.u.tab.len[i];
+
+            if (memchr(k, '\0', klen) || memchr(k, '.', klen))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                            "filter parameter key '%s' contains '.' or NUL; use a nested table instead", k);
+            if (H5Z__check_datum(d.u.tab.value[i], nleaves) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value for filter parameter '%s'", k);
+        }
+    }
+    else {
+        (*nleaves)++;
+        if (d.type == TOML_STRING && memchr(d.u.str.ptr, '\0', (size_t)d.u.str.len))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter parameter string value contains NUL");
+        if (d.type == TOML_ARRAY)
+            for (i = 0; i < d.u.arr.size; i++)
+                if (H5Z__check_datum(d.u.arr.elem[i], &ignored) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter parameter array element");
     }
 
-    return count;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*
- * toml_parse() in the "C" numeric locale.  tomlc17 converts floats with
- * strtod(), which follows LC_NUMERIC; since R261109 it substitutes the
- * decimal point from localeconv() first (cktan/tomlc17#57).  Parsing in the
- * "C" locale makes that substitution a no-op, so the result does not depend
- * on locale state that another thread can change.  Only the calling thread's
- * locale is changed.
+ * toml_parse() in the "C" numeric locale for the calling thread.  tomlc17
+ * converts floats with strtod(), which follows LC_NUMERIC; since R261109 it
+ * substitutes the decimal point from localeconv() first (cktan/tomlc17#57).
+ * Parsing in the "C" locale makes that substitution a no-op, so the result
+ * does not depend on the global locale, which another thread can change.
+ * Platforms with neither uselocale() nor per-thread locales rely on the
+ * upstream substitution alone.
  */
-static toml_result_t
-H5Z__toml_parse_c_locale(const char *src, int len)
+static herr_t
+H5Z__toml_parse_c_locale(const char *src, int len, toml_result_t *tr)
 {
-    const char   *dp = localeconv()->decimal_point;
-    toml_result_t tr;
+    herr_t ret_value = SUCCEED;
 
-    if (dp && dp[0] == '.' && dp[1] == '\0')
-        return toml_parse(src, len);
+    FUNC_ENTER_PACKAGE
 
 #if defined(H5_HAVE_WIN32_API)
     {
-        int   prev_cfg = _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-        char *saved    = H5MM_strdup(setlocale(LC_NUMERIC, NULL));
+        const char *cur;
+        char       *saved = NULL;
+        int         prev_cfg;
 
-        setlocale(LC_NUMERIC, "C");
-        tr = toml_parse(src, len);
-        if (saved)
-            setlocale(LC_NUMERIC, saved);
-        H5MM_xfree(saved);
-        if (prev_cfg != -1)
+        if (-1 == (prev_cfg = _configthreadlocale(_ENABLE_PER_THREAD_LOCALE)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "can't enable a per-thread locale");
+        if (NULL == (cur = setlocale(LC_NUMERIC, NULL)) || NULL == (saved = H5MM_strdup(cur))) {
             _configthreadlocale(prev_cfg);
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't save the numeric locale");
+        }
+        if (NULL == setlocale(LC_NUMERIC, "C")) {
+            H5MM_xfree(saved);
+            _configthreadlocale(prev_cfg);
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "can't switch to the C numeric locale");
+        }
+
+        *tr = toml_parse(src, len);
+
+        setlocale(LC_NUMERIC, saved);
+        H5MM_xfree(saved);
+        _configthreadlocale(prev_cfg);
     }
 #elif defined(H5_HAVE_USELOCALE)
     {
-        locale_t c_loc = newlocale(LC_NUMERIC_MASK, "C", (locale_t)0);
-        locale_t prev  = c_loc ? uselocale(c_loc) : (locale_t)0;
+        locale_t c_loc;
+        locale_t prev;
 
-        tr = toml_parse(src, len);
-        if (c_loc) {
-            uselocale(prev);
+        if ((locale_t)0 == (c_loc = newlocale(LC_NUMERIC_MASK, "C", (locale_t)0)))
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCREATE, FAIL, "can't create the C numeric locale");
+        if ((locale_t)0 == (prev = uselocale(c_loc))) {
             freelocale(c_loc);
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "can't switch to the C numeric locale");
         }
+
+        *tr = toml_parse(src, len);
+
+        uselocale(prev);
+        freelocale(c_loc);
     }
 #else
-    tr = toml_parse(src, len);
+    *tr = toml_parse(src, len);
 #endif
 
-    return tr;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*
  * Parse PARAMS.  On success *ptab_out is the parameter table and the caller
  * must toml_free(*tr_out); on failure *tr_out is zeroed.
  */
-static htri_t
+static herr_t
 H5Z__toml_parse_params(const char *params, toml_result_t *tr_out, toml_datum_t *ptab_out)
 {
-    char  *wrapped   = NULL;
-    htri_t ret_value = true;
+    const char *begin;
+    const char *end;
+    char       *wrapped   = NULL;
+    size_t      nleaves   = 0;
+    bool        have_tr   = false;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
+
+    memset(tr_out, 0, sizeof(*tr_out));
 
     if (params && strlen(params) > H5Z_CONFIG_STRING_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "filter parameter string exceeds H5Z_CONFIG_STRING_MAX (%d bytes)",
                     H5Z_CONFIG_STRING_MAX);
 
-    if (NULL == (wrapped = H5Z__toml_wrap(params)))
+    if (!H5Z__params_body(params, &begin, &end))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "filter parameter string opens with '{' but does not end with '}'");
+
+    if (NULL == (wrapped = H5Z__toml_wrap(begin, end)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory for TOML wrapper buffer");
 
-    *tr_out = H5Z__toml_parse_c_locale(wrapped, (int)strlen(wrapped));
+    if (H5Z__toml_parse_c_locale(wrapped, (int)strlen(wrapped), tr_out) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "can't parse filter parameter string");
+    have_tr = true;
 
     if (!tr_out->ok) {
-        /* errbuf below is sized with sizeof */
-        _Static_assert(sizeof(tr_out->errmsg) > sizeof(void *),
-                       "toml_result_t.errmsg must be a fixed-size char array, not a pointer");
-        char errbuf[sizeof(tr_out->errmsg)];
+        char   errbuf[sizeof(tr_out->errmsg)];
+        size_t n;
+
+        /* errbuf is sized with sizeof, so errmsg must be an array */
+        HDcompile_assert(sizeof(tr_out->errmsg) > sizeof(void *));
+
         memcpy(errbuf, tr_out->errmsg, sizeof(errbuf));
-        toml_free(*tr_out);
-        memset(tr_out, 0, sizeof(*tr_out));
+        errbuf[sizeof(errbuf) - 1] = '\0';
+        n                          = strlen(errbuf);
+        while (n > 0 && (errbuf[n - 1] == '\n' || errbuf[n - 1] == '\r'))
+            errbuf[--n] = '\0';
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "TOML parse error in filter parameter string: %s", errbuf);
     }
 
+    /* The wrapper makes "__p__" the only top-level key */
     *ptab_out = toml_get(tr_out->toptab, "__p__");
-    if (ptab_out->type != TOML_TABLE) {
-        toml_free(*tr_out);
-        memset(tr_out, 0, sizeof(*tr_out));
+    if (tr_out->toptab.u.tab.size != 1 || ptab_out->type != TOML_TABLE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "malformed filter parameter string (not a valid TOML inline table)");
-    }
+                    "malformed filter parameter string (not a single TOML inline table)");
 
-    if (H5Z__count_table_keys(*ptab_out) > H5Z_CONFIG_MAX_PARAMS) {
-        toml_free(*tr_out);
-        memset(tr_out, 0, sizeof(*tr_out));
+    if (H5Z__check_datum(*ptab_out, &nleaves) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter parameter string");
+
+    if (nleaves > H5Z_CONFIG_MAX_PARAMS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "filter parameter string exceeds H5Z_CONFIG_MAX_PARAMS (%d key-value pairs)",
                     H5Z_CONFIG_MAX_PARAMS);
-    }
 
 done:
+    if (ret_value < 0 && have_tr) {
+        toml_free(*tr_out);
+        memset(tr_out, 0, sizeof(*tr_out));
+    }
     H5MM_xfree(wrapped);
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-/* Check each leaf key's dotted path against KNOWN_KEYS */
+/*
+ * Check each leaf key's dotted path against KNOWN_KEYS.  A nested table with
+ * no keys is a leaf.
+ */
 static herr_t
 H5Z__validate_table_keys(toml_datum_t tab, const char *prefix, const char *const *known_keys)
 {
@@ -269,7 +338,7 @@ H5Z__validate_table_keys(toml_datum_t tab, const char *prefix, const char *const
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter parameter key too long: %s", k);
         }
 
-        if (v.type == TOML_TABLE) {
+        if (v.type == TOML_TABLE && v.u.tab.size > 0) {
             if (H5Z__validate_table_keys(v, full, known_keys) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown parameter key in nested table");
             continue;
@@ -392,6 +461,9 @@ H5Z__config_get_datum(const H5Z_config_t *config, const char *key, toml_datum_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config must not be NULL");
     if (!key || !*key)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "key must be a non-empty string");
+    if (strlen(key) >= H5Z_CONFIG_MAX_KEY_PATH)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "key is longer than %d characters",
+                    H5Z_CONFIG_MAX_KEY_PATH - 1);
     if (!config->parsed)
         HGOTO_DONE(false);
 

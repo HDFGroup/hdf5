@@ -11,11 +11,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Renames the public tomlc17 symbols so a static libhdf5 cannot collide with
- * an application's own tomlc17.  Force-included into tomlc17.c by
- * src/CMakeLists.txt, so the vendored files stay byte-identical, and included
- * by H5Zconfig.c.  Keep this list in sync with the external symbols of
- * tomlc17.c (`nm -g`) when updating.
+ * Renames the public tomlc17 symbols so libhdf5 (static or shared) cannot
+ * collide with an application's own tomlc17.  Included before tomlc17.c by
+ * h5_tomlc17.c, so the vendored files stay byte-identical, and included by
+ * H5Zconfig.c.  Keep this list in sync with the external symbols of the
+ * compiled object (`nm -g`) when updating.
  */
 
 #ifndef H5_TOML_PREFIX_H

@@ -3,8 +3,9 @@
 ## Overview
 
 This directory contains a vendored copy of [tomlc17](https://github.com/cktan/tomlc17),
-a lightweight TOML 1.0 parser written in C by CK Tan.  Only the two files
-needed by the HDF5 filter configuration API are included.
+a lightweight TOML 1.0 parser written in C by CK Tan.  Only the two upstream
+files needed by the HDF5 filter configuration API are included, plus the
+HDF5-authored files listed under "Files".
 
 ## Upstream details
 
@@ -29,14 +30,14 @@ None.  Both files are byte-for-byte identical to upstream tag
 `R261109`, and are intentionally excluded from the HDF5 clang-format pass (see
 `.github/workflows/clang-format-check.yml` and `bin/format_source`) so that
 future upstream updates can be dropped in without any re-formatting step.
-Symbols are renamed for static builds by force-including `h5_toml_prefix.h`
-from `src/CMakeLists.txt`, not by editing the sources.
+Symbols are renamed in all builds by compiling `tomlc17.c` through
+`h5_tomlc17.c`, which includes `h5_toml_prefix.h` first, not by editing the
+sources.
 
-The vendored copy contains the two `scan_float()` fixes earlier copies carried
-as local changes, for subnormal float literals:
-<https://github.com/cktan/tomlc17/issues/48> (commit `64a063b86`) and their
-rejection when denormals-are-zero is set, e.g. under Intel icx or
-`-ffast-math` (<https://github.com/cktan/tomlc17/issues/49>, commit
+`R261109` includes the upstream `scan_float()` fixes for subnormal float
+literals (<https://github.com/cktan/tomlc17/issues/48>, commit `64a063b86`)
+and for their rejection when denormals-are-zero is set, e.g. under Intel icx
+or `-ffast-math` (<https://github.com/cktan/tomlc17/issues/49>, commit
 `4d2a53f02`).
 
 ## Known limitations
@@ -46,13 +47,11 @@ rejection when denormals-are-zero is set, e.g. under Intel icx or
 On platforms whose libc flushes inside `strtod()` under ambient FTZ/DAZ --
 observed on Windows Intel oneAPI and MSYS2 clangarm64, where the smallest
 subnormal, `4.9406564584124654e-324`, converts to `0.0` -- the parsed value
-truly is zero and tomlc17 rejects the literal as an underflow. HDF5 handles that case outside the
-parser: `tfilter2` probes the platform's `strtod`/`snprintf` round-trip at
-run time and skips only the two true-subnormal exponents when the probe shows
-the libc does not preserve them (see `test/tfilter2.c`). Filter parameters
-that are exact subnormal doubles (magnitude below ~2.2e-308) are not a
-realistic compression level, tolerance, or scale factor, so this is a
-documented limitation rather than a gap to close in the parser.
+truly is zero and tomlc17 rejects the literal as an underflow.  `tfilter2`
+does not test subnormal literals.  Filter parameters that are exact subnormal
+doubles (magnitude below ~2.2e-308) are not a realistic compression level,
+tolerance, or scale factor, so this is a documented limitation rather than a
+gap to close in the parser.
 
 ### Float parsing depends on `LC_NUMERIC`
 
@@ -62,17 +61,21 @@ calling thread's `LC_NUMERIC` locale.  Since `R261109`
 the decimal point that `localeconv()` reports before calling `strtod()`, so a
 locale such as `de_DE` no longer makes every float literal fail to parse.
 HDF5 still parses in the "C" numeric locale for the calling thread, through
-`H5Z__toml_parse_c_locale()` in `src/H5Zconfig.c`: that makes the upstream
-substitution a no-op and keeps the result independent of `localeconv()`, which
-reads locale state another thread can change.
+`H5Z__toml_parse_c_locale()` in `src/H5Zconfig.c` (`uselocale()` on POSIX, a
+per-thread locale on Windows): that makes the upstream substitution a no-op, so
+the result does not depend on the global locale, which another thread can
+change.  Platforms with neither facility rely on the upstream substitution.
 
 ## Files
 
-| File         | Description              |
-|--------------|--------------------------|
-| `tomlc17.h`  | Public API header        |
-| `tomlc17.c`  | Parser implementation    |
-| `LICENSE`    | MIT license (CK Tan)     |
+| File               | Description                                              |
+|--------------------|----------------------------------------------------------|
+| `tomlc17.h`        | Public API header (upstream)                             |
+| `tomlc17.c`        | Parser implementation (upstream)                         |
+| `LICENSE`          | MIT license (CK Tan)                                     |
+| `h5_toml_prefix.h` | HDF5: renames the tomlc17 symbols                        |
+| `h5_tomlc17.c`     | HDF5: compiles `tomlc17.c` with `h5_toml_prefix.h` first |
+| `README.md`        | This file                                                |
 
 ## Updating the vendored copy
 
