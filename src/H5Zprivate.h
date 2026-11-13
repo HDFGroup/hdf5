@@ -64,8 +64,9 @@ struct H5Z_filter_info_t {
                                                     *stored in pipeline message version 3 */
 };
 
-/* Filter table entry.  class1/2 filters are upgraded to class3 in base; the
- * class4-only fields are NULL for class1/2/3 filters. */
+/* Filter table entry.  class1/2/3 filters are stored (upgraded) as class3 in base; the
+ * class4-only fields are NULL for class1/2/3 filters.  base.name and
+ * description are the table's own copies. */
 typedef struct H5Z_entry_t {
     H5Z_class3_t          base; /* base.filter is NULL for class4 filters */
     H5Z_func2_t           filter2;
@@ -95,8 +96,6 @@ H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, hid_
                            const hsize_t *scaled, size_t ndims, unsigned *filter_mask /*in,out*/,
                            H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/,
                            size_t *buf_size /*in,out*/, void **buf /*in,out*/);
-/* cls->filter is NULL for a class4 filter; use H5Z_find_entry() to call it */
-H5_DLL herr_t H5Z_find(bool attempt, H5Z_filter_t id, H5Z_class3_t **cls);
 H5_DLL herr_t H5Z_find_entry(bool attempt, H5Z_filter_t id, H5Z_entry_t **entry);
 H5_DLL herr_t H5Z_can_apply(hid_t dcpl_id, hid_t type_id, unsigned *universal_filter_mask);
 H5_DLL herr_t H5Z_set_local(hid_t dcpl_id, hid_t type_id, unsigned universal_filter_mask);
