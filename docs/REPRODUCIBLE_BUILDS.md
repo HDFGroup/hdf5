@@ -25,8 +25,13 @@ information to be the same in every build.
   An absolute build-tree RPATH would end up in the linker build ID of the
   installed files, even though CMake replaces the RPATH itself at install
   time.
+* **Installed directory permissions.**
+  `CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS` defaults to `0755`, so
+  directories created by `cmake --install` do not depend on the umask.
+  Installed files already get fixed permissions.
 * **Fortran module directory.** "Module Directory" reports the installed
-  directory, not a path in the build tree.
+  module directory (the modules are in its `shared` and `static`
+  subdirectories), not a path in the build tree.
 * **Tests.** Whether the tests are built (`BUILD_TESTING`) is not recorded,
   so a build that skips the tests matches one that builds them.
 

@@ -163,11 +163,13 @@ We would like to thank the many HDF5 community members who contributed to this r
    - `CMAKE_BUILD_RPATH_USE_ORIGIN` now defaults to `ON`, so the absolute build-tree RPATH no
      longer ends up in the linker build ID of installed libraries and tools. A value set by the
      user is respected
+   - `CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS` now defaults to `0755`, so directories
+     created at install time no longer depend on the umask. A value set by the user is respected
    - The recorded compiler and linker flags leave out `-ffile-prefix-map=`, `-fdebug-prefix-map=`,
-     `-fmacro-prefix-map=` and `-fprofile-prefix-map=` options. The flags used to compile are
-     not changed
-   - "Module Directory" is now the directory the Fortran modules are installed in, not the
-     build tree's module directory
+     `-fmacro-prefix-map=`, `-fprofile-prefix-map=`, `-fcoverage-prefix-map=` and
+     `-fprofile-prefix-path=` options. The flags used to compile are not changed
+   - "Module Directory" is now the installed Fortran module directory (the modules are in its
+     `shared` and `static` subdirectories), not the build tree's module directory
    - Removed the "Build HDF5 Tests" line from the settings. It describes the build tree, not
      the library, and differs between builds that do and do not build the tests
 

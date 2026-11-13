@@ -172,6 +172,15 @@ mark_as_advanced (HDF5_BUILD_HOST_SYSTEM)
 if (NOT DEFINED CMAKE_BUILD_RPATH_USE_ORIGIN)
   set (CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 endif ()
+# Installed files get fixed permissions, but directories created at install
+# time otherwise follow the umask of whoever runs the install.
+if (NOT DEFINED CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS)
+  set (CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  )
+endif ()
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories

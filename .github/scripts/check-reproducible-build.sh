@@ -3,7 +3,8 @@
 # Check that HDF5 builds reproducibly: build and install it twice from
 # different source and build directories, with a different environment
 # (time zone, locale, umask, kernel release, parallelism) and with tests built
-# in only one of them, and compare every installed file.
+# in only one of them, and compare the installed trees: file contents,
+# permissions and symlinks.
 #
 # Usage: ./check-reproducible-build.sh <hdf5-source-dir> [work-dir]
 #
@@ -15,6 +16,11 @@ SRC_DIR=$(cd "${1:?usage: $0 <hdf5-source-dir> [work-dir]}" && pwd)
 WORK_DIR="${2:-$(mktemp -d)}"
 mkdir -p "${WORK_DIR}"
 WORK_DIR=$(cd "${WORK_DIR}" && pwd)
+# The sources are copied into the work directory, so it cannot be inside them
+if [[ "${WORK_DIR}/" == "${SRC_DIR}/"* ]]; then
+    echo "ERROR: the work directory must be outside the source directory" >&2
+    exit 1
+fi
 
 # The same fixed timestamp for both builds, as distribution build tools do
 export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git -C "${SRC_DIR}" log -1 --format=%ct 2>/dev/null || echo 1700000000)}"
@@ -97,7 +103,8 @@ build () {
         -DBUILD_TESTING="${testing}" \
         -DHDF5_BUILD_EXAMPLES=OFF
     logged "${WORK_DIR}/build-${n}.log" "${vary[@]}" cmake --build "${bld}" --parallel "${jobs}"
-    logged "${WORK_DIR}/install-${n}.log" env DESTDIR="${dest}" cmake --install "${bld}"
+    # DESTDIR goes first: vary ends with setarch, which runs its first operand
+    logged "${WORK_DIR}/install-${n}.log" env DESTDIR="${dest}" "${vary[@]}" cmake --install "${bld}"
     umask 022
 }
 
@@ -109,28 +116,35 @@ echo "=== Comparing installed files ==="
 status=0
 nfiles=0
 ndiff=0
-while IFS= read -r -d '' f; do
-    rel="${f#"${WORK_DIR}/install-1/"}"
+
+# Every installed entry (files, directories and symlinks) with its type,
+# permissions and symlink target, so that missing entries, permission
+# differences (the builds use different umasks) and differing symlinks are found
+manifest () {
+    (cd "$1" && find . -mindepth 1 -printf '%P\t%y %m %l\n' | LC_ALL=C sort)
+}
+manifest "${WORK_DIR}/install-1" > "${WORK_DIR}/install-1.manifest"
+manifest "${WORK_DIR}/install-2" > "${WORK_DIR}/install-2.manifest"
+if ! diff "${WORK_DIR}/install-1.manifest" "${WORK_DIR}/install-2.manifest" > "${WORK_DIR}/manifest.diff"; then
+    echo "Entries that are missing or differ in type, permissions or symlink target"
+    echo "(< build 1, > build 2; columns: path, type, mode, symlink target):"
+    grep '^[<>]' "${WORK_DIR}/manifest.diff" | head -50
+    ndiff=$((ndiff + $(sed -n 's/^[<>] //p' "${WORK_DIR}/manifest.diff" | cut -f1 | sort -u | wc -l)))
+fi
+
+# Contents of the regular files installed by both builds
+while IFS= read -r -d '' rel; do
     nfiles=$((nfiles + 1))
+    f="${WORK_DIR}/install-1/${rel}"
     other="${WORK_DIR}/install-2/${rel}"
-    if [ ! -e "${other}" ]; then
-        echo "ONLY IN BUILD 1: ${rel}"
-        ndiff=$((ndiff + 1))
-    elif ! cmp -s "${f}" "${other}"; then
+    if [ -f "${other}" ] && ! cmp -s "${f}" "${other}"; then
         echo "DIFFERS: ${rel} ($(cmp -l "${f}" "${other}" | wc -l) bytes)"
         diff <(strings -n 6 "${f}") <(strings -n 6 "${other}") | head -6 || true
         ndiff=$((ndiff + 1))
     fi
-done < <(find "${WORK_DIR}/install-1" -type f -print0)
-while IFS= read -r -d '' f; do
-    rel="${f#"${WORK_DIR}/install-2/"}"
-    if [ ! -e "${WORK_DIR}/install-1/${rel}" ]; then
-        echo "ONLY IN BUILD 2: ${rel}"
-        ndiff=$((ndiff + 1))
-    fi
-done < <(find "${WORK_DIR}/install-2" -type f -print0)
+done < <(cd "${WORK_DIR}/install-1" && find . -type f -printf '%P\0')
 
-echo "Installed files: ${nfiles}, differing: ${ndiff}"
+echo "Installed files: ${nfiles}, differing entries: ${ndiff}"
 if [ "${nfiles}" -eq 0 ]; then
     status=1
     echo "FAILED: build 1 installed no files"
