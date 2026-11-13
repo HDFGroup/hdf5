@@ -3616,11 +3616,11 @@ error:
  * An H5Z_class2_t filter and an H5Z_class4_t filter in the same pipeline
  * ---------------------------------------------------------------------- */
 #define MIXV2_FILTER_ID 533
-#define MIXV3_FILTER_ID 534
+#define MIXV4_FILTER_ID 534
 
 /* XOR is its own inverse, so count calls to confirm the filters ran */
 static int mixv2_calls = 0;
-static int mixv3_calls = 0;
+static int mixv4_calls = 0;
 
 /* Both filters are byte-reversible transforms so a data round-trip actually
  * proves each ran, rather than passing vacuously as a no-op would. */
@@ -3640,7 +3640,7 @@ mixv2_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
 }
 
 static size_t
-mixv3_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+mixv4_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
                   const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
                   const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
                   void H5_ATTR_UNUSED *state, size_t nbytes, size_t H5_ATTR_UNUSED *buf_size, void **buf)
@@ -3649,14 +3649,14 @@ mixv3_filter_func(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     size_t         i;
 
     (void)flags;
-    mixv3_calls++;
+    mixv4_calls++;
     for (i = 0; i < nbytes; i++)
         p[i] ^= 0xA5U;
     return nbytes;
 }
 
 static herr_t
-mixv3_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+mixv4_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
                  unsigned cd_values[], size_t cd_values_size)
 {
     int64_t lvl = 0;
@@ -3686,23 +3686,23 @@ static const H5Z_class2_t mixv2_cls = {
     mixv2_filter_func,                      /* filter          */
 };
 
-static const H5Z_class4_t mixv3_cls = {
+static const H5Z_class4_t mixv4_cls = {
     H5Z_CLASS_T_VERS_4, /* version         */
-    MIXV3_FILTER_ID,    /* id              */
+    MIXV4_FILTER_ID,    /* id              */
     1,                  /* encoder_present */
     1,                  /* decoder_present */
-    "mixv3",            /* canonical name  */
+    "mixv4",            /* canonical name  */
     NULL,               /* can_apply       */
     NULL,               /* set_local       */
-    mixv3_filter_func,  /* filter          */
+    mixv4_filter_func,  /* filter          */
     0,                  /* feature_flags */
-    mixv3_set_config,   /* set_config      */
+    mixv4_set_config,   /* set_config      */
     NULL,               /* get_config      */
     NULL,               /* description     */
 };
 
 static int
-test_mixed_v2_v3_pipeline(hid_t fapl)
+test_mixed_v2_v4_pipeline(hid_t fapl)
 {
     hid_t    file = H5I_INVALID_HID, dcpl = H5I_INVALID_HID, sid = H5I_INVALID_HID;
     hid_t    dset = H5I_INVALID_HID, dcpl_out = H5I_INVALID_HID;
@@ -3716,7 +3716,7 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
 
     if (H5Zregister(&mixv2_cls) < 0)
         TEST_ERROR;
-    if (H5Zregister(&mixv3_cls) < 0)
+    if (H5Zregister(&mixv4_cls) < 0)
         TEST_ERROR;
 
     TESTING("mixed pipeline: class2 and class4 filters in one dataset");
@@ -3730,8 +3730,8 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
         TEST_ERROR;
 
-    /* Order matters and must survive: v2 (raw cd_values), then a built-in,
-     * then v3 (configuration string). */
+    /* Order matters and must survive: the class2 filter (raw cd_values), then
+     * a built-in, then the class4 filter (configuration string). */
     if (H5Pset_filter(dcpl, MIXV2_FILTER_ID, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
         TEST_ERROR;
     if (H5Pset_shuffle(dcpl) < 0)
@@ -3740,7 +3740,7 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
         H5Z_params_t p;
         p.type  = H5Z_PARAMS_STRING;
         p.u.str = "level = 7";
-        if (H5Pappend_filter(dcpl, MIXV3_FILTER_ID, H5Z_FLAG_MANDATORY, &p) < 0)
+        if (H5Pappend_filter(dcpl, MIXV4_FILTER_ID, H5Z_FLAG_MANDATORY, &p) < 0)
             TEST_ERROR;
     }
 
@@ -3758,9 +3758,9 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
     dset = file = dcpl = H5I_INVALID_HID;
 
     /* Both must have run on the write path. */
-    if (mixv2_calls == 0 || mixv3_calls == 0)
+    if (mixv2_calls == 0 || mixv4_calls == 0)
         TEST_ERROR;
-    mixv2_calls = mixv3_calls = 0;
+    mixv2_calls = mixv4_calls = 0;
 
     /* Reopen: both filters must run in reverse and reproduce the data. */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
@@ -3773,7 +3773,7 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
     if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
         TEST_ERROR;
     /* ... and on the read path, which is what makes the compare meaningful. */
-    if (mixv2_calls == 0 || mixv3_calls == 0)
+    if (mixv2_calls == 0 || mixv4_calls == 0)
         TEST_ERROR;
 
     /* Pipeline shape and per-entry introspection. */
@@ -3782,7 +3782,7 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
     if ((nfilt = (unsigned)H5Pget_nfilters(dcpl_out)) != 3)
         TEST_ERROR;
 
-    /* Entry 0: the v2 filter, in its original position, with no stored
+    /* Entry 0: the class2 filter, in its original position, with no stored
      * string -- it was configured through the raw cd_values path. */
     if (H5Pget_filter2(dcpl_out, 0, NULL, NULL, NULL, 0, NULL, NULL) != MIXV2_FILTER_ID)
         TEST_ERROR;
@@ -3799,8 +3799,8 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
     if (H5Pget_filter2(dcpl_out, 1, NULL, NULL, NULL, 0, NULL, NULL) != H5Z_FILTER_SHUFFLE)
         TEST_ERROR;
 
-    /* Entry 2: the v3 filter, still carrying its configuration string. */
-    if (H5Pget_filter2(dcpl_out, 2, NULL, NULL, NULL, 0, NULL, NULL) != MIXV3_FILTER_ID)
+    /* Entry 2: the class4 filter, still carrying its configuration string. */
+    if (H5Pget_filter2(dcpl_out, 2, NULL, NULL, NULL, 0, NULL, NULL) != MIXV4_FILTER_ID)
         TEST_ERROR;
     if (H5Pget_filter_params_by_idx(dcpl_out, 2, pbuf, sizeof(pbuf), &plen) < 0)
         TEST_ERROR;
@@ -3813,7 +3813,7 @@ test_mixed_v2_v3_pipeline(hid_t fapl)
         TEST_ERROR;
     dcpl_out = dset = file = sid = H5I_INVALID_HID;
 
-    if (H5Zunregister(MIXV2_FILTER_ID) < 0 || H5Zunregister(MIXV3_FILTER_ID) < 0)
+    if (H5Zunregister(MIXV2_FILTER_ID) < 0 || H5Zunregister(MIXV4_FILTER_ID) < 0)
         TEST_ERROR;
     PASSED();
     return 0;
@@ -3827,7 +3827,7 @@ error:
         H5Fclose(file);
         H5Sclose(sid);
         H5Zunregister(MIXV2_FILTER_ID);
-        H5Zunregister(MIXV3_FILTER_ID);
+        H5Zunregister(MIXV4_FILTER_ID);
     }
     H5E_END_TRY
     return -1;
@@ -4752,7 +4752,7 @@ main(void)
     nerrors += test_config_string_golden_file() < 0 ? 1 : 0;
     nerrors += test_config_string_ext_unknown_blocks() < 0 ? 1 : 0;
     nerrors += test_config_string_corrupted_decode() < 0 ? 1 : 0;
-    nerrors += test_mixed_v2_v3_pipeline(fapl) < 0 ? 1 : 0;
+    nerrors += test_mixed_v2_v4_pipeline(fapl) < 0 ? 1 : 0;
 
     /* set_local keeps the stored string */
     nerrors += test_set_local_keeps_config(fapl) < 0 ? 1 : 0;
