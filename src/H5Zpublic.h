@@ -86,6 +86,13 @@ typedef int H5Z_filter_t;
 /** Maximum filter id \since 1.0.0 */
 #define H5Z_FILTER_MAX 65535
 
+/** Maximum length of a filter parameter string, in bytes, not counting the
+ *  NUL terminator \since 3.0.0 */
+#define H5Z_CONFIG_STRING_MAX 4096
+
+/** Maximum number of key-value parameters in a filter parameter string \since 3.0.0 */
+#define H5Z_CONFIG_MAX_PARAMS 64
+
 /* General macros */
 /**
  * Symbol to remove all filters in H5Premove_filter()

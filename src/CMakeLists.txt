@@ -985,6 +985,7 @@ set (H5WB_PRIVATE_HDRS
 
 set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Z.c
+    ${HDF5_SRC_DIR}/H5Zconfig.c
     ${HDF5_SRC_DIR}/H5Zdeflate.c
     ${HDF5_SRC_DIR}/H5Zfletcher32.c
     ${HDF5_SRC_DIR}/H5Znbit.c
@@ -998,6 +999,22 @@ if (H5_ZLIB_HEADER)
   set_source_files_properties(${HDF5_SRC_DIR}/H5Zdeflate.c
                PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
   )
+endif ()
+
+# The vendored tomlc17 is compiled through h5_tomlc17.c, which includes
+# h5_toml_prefix.h before tomlc17.c.  That renames its symbols so they cannot
+# collide with an application's own copy, without modifying the vendored
+# files.  All compiler warnings are disabled for the vendored code.
+set (H5Z_TOMLC17_SOURCE ${HDF5_SRC_DIR}/tomlc17/h5_tomlc17.c)
+list (APPEND H5Z_SOURCES ${H5Z_TOMLC17_SOURCE})
+if (MSVC)
+  set_property (SOURCE ${H5Z_TOMLC17_SOURCE} APPEND PROPERTY COMPILE_OPTIONS "/W0")
+else ()
+  include (CheckCCompilerFlag)
+  check_c_compiler_flag ("-w" HDF5_C_HAS_W)
+  if (HDF5_C_HAS_W)
+    set_property (SOURCE ${H5Z_TOMLC17_SOURCE} APPEND PROPERTY COMPILE_OPTIONS "-w")
+  endif ()
 endif ()
 
 set (H5Z_PUBLIC_HDRS
