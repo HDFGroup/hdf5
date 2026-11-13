@@ -3876,6 +3876,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         H5Z_class_info_t finfo;
                         herr_t           finfo_ret;
 
+                        finfo.version = H5Z_CLASS_INFO_VERSION;
                         H5E_BEGIN_TRY
                         {
                             finfo_ret = H5Zget_filter_class_info(filtn, &finfo);
