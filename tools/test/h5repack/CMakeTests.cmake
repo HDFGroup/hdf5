@@ -1907,12 +1907,12 @@ if (BUILD_SHARED_LIBS)
   # The string-configuration tests check PARAMS_STRING, which h5dump prints
   # only with --filter-params.
   set (H5REPACK_UD_DUMP_ARGS "-H;--filter-params")
-  # UD= accepts a TOML key=value string for v3 (set_config) plugins,
+  # UD= accepts a TOML key=value string for class4 plugins with set_config,
   # dispatched via H5Pappend_filter/H5Z_PARAMS_STRING. "mode" is a TOML
   # string value, so it must be quoted.
   ADD_H5_UD_TEST (plugin_test_cfg 0 h5repack_layout.h5 -v -f UD=261,0,mode="rate",rate=3.5)
   # Guard against regressions in the UD= string-vs-raw-integer dispatch: the
-  # same v3 plugin exercised via the legacy raw cd_values form.
+  # same class4 plugin exercised via the legacy raw cd_values form.
   ADD_H5_UD_TEST (plugin_test_cfg_legacy 0 h5repack_layout.h5 -v -f UD=261,0,1,9)
   # h5dump -p annotates a float that is a small multiple of a power of two with
   # its hexadecimal spelling, which the decimal form hides: 1.25e-01 is 0x1p-3.
