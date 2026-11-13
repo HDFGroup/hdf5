@@ -317,6 +317,16 @@ done:
         if (H5O__free(oh, false) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data");
 
+    /* Release any continuation messages accumulated during the deserialize on
+     *      error.  Normally the caller (H5O_protect) frees these after the
+     *      object header is successfully loaded, but the caller can't do so
+     *      if the object header failed to load (as its 'oh' is left NULL),
+     *      so we must release them here to avoid leaking them.
+     */
+    if (!ret_value && udata->common.cont_msg_info->msgs)
+        udata->common.cont_msg_info->msgs =
+            (H5O_cont_t *)H5FL_SEQ_FREE(H5O_cont_t, udata->common.cont_msg_info->msgs);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_deserialize() */
 
