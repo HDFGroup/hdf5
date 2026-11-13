@@ -1,11 +1,34 @@
 <CPackWiXPatch>
     <CPackWiXFragment Id="CM_CP_libraries.bin.@WIX_CMP_NAME@.dll">
-        <Environment Id="PATH" 
-             Name="PATH" 
-             Value="[CM_DP_libraries.bin]" 
-             Permanent="no" 
-             Part="last" 
-             Action="set" 
+        <Environment Id="PATH"
+             Name="PATH"
+             Value="[CM_DP_libraries.bin]"
+             Permanent="no"
+             Part="last"
+             Action="set"
              System="yes"/>
+    </CPackWiXFragment>
+    <!-- Appends this installation's plugin directory and the %ALLUSERSPROFILE%
+         fallback to the system HDF5_PLUGIN_PATH variable, only when the
+         checkbox on the HDF5PluginPathDlg page (HDF5PluginPathDlg.wxs) is
+         checked, or ADD_HDF5_PLUGIN_PATH=1 is given on the msiexec command
+         line. Uninstall removes only the part added here. -->
+    <CPackWiXFragment Id="#PRODUCTFEATURE">
+        <Component Id="HDF5PluginPathEnv" Directory="INSTALL_ROOT" Guid="*">
+            <Condition>ADD_HDF5_PLUGIN_PATH = "1"</Condition>
+            <RegistryValue Root="HKLM"
+                 Key="Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_NAME@\@CPACK_PACKAGE_VERSION@"
+                 Name="PluginPathEnv"
+                 Type="string"
+                 Value="1"
+                 KeyPath="yes"/>
+            <Environment Id="HDF5_PLUGIN_PATH"
+                 Name="HDF5_PLUGIN_PATH"
+                 Value="[INSTALL_ROOT]lib\plugin"
+                 Permanent="no"
+                 Part="last"
+                 Action="set"
+                 System="yes"/>
+        </Component>
     </CPackWiXFragment>
 </CPackWiXPatch>
