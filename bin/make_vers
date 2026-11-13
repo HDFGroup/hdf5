@@ -387,6 +387,13 @@ sub validate_line {
     # Separate the versions on commas (produces string elements like "v18")
     @vers_list = split (/\s*,\s*/, $vers);
 
+    # vopt is numbered after the real versions, so it must come last
+    for my $i (0 .. $#vers_list - 1) {
+        if ($vers_list[$i] eq 'vopt') {
+            die "vopt must be the last version: $name";
+        }
+    }
+
     # Check for invalid version data
     foreach (@vers_list) {
         # Note:  v111 is allowed because H5O functions were prematurely versioned
@@ -581,7 +588,7 @@ sub create_doxygen_cmake ($) {
 
     # Add function version macros (sorted for consistency)
     for my $name (sort keys %functions) {
-        my $vers = $functions{$name};
+        my $vers = $functions_default{$name};
         print CMAKE "  \"$name=$name$vers\"\n";
     }
 
