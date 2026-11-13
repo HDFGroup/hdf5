@@ -149,6 +149,32 @@ We would like to thank the many HDF5 community members who contributed to this r
    - Reduced the scope of some temporary variables and modifications so they don't propagate to
      consuming CMake projects
 
+### Made it possible to build HDF5 reproducibly without patches
+
+   The build settings in `libhdf5.settings` are also compiled into the library (shown by
+   `h5cc -showconfig`), so anything recorded there that changes between builds makes the
+   library itself differ. Distributions patched these files to build HDF5 reproducibly.
+
+   - Added the `HDF5_BUILD_HOST_SYSTEM` cache variable, recorded as "Host system". It defaults
+     to `CMAKE_HOST_SYSTEM`, which includes the build host's kernel release; set a fixed value
+     such as `Linux` for reproducible builds
+   - "Configured on" honors `SOURCE_DATE_EPOCH` and is now formatted in UTC, so it no longer
+     depends on the build host's time zone
+   - `CMAKE_BUILD_RPATH_USE_ORIGIN` now defaults to `ON`, so the absolute build-tree RPATH no
+     longer ends up in the linker build ID of installed libraries and tools. A value set by the
+     user is respected
+   - `CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS` now defaults to `0755`, so directories
+     created at install time no longer depend on the umask. A value set by the user is respected
+   - The recorded compiler and linker flags leave out `-ffile-prefix-map=`, `-fdebug-prefix-map=`,
+     `-fmacro-prefix-map=`, `-fprofile-prefix-map=`, `-fcoverage-prefix-map=` and
+     `-fprofile-prefix-path=` options. The flags used to compile are not changed
+   - "Module Directory" is now the installed Fortran module directory (the modules are in its
+     `shared` and `static` subdirectories), not the build tree's module directory
+   - Removed the "Build HDF5 Tests" line from the settings. It describes the build tree, not
+     the library, and differs between builds that do and do not build the tests
+
+   See `docs/REPRODUCIBLE_BUILDS.md` for the settings a builder needs.
+
 ### Added stable, linkage-agnostic CMake target names to the installed package
 
    Downstream projects can now link `hdf5::hdf5`, `hdf5::hdf5_hl`, `hdf5::hdf5_cpp`, `hdf5::hdf5_hl_cpp`, `hdf5::hdf5_fortran` and `hdf5::hdf5_hl_fortran` instead of the linkage-qualified `hdf5-shared` and `hdf5-static` targets, along with `hdf5::<tool>` for each installed tool. The names do not encode whether the library is static or shared, so the same project file works against a static installation, a shared one, or one providing both. These are the names CMake's own `FindHDF5` module provides, so a project using them no longer needs different code depending on whether HDF5 was located through `FindHDF5` or through HDF5's `hdf5-config.cmake`. The targets refer to whichever linkage `find_package()` resolved (see Breaking Changes). The existing `hdf5-shared` / `hdf5-static` targets and the `HDF5_<lang>_<LINKAGE>_LIBRARY` variables are otherwise unchanged, and the public names are aliases onto those same targets, so a project naming both on its link line still gets a single library.
