@@ -35,8 +35,8 @@ typedef struct {
 static htri_t H5Z__can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
-                               const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
-                               size_t *buf_size, void **buf);
+                               const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size,
+                               void **buf);
 
 static void   H5Z__calc_parms_nooptype(size_t *cd_values_actual_nparms);
 static void   H5Z__calc_parms_atomic(size_t *cd_values_actual_nparms);
@@ -959,8 +959,8 @@ done:
  */
 static size_t
 H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t H5_ATTR_UNUSED dxpl_id,
-                 const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims,
-                 void H5_ATTR_UNUSED *state, size_t nbytes, size_t *buf_size, void **buf)
+                 const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                 size_t *buf_size, void **buf)
 {
     unsigned char *outbuf;        /* pointer to new output buffer */
     size_t         size_out  = 0; /* size of output buffer */

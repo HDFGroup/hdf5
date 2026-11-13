@@ -320,8 +320,8 @@ typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const 
  * NULL and \p ndims is 0 for data with no chunk position, such as a fractal
  * heap block, or the fill-value chunk that the library filters once and
  * writes to every chunk it allocates early; such a chunk is later decoded
- * with its real coordinates.  \p state is
- * reserved: the library passes NULL, and a filter must not use it.
+ * with its real coordinates, so a filter whose output depends on the
+ * position must still be able to decode what it encoded with \p scaled NULL.
  *
  * \p dxpl_id is the transfer property list of the operation that runs the
  * filter.  Chunks written through the chunk cache are filtered when they
@@ -339,7 +339,7 @@ typedef herr_t (*H5Z_get_config_func_t)(unsigned flags, size_t cd_nelmts, const 
  * \since 3.0.0
  */
 typedef size_t (*H5Z_func2_t)(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
-                              hid_t dxpl_id, const hsize_t *scaled, size_t ndims, void *state, size_t nbytes,
+                              hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
                               size_t *buf_size, void **buf);
 
 /**
