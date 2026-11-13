@@ -967,7 +967,8 @@ test_roundtrip_deflate(hid_t file)
     hsize_t  dims[2]    = {32, 32};
     hsize_t  chunks[2]  = {8, 8};
     unsigned cd_vals[1] = {6}; /* deflate level 6 */
-    int      wbuf[32 * 32], rbuf[32 * 32];
+    int     *wbuf       = NULL;
+    int     *rbuf       = NULL;
     int      i;
 
     TESTING("Round-trip: deflate level 6 write/read");
@@ -976,14 +977,22 @@ test_roundtrip_deflate(hid_t file)
         puts("    deflate filter not available");
         return 0;
     }
+    if (NULL == (wbuf = (int *)malloc(32 * 32 * sizeof(int))) ||
+        NULL == (rbuf = (int *)malloc(32 * 32 * sizeof(int))))
+        TEST_ERROR;
     for (i = 0; i < 32 * 32; i++)
         wbuf[i] = i;
     if (h5_run_filter_roundtrip(file, "deflate_rt", dims, chunks, 2, H5Z_FILTER_DEFLATE, 1, cd_vals, wbuf,
                                 rbuf, 32 * 32) < 0)
         TEST_ERROR;
+    free(wbuf);
+    free(rbuf);
     PASSED();
     return 0;
+
 error:
+    free(wbuf);
+    free(rbuf);
     return -1;
 }
 

@@ -20,8 +20,6 @@
 /* Include private header file */
 #include "H5Zprivate.h" /* Filter functions                */
 
-#define H5Z_CLASS_T_VERS_4_INTERNAL H5Z_CLASS_T_VERS_4
-
 /* The built-in filter class structs are static in each filter's source file,
  * which registers the filter through one of these functions, so that libhdf5
  * does not export symbols such as H5Z_DEFLATE that a plugin built from a copy

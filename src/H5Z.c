@@ -219,7 +219,7 @@ next:
  * Function:    H5Z__validate_class4_name
  *
  * Purpose:     Check that a class4 filter name is non-empty, at most
- *              H5Z_CLASS4_NAME_MAX_LEN bytes, and only [A-Za-z0-9_.-], so it
+ *              H5Z_FILTER_NAME_MAX_LEN bytes, and only [A-Za-z0-9_.-], so it
  *              is safe to use on a command line and in tool output.
  *              (isalnum() is avoided because it is locale-dependent.)
  *
@@ -239,9 +239,9 @@ H5Z__validate_class4_name(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be NULL for H5Z_class4_t");
     if ((len = strlen(name)) == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name must not be empty for H5Z_class4_t");
-    if (len > H5Z_CLASS4_NAME_MAX_LEN)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name exceeds H5Z_CLASS4_NAME_MAX_LEN (%u) bytes",
-                    H5Z_CLASS4_NAME_MAX_LEN);
+    if (len > H5Z_FILTER_NAME_MAX_LEN)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "name exceeds H5Z_FILTER_NAME_MAX_LEN (%u) bytes",
+                    H5Z_FILTER_NAME_MAX_LEN);
 
     for (i = 0; i < len; i++) {
         unsigned char c = (unsigned char)name[i];
@@ -279,7 +279,7 @@ H5Zregister(const void *cls)
 
     /* An H5Z_class4_t cannot be upgraded from or to an older class: its
      * filter callback has a different signature */
-    if (((const H5Z_class3_t *)cls)->version == H5Z_CLASS_T_VERS_4_INTERNAL) {
+    if (((const H5Z_class3_t *)cls)->version == H5Z_CLASS_T_VERS_4) {
         const H5Z_class4_t *cls4 = (const H5Z_class4_t *)cls;
 
         if (cls4->id < 0 || cls4->id > H5Z_FILTER_MAX)
@@ -400,7 +400,7 @@ H5Z__upgrade_class_vers(const void *_cls, H5Z_class3_t *cls3_buf)
     assert(cls);
     assert(cls3_buf);
     /* An H5Z_class4_t cannot be converted; callers register it directly */
-    assert(cls->version != H5Z_CLASS_T_VERS_4_INTERNAL);
+    assert(cls->version != H5Z_CLASS_T_VERS_4);
 
     HDcompile_assert(offsetof(H5Z_class2_t, version) == offsetof(H5Z_class3_t, version));
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -520,7 +520,7 @@ H5Z_register4(const H5Z_class4_t *cls)
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(cls);
-    assert(cls->version == H5Z_CLASS_T_VERS_4_INTERNAL);
+    assert(cls->version == H5Z_CLASS_T_VERS_4);
     assert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
 
     /* Plugins reach here without going through H5Zregister() */
@@ -535,7 +535,7 @@ H5Z_register4(const H5Z_class4_t *cls)
         size_t i;
 
         for (i = 0; i < H5Z_table_used_g; i++) {
-            if (H5Z_table_g[i].base.version != H5Z_CLASS_T_VERS_4_INTERNAL)
+            if (H5Z_table_g[i].base.version != H5Z_CLASS_T_VERS_4)
                 continue;
             if (H5Z_table_g[i].base.id == cls->id)
                 continue;
@@ -586,7 +586,7 @@ H5Z__register_plugin(const void *cls)
 
     assert(cls);
 
-    if (((const H5Z_class3_t *)cls)->version == H5Z_CLASS_T_VERS_4_INTERNAL) {
+    if (((const H5Z_class3_t *)cls)->version == H5Z_CLASS_T_VERS_4) {
         if (H5Z_register4((const H5Z_class4_t *)cls) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
     }

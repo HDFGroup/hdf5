@@ -68,9 +68,10 @@
 #define H5Z_CLASS_T_VERS_4 (4)
 
 /**
- * Maximum length of \c H5Z_class4_t's \c name, not counting the NUL \since 3.0.0
+ * Maximum length of a filter class's \c name, not counting the NUL.  Enforced
+ * for \c H5Z_class4_t. \since 3.0.0
  */
-#define H5Z_CLASS4_NAME_MAX_LEN 255u
+#define H5Z_FILTER_NAME_MAX_LEN 255u
 
 /*******************/
 /* Public Typedefs */
@@ -253,18 +254,34 @@ typedef struct H5Z_config_t H5Z_config_t;
  * \brief Callback to configure a filter from a key=value parameter string.
  *
  * \param[in]     config         Parsed parameter string, owned by the library
- * \param[in,out] flags          Caller's flags; callback may modify them.
- * \param[in,out] cd_nelmts      On input 0; on output, number of cd_values slots written
- *                               (or required when cd_values is NULL).  Never NULL.
- * \param[out]    cd_values      Array to populate, or NULL for a size query.
- * \param[in]     cd_values_size Capacity of cd_values in elements (0 when cd_values is NULL).
+ * \param[in,out] flags          Filter flags (#H5Z_FLAG_MANDATORY or #H5Z_FLAG_OPTIONAL);
+ *                               the callback may change them.
+ * \param[in,out] cd_nelmts      Number of \p cd_values elements; see below.  Never NULL.
+ * \param[out]    cd_values      Array to populate, or NULL for the size query.
+ * \param[in]     cd_values_size Capacity of \p cd_values in elements; 0 for the size query.
  *
  * \return Non-negative on success; negative on failure.
  *
- * \details Must return the same cd_nelmts on both the size-query pass
- *          (cd_values == NULL) and the populate pass (cd_values != NULL).
+ * \details The library calls \c set_config twice for each parameter string,
+ *          with the same \p config:
+ *          -# <b>Size query.</b>  \p cd_values is NULL, \p cd_values_size is
+ *             0 and \p *cd_nelmts is 0.  Validate \p config and set
+ *             \p *cd_nelmts to the number of \p cd_values elements the filter
+ *             needs, at most \c H5Z_MAX_CD_NELMTS.
+ *          -# <b>Populate.</b>  \p cd_values has room for \p cd_values_size
+ *             elements, at least the count from the size query, and
+ *             \p *cd_nelmts holds that count.  Fill \p cd_values and leave
+ *             \p *cd_nelmts unchanged; a different value is an error.
  *
- *          The H5Zconfig_* accessors may be called from this callback.
+ *          \p flags is the same variable in both calls, so a change made in
+ *          the size query is visible in the populate call.  Returning
+ *          negative from either call fails the \c H5Pappend_filter call that
+ *          supplied the string; push an HDF5 error describing the bad
+ *          parameter first.
+ *
+ *          The H5Zconfig_*() accessors may be called from this callback.
+ *          \p config is valid only until the callback returns; do not close
+ *          or keep it.
  *
  * \since 3.0.0
  */
@@ -546,7 +563,7 @@ H5_DLL htri_t H5Zconfig_get_str(const H5Z_config_t *config, const char *key, cha
  *          the newer #H5Z_class4_t:
  *          \snippet this H5Z_class4_t_snip
  *          For #H5Z_class4_t, \c version is #H5Z_CLASS_T_VERS_4 and \c name
- *          is required: at most #H5Z_CLASS4_NAME_MAX_LEN bytes from
+ *          is required: at most #H5Z_FILTER_NAME_MAX_LEN bytes from
  *          <tt>[A-Za-z0-9_.-]</tt>, and unique among #H5Z_class4_t filters.
  *          The \c version and \c name descriptions below apply to
  *          #H5Z_class1_t, #H5Z_class2_t and #H5Z_class3_t.
