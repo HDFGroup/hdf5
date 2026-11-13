@@ -3464,6 +3464,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     size_t           cd_nelmts;     /* filter client number of values */
     HDoff_t          offset;        /* offset of external file     */
     char             f_name[256];   /* filter name */
+    char             id_str[16];    /* filter ID as a string */
     char             name[256];     /* external or virtual file name       */
     hsize_t          chsize[64];    /* chunk size in elements */
     hsize_t          size;          /* size of external file   */
@@ -4112,7 +4113,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols,
                                                (hsize_t)0, (hsize_t)0);
 
-                        if (f_name[0] != '\0') {
+                        /* A filter with no name reports its decimal ID as the name */
+                        snprintf(id_str, sizeof(id_str), "%d", (int)filtn);
+                        if (f_name[0] != '\0' && strcmp(f_name, id_str) != 0) {
                             ctx->need_prefix = true;
 
                             h5tools_str_reset(&buffer);

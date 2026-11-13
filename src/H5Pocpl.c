@@ -1174,11 +1174,11 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
 
         /* If there's no name on the filter, use the class's filter name */
         if (!s) {
-            H5Z_class3_t *cls;
+            H5Z_entry_t *entry;
 
-            H5Z_find(true, filter->id, &cls);
-            if (cls)
-                s = cls->name;
+            H5Z_find_entry(true, filter->id, &entry);
+            if (entry)
+                s = entry->base.name;
         } /* end if */
 
         /* Check for actual name */
