@@ -98,8 +98,8 @@ static H5Z_class4_t H5Z_NBIT[1] = {{
     H5Z__filter_nbit,    /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
-    NULL,                            /* String config setter */
-    NULL,                            /* String config getter */
+    H5Z__no_params_set_config,       /* String config setter: parameters come from set_local */
+    NULL,                            /* No string config getter */
     "N-bit packing for non-byte-aligned integer/float storage", /* description */
 }};
 
@@ -937,7 +937,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     cd_values[1] = (unsigned)need_not_compress;
 
     /* Modify the filter's parameters for this dataset */
-    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, cd_values) < 0)
+    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_NBIT, flags, cd_values_actual_nparms, true, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local nbit parameters");
 
 done:
