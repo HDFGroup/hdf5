@@ -241,7 +241,7 @@
  * \ref subsecViewToolsViewContent_h5dump
  * page under
  * \ref ViewToolsCommand.
- * The HDF5 DDL grammar is described in the document \ref DDLBNF200.
+ * The HDF5 DDL grammar is described in the document \ref DDLBNF300.
  *
  * \subsection subsec_file_summary File Function Summaries
  * General library (\ref H5 functions and macros), (\ref H5F functions), file related
