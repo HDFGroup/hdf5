@@ -178,8 +178,9 @@ done:
  * substitutes the decimal point from localeconv() first (cktan/tomlc17#57).
  * Parsing in the "C" locale makes that substitution a no-op, so the result
  * does not depend on the global locale, which another thread can change.
- * Platforms with neither uselocale() nor per-thread locales rely on the
- * upstream substitution alone.
+ * Platforms with neither uselocale() nor per-thread locales (including C
+ * runtimes where _configthreadlocale() fails) rely on the upstream
+ * substitution alone.
  */
 static herr_t
 H5Z__toml_parse_c_locale(const char *src, int len, toml_result_t *tr)
@@ -194,8 +195,13 @@ H5Z__toml_parse_c_locale(const char *src, int len, toml_result_t *tr)
         char       *saved = NULL;
         int         prev_cfg;
 
-        if (-1 == (prev_cfg = _configthreadlocale(_ENABLE_PER_THREAD_LOCALE)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "can't enable a per-thread locale");
+        /* Some C runtimes (e.g. MinGW's msvcrt) have no per-thread locales.
+         * Changing the global locale there would affect other threads, so
+         * parse in the current locale and rely on the upstream substitution. */
+        if (-1 == (prev_cfg = _configthreadlocale(_ENABLE_PER_THREAD_LOCALE))) {
+            *tr = toml_parse(src, len);
+            HGOTO_DONE(SUCCEED);
+        }
         if (NULL == (cur = setlocale(LC_NUMERIC, NULL)) || NULL == (saved = H5MM_strdup(cur))) {
             _configthreadlocale(prev_cfg);
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "can't save the numeric locale");
