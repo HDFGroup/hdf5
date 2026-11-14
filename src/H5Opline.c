@@ -24,6 +24,9 @@
 #include "H5Opkg.h"      /* Object headers               */
 #include "H5Zpkg.h"      /* Data filters                 */
 
+/* Size of a bitmap with one bit per extension block type */
+#define H5O_PLINE_EXT_SEEN_SIZE ((UINT16_MAX + 1) / 8)
+
 /* PRIVATE PROTOTYPES */
 static herr_t H5O__pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
 static void  *H5O__pline_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
@@ -89,7 +92,7 @@ const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V112 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V114 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V200 */
-    H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V300 */
+    H5O_PLINE_VERSION_3,     /* H5F_LIBVER_V300 */
     H5O_PLINE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -115,6 +118,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     size_t             name_length;                /* Length of filter name */
     size_t             i;                          /* Local index variable */
     const uint8_t     *p_end     = p + p_size - 1; /* End of the p buffer */
+    uint8_t           *ext_seen  = NULL;           /* Bitmap of extension block types seen in a filter */
     void              *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -241,12 +245,94 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     p += 4; /* padding */
                 }
         }
+
+        /* Extension blocks, for version 3+ */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            unsigned ext_count;
+
+            if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+            UINT16DECODE(p, ext_count);
+
+            /* No block type is repeatable, so track the types seen in this
+             * entry's list when it holds more than one block */
+            if (ext_count > 1) {
+                if (NULL == ext_seen && NULL == (ext_seen = (uint8_t *)H5MM_malloc(H5O_PLINE_EXT_SEEN_SIZE)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                memset(ext_seen, 0, H5O_PLINE_EXT_SEEN_SIZE);
+            }
+
+            for (size_t k = 0; k < ext_count; k++) {
+                unsigned ext_type;
+                uint8_t  ext_flags;
+                uint32_t ext_length;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, H5O_PLINE_EXT_HDR_SIZE, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                UINT16DECODE(p, ext_type);
+                ext_flags = *p++;
+                p++; /* reserved */
+                UINT32DECODE(p, ext_length);
+
+                /* A type may appear only once per entry */
+                if (ext_count > 1) {
+                    if (ext_seen[ext_type / 8] & (1U << (ext_type % 8)))
+                        HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                    "filter extension block duplicated (type 0x%04x on filter %u)", ext_type,
+                                    (unsigned)filter->id);
+                    ext_seen[ext_type / 8] |= (uint8_t)(1U << (ext_type % 8));
+                }
+
+                switch (ext_type) {
+                    case H5O_PLINE_EXT_CONFIG:
+                        if (ext_flags & ~H5O_PLINE_EXT_CONFIG_FLAGS_KNOWN)
+                            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                        "filter config extension block sets an unrecognized flags bit "
+                                        "(0x%02x)",
+                                        ext_flags & ~H5O_PLINE_EXT_CONFIG_FLAGS_KNOWN);
+                        if (ext_length > H5Z_CONFIG_STRING_MAX)
+                            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                        "filter config string exceeds maximum length");
+                        if (H5_IS_BUFFER_OVERFLOW(p, ext_length, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        if (ext_length) {
+                            /* Stored without a NUL terminator; add one here.
+                             * A zero length is the same as no string. */
+                            if (NULL != memchr(p, '\0', ext_length))
+                                HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                            "filter config string contains a NUL byte");
+                            if (NULL == (filter->config = (char *)H5MM_malloc(ext_length + 1)))
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                            "memory allocation failed for filter config string");
+                            H5MM_memcpy(filter->config, p, ext_length);
+                            filter->config[ext_length] = '\0';
+                        }
+                        break;
+
+                    default:
+                        /* Unknown type: skip it unless it is critical */
+                        if (ext_flags & H5O_PLINE_EXT_FLAG_CRITICAL)
+                            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                        "unsupported critical filter extension block "
+                                        "(type 0x%04x on filter %u)",
+                                        ext_type, (unsigned)filter->id);
+                        if (H5_IS_BUFFER_OVERFLOW(p, ext_length, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        break;
+                }
+
+                p += ext_length;
+            }
+        }
     }
 
     /* Set return value */
     ret_value = pline;
 
 done:
+    H5MM_xfree(ext_seen);
     if (!ret_value && pline) {
         H5O__pline_reset(pline);
         H5O__pline_free(pline);
@@ -347,6 +433,24 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
         if (pline->version == H5O_PLINE_VERSION_1)
             if (filter->cd_nelmts % 2)
                 UINT32ENCODE(p, 0);
+
+        /* Extension blocks, for version 3+, in ascending type order */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            size_t config_length = filter->config ? strlen(filter->config) : 0;
+
+            assert(config_length <= H5Z_CONFIG_STRING_MAX);
+            UINT16ENCODE(p, (unsigned)(config_length ? 1 : 0));
+
+            /* Non-critical, since cd_values are complete without it */
+            if (config_length > 0) {
+                UINT16ENCODE(p, H5O_PLINE_EXT_CONFIG);
+                *p++ = 0; /* flags: not critical */
+                *p++ = 0; /* reserved          */
+                UINT32ENCODE(p, (uint32_t)config_length);
+                H5MM_memcpy(p, filter->config, config_length);
+                p += config_length;
+            }
+        }
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -430,8 +534,7 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                     dst->filter[i].cd_values = dst->filter[i]._cd_values;
             } /* end if */
 
-            /* Canonical configuration string (held in memory only; not
-             * part of the encoded message) */
+            /* Canonical configuration string */
             if (src->filter[i].config)
                 if (NULL == (dst->filter[i].config = (char *)H5MM_strdup(src->filter[i].config)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -513,6 +616,16 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
         if (pline->version == H5O_PLINE_VERSION_1)
             if (pline->filter[i].cd_nelmts % 2)
                 ret_value += 4;
+
+        /* Extension block list, for version 3+: 2-byte count, then framing
+         * plus payload for each block actually written */
+        if (pline->version >= H5O_PLINE_VERSION_3) {
+            size_t config_length = pline->filter[i].config ? strlen(pline->filter[i].config) : 0;
+
+            ret_value += 2; /* ext_count */
+            if (config_length)
+                ret_value += H5O_PLINE_EXT_HDR_SIZE + config_length;
+        }
     } /* end for */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -722,6 +835,29 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);
+
+    /* A configuration string needs version 3.  Fail rather than drop it if
+     * the file's high bound is too low. */
+    if (version < H5O_PLINE_VERSION_3) {
+        bool have_config = false;
+
+        for (size_t u = 0; u < pline->nused; u++)
+            if (pline->filter[u].config) {
+                have_config = true;
+                break;
+            }
+
+        if (have_config) {
+            if (H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)] >= H5O_PLINE_VERSION_3)
+                version = H5O_PLINE_VERSION_3;
+            else
+                HGOTO_ERROR(H5E_PLINE, H5E_BADRANGE, FAIL,
+                            "filter configuration string cannot be stored: the file's high library "
+                            "version bound does not admit the version-3 filter pipeline message "
+                            "(raise the bound with H5Pset_libver_bounds(), or append the filter "
+                            "without a configuration string)");
+        }
+    }
 
     /* Version bounds check */
     if (version > H5O_pline_ver_bounds[H5F_HIGH_BOUND(f)])
