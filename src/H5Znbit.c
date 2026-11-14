@@ -34,8 +34,9 @@ typedef struct {
 /* Local function prototypes */
 static htri_t H5Z__can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                               size_t *buf_size, void **buf);
+static size_t H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t dxpl_id,
+                               const hsize_t *scaled, size_t ndims, size_t nbytes, size_t *buf_size,
+                               void **buf);
 
 static void   H5Z__calc_parms_nooptype(size_t *cd_values_actual_nparms);
 static void   H5Z__calc_parms_atomic(size_t *cd_values_actual_nparms);
@@ -86,17 +87,20 @@ static void   H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigne
                                  size_t *buffer_size, const unsigned parms[]);
 
 /* This message derives from H5Z */
-static H5Z_class3_t H5Z_NBIT[1] = {{
-    H5Z_CLASS_T_VERS_3,  /* H5Z_class_t version */
-    H5Z_FILTER_NBIT,     /* Filter id number		*/
+static H5Z_class4_t H5Z_NBIT[1] = {{
+    H5Z_CLASS_T_VERS_4,  /* H5Z_class4_t version */
+    H5Z_FILTER_NBIT,     /* Filter id number */
     1,                   /* Assume encoder present: check before registering */
     1,                   /* decoder_present flag (set to true) */
-    "nbit",              /* Filter name for debugging	*/
-    H5Z__can_apply_nbit, /* The "can apply" callback     */
-    H5Z__set_local_nbit, /* The "set local" callback     */
-    H5Z__filter_nbit,    /* The actual filter function	*/
+    "nbit",              /* name */
+    H5Z__can_apply_nbit, /* The "can apply" callback */
+    H5Z__set_local_nbit, /* The "set local" callback */
+    H5Z__filter_nbit,    /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    NULL,                            /* String config setter */
+    NULL,                            /* String config getter */
+    "N-bit packing for non-byte-aligned integer/float storage", /* description */
 }};
 
 /*-------------------------------------------------------------------------
@@ -115,7 +119,7 @@ H5Z__nbit_register(void)
 
     FUNC_ENTER_PACKAGE
 
-    if (H5Z_register(H5Z_NBIT) < 0)
+    if (H5Z_register4(H5Z_NBIT) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register nbit filter");
 
 done:
@@ -954,7 +958,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], hid_t H5_ATTR_UNUSED dxpl_id,
+                 const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
                  size_t *buf_size, void **buf)
 {
     unsigned char *outbuf;        /* pointer to new output buffer */

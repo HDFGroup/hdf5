@@ -54,7 +54,8 @@ static herr_t                 H5Z__scaleoffset_set_parms_fillval(H5P_genplist_t 
                                                                  int need_convert);
 static herr_t                 H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                                      size_t nbytes, size_t *buf_size, void **buf);
+                                      hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                                      size_t *buf_size, void **buf);
 static void   H5Z__scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype_size);
 static H5_ATTR_CONST unsigned H5Z__scaleoffset_log2(unsigned long long num);
 static void   H5Z__scaleoffset_precompress_i(void *data, unsigned d_nelmts, enum H5Z_scaleoffset_t type,
@@ -89,17 +90,20 @@ static void   H5Z__scaleoffset_compress(unsigned char *data, unsigned d_nelmts, 
                                         size_t buffer_size, parms_atomic p);
 
 /* This message derives from H5Z */
-static H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
-    H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
-    H5Z_FILTER_SCALEOFFSET,     /* Filter id number        */
+static H5Z_class4_t H5Z_SCALEOFFSET[1] = {{
+    H5Z_CLASS_T_VERS_4,         /* H5Z_class4_t version */
+    H5Z_FILTER_SCALEOFFSET,     /* Filter id number */
     1,                          /* Assume encoder present: check before registering */
     1,                          /* decoder_present flag (set to true) */
-    "scaleoffset",              /* Filter name for debugging    */
-    H5Z__can_apply_scaleoffset, /* The "can apply" callback     */
-    H5Z__set_local_scaleoffset, /* The "set local" callback     */
-    H5Z__filter_scaleoffset,    /* The actual filter function    */
+    "scaleoffset",              /* name */
+    H5Z__can_apply_scaleoffset, /* The "can apply" callback */
+    H5Z__set_local_scaleoffset, /* The "set local" callback */
+    H5Z__filter_scaleoffset,    /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    NULL,                            /* String config setter */
+    NULL,                            /* String config getter */
+    "Scale+offset lossy compression for integer/float data", /* description */
 }};
 
 /*-------------------------------------------------------------------------
@@ -118,7 +122,7 @@ H5Z__scaleoffset_register(void)
 
     FUNC_ENTER_PACKAGE
 
-    if (H5Z_register(H5Z_SCALEOFFSET) < 0)
+    if (H5Z_register4(H5Z_SCALEOFFSET) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register scaleoffset filter");
 
 done:
@@ -1125,8 +1129,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                        size_t *buf_size, void **buf)
+H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+                        hid_t H5_ATTR_UNUSED dxpl_id, const hsize_t H5_ATTR_UNUSED *scaled,
+                        size_t H5_ATTR_UNUSED ndims, size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t                 ret_value = 0; /* return value */
     size_t                 size_out  = 0; /* size of output buffer */

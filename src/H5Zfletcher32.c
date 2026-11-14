@@ -19,20 +19,24 @@
 
 /* Local function prototypes */
 static size_t H5Z__filter_fletcher32(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                                     size_t nbytes, size_t *buf_size, void **buf);
+                                     hid_t dxpl_id, const hsize_t *scaled, size_t ndims, size_t nbytes,
+                                     size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-static const H5Z_class3_t H5Z_FLETCHER32[1] = {{
-    H5Z_CLASS_T_VERS_3,     /* H5Z_class_t version */
-    H5Z_FILTER_FLETCHER32,  /* Filter id number		*/
+static const H5Z_class4_t H5Z_FLETCHER32[1] = {{
+    H5Z_CLASS_T_VERS_4,     /* H5Z_class4_t version */
+    H5Z_FILTER_FLETCHER32,  /* Filter id number */
     1,                      /* encoder_present flag (set to true) */
     1,                      /* decoder_present flag (set to true) */
-    "fletcher32",           /* Filter name for debugging	*/
-    NULL,                   /* The "can apply" callback     */
-    NULL,                   /* The "set local" callback     */
-    H5Z__filter_fletcher32, /* The actual filter function	*/
+    "fletcher32",           /* name */
+    NULL,                   /* The "can apply" callback */
+    NULL,                   /* The "set local" callback */
+    H5Z__filter_fletcher32, /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
+    NULL,                            /* String config setter */
+    NULL,                            /* String config getter */
+    "Fletcher32 checksum for end-to-end data integrity", /* description */
 }};
 
 /*-------------------------------------------------------------------------
@@ -51,7 +55,7 @@ H5Z__fletcher32_register(void)
 
     FUNC_ENTER_PACKAGE
 
-    if (H5Z_register(H5Z_FLETCHER32) < 0)
+    if (H5Z_register4(H5Z_FLETCHER32) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register fletcher32 filter");
 
 done:
@@ -72,7 +76,9 @@ done:
  */
 static size_t
 H5Z__filter_fletcher32(unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts,
-                       const unsigned H5_ATTR_UNUSED cd_values[], size_t nbytes, size_t *buf_size, void **buf)
+                       const unsigned H5_ATTR_UNUSED cd_values[], hid_t H5_ATTR_UNUSED dxpl_id,
+                       const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+                       size_t *buf_size, void **buf)
 {
     void          *outbuf = NULL; /* Pointer to new buffer */
     unsigned char *src    = (unsigned char *)(*buf);
