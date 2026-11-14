@@ -38,8 +38,8 @@ static const H5Z_class4_t H5Z_SHUFFLE[1] = {{
     H5Z__filter_shuffle,    /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
-    NULL,                            /* String config setter */
-    NULL,                            /* String config getter */
+    H5Z__no_params_set_config,       /* String config setter */
+    NULL,                            /* No string config getter */
     "Byte shuffle preprocessing to improve downstream compression", /* description */
 }};
 
@@ -110,7 +110,7 @@ H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_
         HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
 
     /* Modify the filter's parameters for this dataset */
-    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SHUFFLE, flags, (size_t)H5Z_SHUFFLE_TOTAL_NPARMS,
+    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SHUFFLE, flags, (size_t)H5Z_SHUFFLE_TOTAL_NPARMS, true,
                           cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local shuffle parameters");
 

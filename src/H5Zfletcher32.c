@@ -34,8 +34,8 @@ static const H5Z_class4_t H5Z_FLETCHER32[1] = {{
     H5Z__filter_fletcher32, /* The actual filter function */
     H5Z_FEAT_FILTER_THREADSAFE |
         H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
-    NULL,                            /* String config setter */
-    NULL,                            /* String config getter */
+    H5Z__no_params_set_config,       /* String config setter */
+    NULL,                            /* No string config getter */
     "Fletcher32 checksum for end-to-end data integrity", /* description */
 }};
 
