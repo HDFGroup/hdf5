@@ -306,6 +306,15 @@ usage(const char *prog, const pack_opt_t *options)
                    "            Required values: filter_number, filter_flag, cd_value_count, value1\n");
     PRINTVALSTREAM(rawoutstream, "            Optional values: value2 to valueN\n");
     PRINTVALSTREAM(rawoutstream, "            filter_flag: 1 is OPTIONAL or 0 is MANDATORY\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "        UD=<filter_number,filter_flag,key=value[,key2=value2,...]> string form\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "            Required values: filter_number, filter_flag, at least one key=value pair\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "            Configures the filter via its string-based set_config callback instead\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "            of raw cd_values; distinguished from the legacy form above by the third\n");
+    PRINTVALSTREAM(rawoutstream, "            field containing '=' instead of being a plain digit\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    LAYT - is a string with the format:\n");
@@ -357,7 +366,13 @@ usage(const char *prog, const pack_opt_t *options)
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "7) h5repack --low=0 --high=1 file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "7) h5repack -f UD=32013,0,rate=\"3.0\" file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   Add a filter configured via its string-based set_config callback (the\n");
+    PRINTVALSTREAM(rawoutstream, "   filter plugin must implement set_config for this form to work)\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "8) h5repack --low=0 --high=1 file1 file2\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "   Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via\n");
     PRINTVALSTREAM(rawoutstream, "   H5Pset_libver_bounds() when creating the repacked file, file2\n");
