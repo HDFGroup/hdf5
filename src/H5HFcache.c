@@ -29,6 +29,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
+#include "H5CXprivate.h" /* API Contexts                             */
 #include "H5ACprivate.h" /* Metadata cache			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5FLprivate.h" /* Free Lists                               */
@@ -1575,8 +1576,8 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
         H5MM_memcpy(read_buf, image, len);
 
         /* Push direct block data through I/O filter pipeline */
-        if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes,
-                         &len, &read_buf) < 0)
+        if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, H5CX_get_dxpl(), NULL, 0, &filter_mask,
+                         H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed");
 
         /* Update info about direct block */
@@ -1731,8 +1732,8 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, boo
             filter_mask = udata->filter_mask;
 
             /* Push direct block data through I/O filter pipeline */
-            if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb,
-                             &nbytes, &len, &read_buf) < 0)
+            if (H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, H5CX_get_dxpl(), NULL, 0, &filter_mask,
+                             H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed");
 
             /* Sanity check */
@@ -2092,8 +2093,8 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
 
         /* Push direct block data through I/O filter pipeline */
         nbytes = write_size;
-        if (H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &write_size,
-                         &write_buf) < 0)
+        if (H5Z_pipeline(&(hdr->pline), 0, H5CX_get_dxpl(), NULL, 0, &filter_mask, H5Z_ENABLE_EDC, filter_cb,
+                         &nbytes, &write_size, &write_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "output pipeline failed");
 
         /* Use the compressed number of bytes as the size to write */

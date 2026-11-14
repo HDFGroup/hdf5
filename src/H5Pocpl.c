@@ -1153,11 +1153,11 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
 
         /* If there's no name on the filter, use the class's filter name */
         if (!s) {
-            H5Z_class3_t *cls;
+            H5Z_entry_t *entry;
 
-            H5Z_find(true, filter->id, &cls);
-            if (cls)
-                s = cls->name;
+            H5Z_find_entry(true, filter->id, &entry);
+            if (entry)
+                s = entry->base.name;
         } /* end if */
 
         /* Check for actual name */
@@ -1166,15 +1166,9 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
             name[namelen - 1] = '\0';
         } /* end if */
         else {
-            /* Check for unknown library filter */
-            /* (probably from a future version of the library) */
-            if (filter->id < 256) {
-                strncpy(name, "Unknown library filter", namelen);
-                name[namelen - 1] = '\0';
-            } /* end if */
-            else
-                name[0] = '\0';
-        } /* end if */
+            /* No name and no stored name: fall back to decimal filter ID */
+            snprintf(name, namelen, "%d", (int)filter->id);
+        } /* end else */
     }     /* end if */
 
     /* Filter configuration (assume filter ID has already been checked) */
