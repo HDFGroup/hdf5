@@ -1541,9 +1541,22 @@ H5Pget_driver_info(hid_t plist_id)
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
 
-    /* Get the driver info */
-    if (NULL == (ret_value = (const void *)H5P_peek_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info");
+    /* Get the driver info.
+     *
+     * NULL here is not necessarily a failure: a driver that registered no
+     * driver-specific properties leaves driver_info NULL, and both this
+     * function's own header above and its entry in H5Ppublic.h say that case
+     * returns NULL with nothing pushed on the error stack.  It used to push
+     * H5E_CANTGET anyway, so every H5Fopen through a driver selected by
+     * H5Pset_driver_by_name() or the HDF5_DRIVER environment variable -- which
+     * set no info block -- printed an error stack that described no error.
+     *
+     * The two real failures still report themselves: H5P_peek_driver_info()
+     * pushes H5E_BADTYPE for a list that is not a file access property list,
+     * and H5E_CANTGET when the property cannot be read.  Adding a second frame
+     * on top of those said nothing the first did not.
+     */
+    ret_value = (const void *)H5P_peek_driver_info(plist);
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -24,6 +24,33 @@ on:
       file_base:
         description: "The common base name of the source tarballs"
         value: ${{ jobs.call-workflow-tarball.outputs.file_base }}
+    secrets:
+      APPLE_CERTS_BASE64:
+          required: true
+      APPLE_CERTS_BASE64_PASSWD:
+          required: true
+      KEYCHAIN_NAME:
+          required: true
+      KEYCHAIN_PASSWD:
+          required: true
+      SIGNER:
+          required: true
+      NOTARY_USER:
+          required: true
+      NOTARY_KEY:
+          required: true
+      AZURE_TENANT_ID:
+          required: true
+      AZURE_CLIENT_ID:
+          required: true
+      AZURE_CLIENT_SECRET:
+          required: true
+      AZURE_ENDPOINT:
+          required: true
+      AZURE_CODE_SIGNING_NAME:
+          required: true
+      AZURE_CERT_PROFILE_NAME:
+          required: true
 
 permissions:
   contents: read
@@ -156,7 +183,11 @@ jobs:
     secrets:
         APPLE_CERTS_BASE64: ${{ secrets.APPLE_CERTS_BASE64 }}
         APPLE_CERTS_BASE64_PASSWD: ${{ secrets.APPLE_CERTS_BASE64_PASSWD }}
+        KEYCHAIN_NAME: ${{ secrets.KEYCHAIN_NAME }}
         KEYCHAIN_PASSWD: ${{ secrets.KEYCHAIN_PASSWD }}
+        SIGNER: ${{ secrets.SIGNER }}
+        NOTARY_USER: ${{ secrets.NOTARY_USER }}
+        NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}

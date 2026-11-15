@@ -2220,6 +2220,34 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
     return ret_val;
 }
 
+/*
+ * Checks if the read() and write() callbacks for the current VFD set on the
+ * given FAPL re-enter the HDF5 API
+ */
+herr_t
+h5_driver_readwrite_no_h5_calls(hid_t fapl_id, bool *readwrite_no_h5_calls)
+{
+    unsigned long feat_flags = 0;
+    hid_t         driver_id  = H5I_INVALID_HID;
+    herr_t        ret_value  = SUCCEED;
+
+    assert(fapl_id >= 0);
+    assert(readwrite_no_h5_calls);
+
+    if (fapl_id == H5P_DEFAULT)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        return FAIL;
+
+    if (H5FDdriver_query(driver_id, &feat_flags) < 0)
+        return FAIL;
+
+    *readwrite_no_h5_calls = (feat_flags & H5FD_FEAT_READWRITE_NO_H5_CALLS);
+
+    return ret_value;
+} /* end h5_driver_no_h5_calls() */
+
 /* Deterministic random number functions that don't modify the underlying
  * C/POSIX library rand/random state, as this can cause spurious test failures.
  *

@@ -868,8 +868,9 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
         HGOTO_ERROR(H5E_ID, H5E_BADTYPE, (-1), "invalid identifier");
 
     /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(id);
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    if (H5I_BADID == (loc_params.obj_type = H5I_get_type(id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid identifier");
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                = H5VL_OBJECT_GET_NAME;

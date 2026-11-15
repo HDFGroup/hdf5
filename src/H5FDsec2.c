@@ -482,6 +482,8 @@ H5FD__sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
             H5FD_FEAT_SUPPORTS_SWMR_IO; /* VFD supports the single-writer/multiple-readers (SWMR) pattern   */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD      */
+        *flags |=
+            H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the HDF5 API */
 
         /* Check for flags that are set by h5repart */
         if (file && file->fam_to_single)

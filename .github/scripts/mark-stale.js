@@ -2,6 +2,8 @@
 // non-bot comments, review submissions, or commits pushed to the branch.
 // Bot-only events (e.g. /remove-reviewer acknowledgment comments, CI status
 // posts) do not reset the stale countdown.
+const { lastHumanLabelRemovalAt } = require("./stale-label.js");
+
 const DAYS_BEFORE_STALE = 30;
 const STALE_LABEL = "stale";
 const EXEMPT_LABELS = ["pinned", "security"];
@@ -67,6 +69,12 @@ async function lastMeaningfulActivity(github, owner, repo, pr) {
     const d = new Date(c.commit.committer?.date || c.commit.author?.date);
     if (d > latest) latest = d;
   }
+
+  // A person removing the stale label (as the needs-decision alert suggests)
+  // also counts; looked up only when the PR would otherwise be stale.
+  if (daysSince(latest.toISOString()) < DAYS_BEFORE_STALE) return latest;
+  const removedAt = await lastHumanLabelRemovalAt(github, owner, repo, pr.number, STALE_LABEL);
+  if (removedAt !== null && removedAt > latest.getTime()) latest = new Date(removedAt);
 
   return latest;
 }

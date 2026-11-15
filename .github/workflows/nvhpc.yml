@@ -20,9 +20,8 @@ jobs:
     name: "nvhpc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     env:
-      CUDAVERDOT: "13.2"
-      NVERDOT: "26.5"
-      NVERDASH: "26-5"
+      NVERDOT: "26.9"
+      NVERDASH: "26-9"
       # CI stabilization: GitHub-hosted runners have no real InfiniBand, and the
       # Open MPI bundled with NVIDIA HPC-X sometimes has UCX select a
       # non-functional verbs interface (e.g. ud_verbs/mana_0), causing
@@ -69,7 +68,9 @@ jobs:
           echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/bin/nvfortran" >> $GITHUB_ENV
           echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpicc" >> $GITHUB_ENV
           echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/comm_libs/hpcx/bin/mpifort" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/cuda/${{ env.CUDAVERDOT }}/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/lib" >> $GITHUB_ENV
+          # Use the CUDA version bundled with this NVHPC release
+          CUDADIR=$(ls -d /opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/cuda/[0-9]*.[0-9]* | sort -V | tail -1)
+          echo "LD_LIBRARY_PATH=${CUDADIR}/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/${{ env.NVERDOT }}/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
 
       - name: Configure

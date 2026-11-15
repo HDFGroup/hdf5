@@ -5,6 +5,8 @@
 // remembering an exact phrase to comment.
 'use strict';
 
+const { lastHumanLabelRemovalAt } = require('./stale-label.js');
+
 const LABEL = "draft-stale";
 const STALE_DAYS = 60;
 const KEEPALIVE_MARKER = "<!-- draft-stale-keepalive -->";
@@ -78,7 +80,12 @@ async function lastRealActivityAt(github, owner, repo, pr) {
     if (rc.user?.type !== "Bot") timestamps.push(new Date(rc.created_at).getTime());
   }
 
-  return Math.max(...timestamps);
+  // A person removing the label (as the needs-decision alert suggests) also
+  // counts; looked up only when the draft would otherwise be flagged.
+  const latest = Math.max(...timestamps);
+  if (daysSince(latest) < STALE_DAYS) return latest;
+  const removedAt = await lastHumanLabelRemovalAt(github, owner, repo, pr.number, LABEL);
+  return removedAt === null ? latest : Math.max(latest, removedAt);
 }
 
 // Returns true and removes the label if the PR has a keepalive signal:

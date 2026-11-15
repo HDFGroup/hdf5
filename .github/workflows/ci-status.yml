@@ -1,0 +1,52 @@
+name: CI status reporter
+
+# Posts the overall result of the "hdf5 dev cmake CI" run as a "CI status"
+# commit status on the commit it tested, so it shows on the pull request.
+#
+# The run's conclusion covers every job in call-workflows.yml, including a
+# called workflow that GitHub rejects before creating any job. Such a
+# workflow shows no failed check of its own, so without this, the pull
+# request would look green.
+#
+# Notes:
+# - workflow_run only uses this file from the default branch (develop).
+# - GitHub sends no "requested" event for re-runs, so a re-run doesn't reset
+#   the status to pending; the status updates when the re-run completes.
+
+on:
+  # This job never checks out or runs code from the pull request. It only
+  # reads the run's result and posts a commit status.
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: ["hdf5 dev cmake CI"]
+    types: [requested, completed]
+
+permissions: {}
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+    steps:
+      - name: Post the run's result as the "CI status" commit status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          ACTION: ${{ github.event.action }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          if [ "$ACTION" = requested ]; then
+            state=pending; desc="Running"
+          else
+            case "$CONCLUSION" in
+              success)   state=success; desc="Every job passed or was skipped" ;;
+              cancelled) state=error;   desc="The run was canceled" ;;
+              *)         state=failure; desc="The run concluded: $CONCLUSION" ;;
+            esac
+          fi
+          echo "Posting CI status=$state for $SHA ($desc)"
+          gh api -X POST "repos/$REPO/statuses/$SHA" -f state="$state" \
+            -f context="CI status" -f description="$desc" -f target_url="$RUN_URL" \
+            --jq .state

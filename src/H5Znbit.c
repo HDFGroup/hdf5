@@ -86,8 +86,8 @@ static void   H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigne
                                  size_t *buffer_size, const unsigned parms[]);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_NBIT[1] = {{
-    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
+static H5Z_class3_t H5Z_NBIT[1] = {{
+    H5Z_CLASS_T_VERS_3,  /* H5Z_class_t version */
     H5Z_FILTER_NBIT,     /* Filter id number		*/
     1,                   /* Assume encoder present: check before registering */
     1,                   /* decoder_present flag (set to true) */
@@ -95,7 +95,32 @@ H5Z_class2_t H5Z_NBIT[1] = {{
     H5Z__can_apply_nbit, /* The "can apply" callback     */
     H5Z__set_local_nbit, /* The "set local" callback     */
     H5Z__filter_nbit,    /* The actual filter function	*/
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__nbit_register
+ *
+ * Purpose:     Register the nbit filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__nbit_register(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_NBIT) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register nbit filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__nbit_register() */
 
 /* Local macros */
 #define H5Z_NBIT_ATOMIC     1    /* Atomic datatype class: integer/floating-point */

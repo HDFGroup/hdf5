@@ -145,8 +145,12 @@ verify_counting(void *_counter)
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
 
-            /* Give the writers a chance to make progress */
-            H5TS_thread_yield();
+            /* Give the writers a chance to make progress.  Yielding is not
+             * enough: with a reader-preferring lock (glibc's default), the
+             * readers' critical sections keep overlapping and the writers
+             * can starve.  Sleeping briefly leaves gaps where the lock is free.
+             */
+            H5_nanosleep(10000);
         } while (last_val < (NUM_WRITERS * COUNT_MAX));
 
         /* Wait at barrier, to ensure all threads have finishend counting up */
@@ -168,8 +172,8 @@ verify_counting(void *_counter)
             result = H5TS_rwlock_rdunlock(&counter->lock);
             CHECK_I(result, "H5TS_rdlock_wrunlock");
 
-            /* Give the writers a chance to make progress */
-            H5TS_thread_yield();
+            /* Give the writers a chance to make progress (see above) */
+            H5_nanosleep(10000);
         } while (last_val > 0);
     }
 

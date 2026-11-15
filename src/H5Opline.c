@@ -308,7 +308,7 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
              * as it was registered.
              */
             if (NULL == (name = filter->name)) {
-                H5Z_class2_t *cls; /* Filter class */
+                H5Z_class3_t *cls; /* Filter class */
 
                 H5Z_find(true, filter->id, &cls);
                 if (cls)
@@ -478,7 +478,7 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
         else {
             /* Get the name of the filter, same as done with H5O__pline_encode() */
             if (NULL == (name = pline->filter[i].name)) {
-                H5Z_class2_t *cls; /* Filter class */
+                H5Z_class3_t *cls; /* Filter class */
 
                 H5Z_find(true, pline->filter[i].id, &cls);
                 if (cls)

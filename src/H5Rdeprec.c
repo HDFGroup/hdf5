@@ -276,7 +276,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
                     "H5Rget_obj_type1 is only meant to be used with the native VOL connector");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "invalid location identifier");
 
     /* Get object token */
@@ -350,7 +350,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
                     "H5Rdereference1 is only meant to be used with the native VOL connector");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(obj_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Get object token */
@@ -432,7 +432,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_REFERENCE, H5E_VOL, FAIL, "must use native VOL connector to create reference");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(loc_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Set location parameters */
@@ -546,7 +546,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref, H5O_type_t *obj
                     "H5Rget_obj_type2 is only meant to be used with the native VOL connector");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
     /* Get object token */
@@ -623,7 +623,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *re
                     "H5Rdereference2 is only meant to be used with the native VOL connector");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(obj_id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Get object token */
@@ -698,7 +698,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
                     "H5Rget_region is only meant to be used with the native VOL connector");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier");
 
     /* Get the file for the object */
@@ -789,7 +789,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *ref, char *name /*out*/, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid file identifier");
 
     /* Get object type */
-    if ((vol_obj_type = H5I_get_type(id)) < 0)
+    if (H5I_BADID == (vol_obj_type = H5I_get_type(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier");
 
     /* Get object token */

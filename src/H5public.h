@@ -815,6 +815,9 @@ H5_DLL herr_t H5is_library_threadsafe(bool *is_ts);
  *          name of a compound datatype member. It is the caller's
  *          responsibility to eventually free that buffer with H5free_memory().
  *
+ * \note This function does not take the global thread lock and may be executed
+ *       concurrently.
+ *
  * \attention It is especially important to use this function to free memory
  *            allocated by the library on Windows. The C standard library is
  *            implemented in dynamic link libraries (DLLs) known as the C
@@ -863,6 +866,9 @@ H5_DLL herr_t H5free_memory(void *mem);
  * \note At this time, the only intended use for this function is to allocate
  *       memory that will be returned to the library as a data buffer from a
  *       third-party filter.
+ *
+ * \note This function does not take the global thread lock and may be executed
+ *       concurrently.
  *
  * \attention To avoid heap corruption, allocated memory should be freed using
  *            the same library that initially allocated it. In most cases, the
@@ -937,6 +943,9 @@ H5_DLL void *H5allocate_memory(size_t size, bool clear);
  * \note At this time, the only intended use for this function is to resize or
  *       reallocate memory that will be returned to the library (and eventually
  *       to the user) as a data buffer from a third-party HDF5 filter.
+ *
+ * \note This function does not take the global thread lock and may be executed
+ *       concurrently.
  *
  * \attention To avoid heap corruption, allocated memory should be freed using
  *            the same library that initially allocated it. In most cases, the

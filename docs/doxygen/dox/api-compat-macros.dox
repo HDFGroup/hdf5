@@ -880,13 +880,17 @@ Navigate back: \ref index "Main" / \ref TN
   <td>H5Topen2()</td>
   </tr>
   <tr>
-  <td rowspan="2">\ref H5Z_class_t struct for H5Zregister()</td>
+  <td rowspan="3">\ref H5Z_class_t struct for H5Zregister()</td>
   <td>\TText{DH5Z_class_t_vers=1}</td>
   <td>\ref H5Z_class1_t</td>
   </tr>
   <tr>
   <td>\TText{DH5Z_class_t_vers=2}</td>
   <td>\ref H5Z_class2_t</td>
+  </tr>
+  <tr>
+  <td>\TText{DH5Z_class_t_vers=3}</td>
+  <td>\ref H5Z_class3_t</td>
   </tr>
   </table>
   </div>

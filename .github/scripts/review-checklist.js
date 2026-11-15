@@ -69,6 +69,14 @@ function withExcluded(commentBody, excluded) {
 const MANUAL_PREFIX = '<!-- hdf5-review-checklist-manual:';
 const MANUAL_SUFFIX = '-->';
 
+// Returns `commentBody` with `logins` added to its persisted exclusion list.
+// Used by the /remove-reviewer workflow, whose removals are made with the
+// workflow token and so never reach the review_request_removed handling in
+// coordinateReviewers.
+function addExcluded(commentBody, logins) {
+  return withExcluded(commentBody, new Set([...parseExcluded(commentBody), ...logins]));
+}
+
 // Extracts the persisted manually-added-CODEOWNER list. Returns an empty Set
 // if there's no comment yet or no marker in it.
 function parseManuallyAdded(commentBody) {
@@ -201,6 +209,18 @@ function latestReviewStates(reviews) {
     }
   }
   return latest;
+}
+
+// Returns Set of logins who have submitted at least one COMMENTED review —
+// the only evidence that a sticky pick who has dropped out of
+// requested_reviewers is mid-review rather than removed (see
+// stillEngagedAssignees).
+function commentOnlyReviewers(reviews) {
+  const logins = new Set();
+  for (const review of reviews) {
+    if (review.user && review.state === 'COMMENTED') logins.add(review.user.login);
+  }
+  return logins;
 }
 
 // Returns Set of logins whose most-recent substantive review state is APPROVED.
@@ -451,10 +471,12 @@ function resolveAreaPicks(areas, {
   const log   = [];
   const needsFreshPick = [];
   const finalStateLogins = new Set(Object.keys(latestReviewStates(allReviews || [])));
+  const commenters       = commentOnlyReviewers(allReviews || []);
 
   for (const area of areas) {
     const sticky = assignedByArea.get(area.label);
-    const stickyStillEngaged = sticky && (existingRequested.has(sticky) || !finalStateLogins.has(sticky));
+    const stickyStillEngaged = sticky &&
+      (existingRequested.has(sticky) || (commenters.has(sticky) && !finalStateLogins.has(sticky)));
     if (sticky && area.owners.includes(sticky) && stickyStillEngaged) {
       picks.set(area.label, sticky);
       log.push(existingRequested.has(sticky)
@@ -504,10 +526,12 @@ function resolveAreaPicks(areas, {
 // Pure — no I/O.
 function stillEngagedAssignees(areas, { assignedByArea, existingRequested, allReviews }) {
   const finalStateLogins = new Set(Object.keys(latestReviewStates(allReviews || [])));
+  const commenters       = commentOnlyReviewers(allReviews || []);
   const result = new Map();
   for (const area of areas) {
     const sticky = assignedByArea.get(area.label);
-    if (sticky && area.owners.includes(sticky) && !existingRequested.has(sticky) && !finalStateLogins.has(sticky)) {
+    if (sticky && area.owners.includes(sticky) && !existingRequested.has(sticky) &&
+        commenters.has(sticky) && !finalStateLogins.has(sticky)) {
       result.set(area.label, sticky);
     }
   }
@@ -990,16 +1014,33 @@ async function coordinateReviewers(github, context, core, {
     }
 
     const avalancheOwners = new Set(avalancheAreas.flatMap(a => a.owners));
-    // Keep the pruned single pick per area; leave non-avalanche owners untouched.
+    // removeRequestedReviewers drops a reviewer from the whole PR, not just
+    // from this area. An avalanche owner who is also requested for a touched
+    // area outside the avalanche is that area's only requested owner (two
+    // would make it an avalanche area too), so removing them would leave that
+    // area uncovered — same reasoning as neededElsewhere in
+    // planSynchronizeSwaps.
+    const neededElsewhere = [...existingRequested].filter(r =>
+      avalancheOwners.has(r) && !avalanchePruned.has(r) &&
+      eligibleAreas.some(a => !avalancheAreas.includes(a) && a.owners.includes(r))
+    );
+    for (const login of neededElsewhere) {
+      core.info(`Keeping ${login} — only requested owner of another touched area`);
+    }
+    // Keep the pruned single pick per area and anyone needed elsewhere; leave
+    // non-avalanche owners untouched.
     const keepSet = new Set([
       ...[...existingRequested].filter(r => !avalancheOwners.has(r)),
       ...avalanchePruned,
+      ...neededElsewhere,
     ]);
     await removeUnselected(github, core, pr, avalancheOwners, existingRequested, keepSet);
 
     // Update existingRequested so the swap and additive-fill steps see the
     // post-prune state — not the stale avalanche.
-    for (const login of avalancheOwners) existingRequested.delete(login);
+    for (const login of avalancheOwners) {
+      if (!keepSet.has(login)) existingRequested.delete(login);
+    }
     for (const login of avalanchePruned) existingRequested.add(login);
 
     core.info(
@@ -1400,6 +1441,7 @@ module.exports.computeAssigneePing       = computeAssigneePing;
 module.exports.parseExcluded             = parseExcluded;
 module.exports.serializeExcluded         = serializeExcluded;
 module.exports.withExcluded              = withExcluded;
+module.exports.addExcluded               = addExcluded;
 module.exports.parseManuallyAdded        = parseManuallyAdded;
 module.exports.serializeManuallyAdded    = serializeManuallyAdded;
 module.exports.parseAssigned             = parseAssigned;

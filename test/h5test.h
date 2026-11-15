@@ -1179,6 +1179,31 @@ H5TEST_DLL bool h5_driver_uses_multiple_files(const char *drv_name, unsigned fla
  * --------------------------------------------------------------------------
  * \ingroup H5TEST
  *
+ * \brief Determines whether the read() and write() callbacks for the VFD
+ *        set on the given File Access Property List re-enter the HDF5 API
+ *
+ * \param[in]  fapl_id File Access Property List to use when checking for a
+ *                     VFD that is compatible with the library's default VFD
+ * \param[out] no_h5_calls Boolean value for whether read() and write()
+ *                         callbacks for the VFD set on \p fapl_id re-enter
+ *                         the HDF5 API
+ *
+ * \return \herr_t
+ *
+ * \details h5_driver_readwrite_no_h5_calls() checks if the read() and
+ *          write() callbacks for the VFD set on \p fapl_id can re-enter the
+ *          HDF5 API. This is true if the \p H5FD_FEAT_READWRITE_NO_H5_CALLS
+ *          feature flag is not set. \p readwrite_no_h5_calls will be set to
+ *          true if the VFD does not re-enter HDF5. This is a requirement
+ *          for internal multithreading.
+ *
+ */
+H5TEST_DLL herr_t h5_driver_readwrite_no_h5_calls(hid_t fapl_id, bool *readwrite_no_h5_calls);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5TEST
+ *
  * \brief Returns a random integer value; analogous to rand().
  *
  * \return A random integer value

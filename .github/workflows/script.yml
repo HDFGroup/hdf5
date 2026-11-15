@@ -495,7 +495,7 @@ jobs:
         run: choco install ninja
 
       - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@be037f0a45b1160f139d4ccd0b96f9e9bfd6a682 # v1
+        uses: fortran-lang/setup-fortran@4b0d970b3801207ebcef014f759c435985c53486 # main, fixes apt-key removal on ubuntu-26.04 (fortran-lang/setup-fortran#301)
         id: setup-fortran
         with:
           compiler: intel
@@ -620,7 +620,7 @@ jobs:
           sudo apt-get install ninja-build graphviz curl
 
       - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@be037f0a45b1160f139d4ccd0b96f9e9bfd6a682 # v1
+        uses: fortran-lang/setup-fortran@4b0d970b3801207ebcef014f759c435985c53486 # main, fixes apt-key removal on ubuntu-26.04 (fortran-lang/setup-fortran#301)
         id: setup-fortran
         with:
           compiler: intel

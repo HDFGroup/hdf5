@@ -585,6 +585,7 @@ struct H5D_shared_t {
     H5O_layout_t     layout;                /* Data layout                  */
     bool             layout_copied_to_dcpl; /* Whether the layout has change not present in the DCPL */
     bool             checked_filters;       /* true if dataset passes can_apply check */
+    unsigned         universal_filter_mask; /* Mask of filters disabled for all chunks in this dataset */
 
     /* Cached dataspace info */
     unsigned ndims;                       /* The dataset's dataspace rank */

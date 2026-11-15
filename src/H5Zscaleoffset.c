@@ -89,8 +89,8 @@ static void   H5Z__scaleoffset_compress(unsigned char *data, unsigned d_nelmts, 
                                         size_t buffer_size, parms_atomic p);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
-    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+static H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
+    H5Z_CLASS_T_VERS_3,         /* H5Z_class_t version */
     H5Z_FILTER_SCALEOFFSET,     /* Filter id number        */
     1,                          /* Assume encoder present: check before registering */
     1,                          /* decoder_present flag (set to true) */
@@ -98,7 +98,32 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     H5Z__can_apply_scaleoffset, /* The "can apply" callback     */
     H5Z__set_local_scaleoffset, /* The "set local" callback     */
     H5Z__filter_scaleoffset,    /* The actual filter function    */
+    H5Z_FEAT_FILTER_THREADSAFE |
+        H5Z_FEAT_FILTER_NO_H5_CALLS, /* Feature flags - thread-safe and does not *re*-enter the HDF5 API */
 }};
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z__scaleoffset_register
+ *
+ * Purpose:     Register the scaleoffset filter with the library.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z__scaleoffset_register(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5Z_register(H5Z_SCALEOFFSET) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTREGISTER, FAIL, "unable to register scaleoffset filter");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z__scaleoffset_register() */
 
 /* Local macros */
 #define H5Z_SCALEOFFSET_TOTAL_NPARMS     20 /* Total number of parameters for filter */
@@ -413,9 +438,12 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     }
 
 /* Check and handle special situation for signed integer type */
+/* Compute (max - min) in the unsigned domain so the subtraction can't
+ * trigger a signed int overflow when the data spans the full range of the type.
+ */
 #define H5Z_scaleoffset_check_2(type, max, min, minbits)                                                     \
     {                                                                                                        \
-        if ((unsigned type)(max - min) > (unsigned type)(~(unsigned type)0 - 2)) {                           \
+        if (((unsigned type)max - (unsigned type)min) > (unsigned type)(~(unsigned type)0 - 2)) {            \
             *minbits = sizeof(type) * 8;                                                                     \
             return;                                                                                          \
         }                                                                                                    \
@@ -498,7 +526,8 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (*minbits ==                                                                                  \
                 H5Z_SO_INT_MINBITS_DEFAULT) { /* minbits not set yet, calculate max, min, and minbits */     \
                 H5Z_scaleoffset_max_min_1(i, d_nelmts, buf, filval, max, min)                                \
-                    H5Z_scaleoffset_check_2(type, max, min, minbits) span = (unsigned type)(max - min + 1);  \
+                    H5Z_scaleoffset_check_2(type, max, min, minbits) span =                                  \
+                        (unsigned type)((unsigned type)max - (unsigned type)min + 1);                        \
                 *minbits = H5Z__scaleoffset_log2((unsigned long long)(span + 1));                            \
             }                                                                                                \
             else /* minbits already set, only calculate min */                                               \
@@ -512,7 +541,8 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (*minbits ==                                                                                  \
                 H5Z_SO_INT_MINBITS_DEFAULT) { /* minbits not set yet, calculate max, min, and minbits */     \
                 H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                                        \
-                    H5Z_scaleoffset_check_2(type, max, min, minbits) span = (unsigned type)(max - min + 1);  \
+                    H5Z_scaleoffset_check_2(type, max, min, minbits) span =                                  \
+                        (unsigned type)((unsigned type)max - (unsigned type)min + 1);                        \
                 *minbits = H5Z__scaleoffset_log2((unsigned long long)span);                                  \
             }                                                                                                \
             else /* minbits already set, only calculate min */                                               \
@@ -1204,10 +1234,18 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         unsigned long long minval_mask  = 0;
         unsigned           minval_size  = 0;
 
-        minbits = 0;
-        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5, (unsigned char *)*buf + *buf_size - 1))
+        /* Bound every read below by nbytes rather than *buf_size.  The caller may
+         * provide a buffer larger than the data it holds, so restrict the read
+         * to the valid nbytes.
+         */
+        /* The minbits and minval-size fields are the first five bytes of the
+         * stream, so validate that length before deriving an end-of-buffer
+         * pointer from nbytes
+         */
+        if (nbytes < 5)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
 
+        minbits = 0;
         for (i = 0; i < 4; i++) {
             minbits_mask = ((unsigned char *)*buf)[i];
             minbits_mask <<= i * 8;
@@ -1223,8 +1261,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         minval_size = sizeof(unsigned long long) <= ((unsigned char *)*buf)[4] ? sizeof(unsigned long long)
                                                                                : ((unsigned char *)*buf)[4];
         minval      = 0;
-        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5 + minval_size,
-                                  (unsigned char *)*buf + *buf_size - 1))
+        if (H5_IS_BUFFER_OVERFLOW((unsigned char *)*buf, 5 + minval_size, (unsigned char *)*buf + nbytes - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "buffer too short");
         for (i = 0; i < minval_size; i++) {
             minval_mask = ((unsigned char *)*buf)[5 + i];
@@ -1235,8 +1272,21 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         assert(minbits <= p.size * 8);
         p.minbits = minbits;
 
+        /* the valid compressed data must at least cover the parameter header */
+        if (nbytes < buf_offset)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "chunk does not cover the scale-offset parameter header");
+
+        /* guard against overflow when computing the output buffer size */
+        if (p.size != 0 && d_nelmts > SIZE_MAX / p.size)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid number of data elements");
+
         /* calculate size of output buffer after decompression */
         size_out = d_nelmts * (size_t)p.size;
+
+        /* check before allocating so a malformed chunk cannot force a large
+           allocation first. */
+        if (minbits == p.size * 8 && size_out > nbytes - buf_offset)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "scale-offset decompressed size exceeds chunk data");
 
         /* allocate memory space for decompressed buffer */
         if (NULL == (outbuf = (unsigned char *)H5MM_malloc(size_out)))
@@ -1263,7 +1313,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
         /* decompress the buffer if minbits not equal to zero */
         if (minbits != 0) {
             if (H5Z__scaleoffset_decompress(outbuf, d_nelmts, (unsigned char *)(*buf) + buf_offset,
-                                            *buf_size - buf_offset, p))
+                                            nbytes - buf_offset, p))
                 HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, 0, "Scaleoffset decompression failed");
         }
         else {

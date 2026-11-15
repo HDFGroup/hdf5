@@ -678,7 +678,7 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     H5FD__s3comms_aws_params_t         *aws_params            = NULL;
     s3r_t                              *handle                = NULL;
     char                               *pathstyle_env         = NULL;
-    char                               *endpoint_env          = NULL;
+    char                               *endpoint_config       = NULL;
     bool                                mutex_init            = false;
     bool                                cond_var_init         = false;
     s3r_t                              *ret_value             = NULL;
@@ -782,18 +782,14 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     if (!handle->purl->key)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "invalid URL specified - could not parse object key");
 
-    /* If no alternate endpoint URL was specified in the FAPL, check to see
-     * if one of the AWS environment variables were specified
+    /* If no alternate endpoint URL was specified in the FAPL, resolve one from
+     * the AWS environment variables and configuration file
      */
     if (!alt_endpoint) {
-        endpoint_env = getenv("AWS_ENDPOINT_URL_S3");
-        if (endpoint_env && (*endpoint_env != '\0'))
-            alt_endpoint = endpoint_env;
-        else {
-            endpoint_env = getenv("AWS_ENDPOINT_URL");
-            if (endpoint_env && (*endpoint_env != '\0'))
-                alt_endpoint = endpoint_env;
-        }
+        if (H5FD__s3comms_get_aws_endpoint(&endpoint_config) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "couldn't determine alternate endpoint URL");
+
+        alt_endpoint = endpoint_config;
     }
 
     if (alt_endpoint && (*alt_endpoint != '\0')) {
@@ -843,6 +839,8 @@ done:
                 HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "can't free handle");
         }
     }
+
+    free(endpoint_config);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_s3r_open() */
@@ -1752,6 +1750,185 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_get_aws_region() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_get_aws_endpoint
+ *
+ * Purpose:     Helper function to resolve an alternate S3 endpoint URL and
+ *              return an allocated copy of it, which the caller must free
+ *              with free(). The following are checked in order:
+ *
+ *              - The AWS_ENDPOINT_URL_S3 environment variable
+ *              - The AWS_ENDPOINT_URL environment variable
+ *              - The 'endpoint_url' entry under the 's3' key of the
+ *                '[services ...]' section named by the active profile's
+ *                'services' entry
+ *              - The 'endpoint_url' entry of the active profile itself
+ *
+ *              The last two are read from the AWS configuration file
+ *              (~/.aws/config by default, overridden with AWS_CONFIG_FILE).
+ *              The 'default' profile is used, unless a different profile is
+ *              named by the AWS_PROFILE environment variable.
+ *
+ *              All of the above are skipped, and NULL returned, when
+ *              configured endpoint URLs are to be ignored. That is requested
+ *              with the AWS_IGNORE_CONFIGURED_ENDPOINT_URLS environment
+ *              variable or the 'ignore_configured_endpoint_urls' entry of the
+ *              active profile, the environment variable taking precedence.
+ *              Note that an endpoint URL specified in the FAPL is resolved by
+ *              the caller and is never suppressed this way.
+ *
+ *              Not static so that test/ros3.c can exercise the resolution
+ *              order without performing any I/O.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *----------------------------------------------------------------------------
+ */
+herr_t
+H5FD__s3comms_get_aws_endpoint(char **aws_endpoint_out)
+{
+    const struct aws_profile_property *prop              = NULL;
+    const struct aws_string           *prop_val          = NULL;
+    struct aws_profile_collection     *config_coll       = NULL;
+    const struct aws_profile          *aws_profile       = NULL;
+    const struct aws_profile          *services_section  = NULL;
+    struct aws_string                 *config_file_path  = NULL;
+    struct aws_string                 *profile_name_str  = NULL;
+    struct aws_string                 *prop_name_str     = NULL;
+    char                              *endpoint_copy     = NULL;
+    const char                        *endpoint_env      = NULL;
+    const char                        *ignore_env        = NULL;
+    bool                               ignore_configured = false;
+    herr_t                             ret_value         = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(aws_endpoint_out);
+
+    if (!H5FD_ros3_aws_allocator_g)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "S3 communications interface hasn't been initialized");
+
+    /* The environment variable takes precedence over the configuration file
+     * entry, so note whether it was set before reading the file
+     */
+    ignore_env = getenv("AWS_IGNORE_CONFIGURED_ENDPOINT_URLS");
+    if (ignore_env && (*ignore_env != '\0'))
+        ignore_configured = (0 == HDstrcasecmp(ignore_env, "true"));
+
+    /* Resolve the configuration file name, which could be overridden with AWS_CONFIG_FILE */
+    if (NULL == (config_file_path = aws_get_config_file_path(H5FD_ros3_aws_allocator_g, NULL)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't get AWS configuration file path");
+
+    config_coll =
+        aws_profile_collection_new_from_file(H5FD_ros3_aws_allocator_g, config_file_path, AWS_PST_CONFIG);
+
+    if (config_coll) {
+        /* Resolve the profile name to use, which could be overridden with AWS_PROFILE */
+        if (NULL == (profile_name_str = aws_get_profile_name(H5FD_ros3_aws_allocator_g, NULL)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                        "couldn't determine AWS profile to retrieve endpoint information from");
+
+        aws_profile = aws_profile_collection_get_profile(config_coll, profile_name_str);
+    }
+
+    /* Only consult the profile for this when the environment variable didn't already answer it */
+    if (aws_profile && (!ignore_env || (*ignore_env == '\0'))) {
+        if (NULL == (prop_name_str = aws_string_new_from_c_str(H5FD_ros3_aws_allocator_g,
+                                                               "ignore_configured_endpoint_urls")))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for AWS string");
+
+        prop = aws_profile_get_property(aws_profile, prop_name_str);
+        if (prop && (prop_val = aws_profile_property_get_value(prop)))
+            ignore_configured = (0 == HDstrcasecmp(aws_string_c_str(prop_val), "true"));
+
+        aws_string_destroy(prop_name_str);
+        prop_name_str = NULL;
+    }
+
+    if (ignore_configured)
+        HGOTO_DONE(SUCCEED);
+
+    /* From the AWS environment variables */
+    endpoint_env = getenv("AWS_ENDPOINT_URL_S3");
+    if (!endpoint_env || (*endpoint_env == '\0'))
+        endpoint_env = getenv("AWS_ENDPOINT_URL");
+
+    if (endpoint_env && (*endpoint_env != '\0')) {
+        if (NULL == (endpoint_copy = strdup(endpoint_env)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
+                        "couldn't copy AWS endpoint URL from environment variable");
+        HGOTO_DONE(SUCCEED);
+    }
+
+    if (!aws_profile)
+        HGOTO_DONE(SUCCEED); /* No configuration file, or no such profile in it */
+
+    /* An 'endpoint_url' under the 's3' key of the '[services ...]' section named by this profile
+     * takes precedence over one specified directly in the profile
+     */
+    if (NULL == (prop_name_str = aws_string_new_from_c_str(H5FD_ros3_aws_allocator_g, "services")))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for AWS string");
+
+    prop = aws_profile_get_property(aws_profile, prop_name_str);
+    if (prop && (prop_val = aws_profile_property_get_value(prop)))
+        services_section =
+            aws_profile_collection_get_section(config_coll, AWS_PROFILE_SECTION_TYPE_SERVICES, prop_val);
+
+    aws_string_destroy(prop_name_str);
+    prop_name_str = NULL;
+
+    if (services_section) {
+        if (NULL == (prop_name_str = aws_string_new_from_c_str(H5FD_ros3_aws_allocator_g, "s3")))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for AWS string");
+
+        prop = aws_profile_get_property(services_section, prop_name_str);
+
+        aws_string_destroy(prop_name_str);
+        prop_name_str = NULL;
+
+        if (prop) {
+            if (NULL ==
+                (prop_name_str = aws_string_new_from_c_str(H5FD_ros3_aws_allocator_g, "endpoint_url")))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for AWS string");
+
+            prop_val = aws_profile_property_get_sub_property(prop, prop_name_str);
+            if (prop_val)
+                if (NULL == (endpoint_copy = strdup(aws_string_c_str(prop_val))))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
+                                "couldn't copy AWS endpoint URL from AWS configuration file");
+
+            aws_string_destroy(prop_name_str);
+            prop_name_str = NULL;
+        }
+    }
+
+    /* Fall back to an 'endpoint_url' specified directly in the profile */
+    if (!endpoint_copy) {
+        if (NULL == (prop_name_str = aws_string_new_from_c_str(H5FD_ros3_aws_allocator_g, "endpoint_url")))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate space for AWS string");
+
+        prop = aws_profile_get_property(aws_profile, prop_name_str);
+        if (prop && (prop_val = aws_profile_property_get_value(prop)))
+            if (NULL == (endpoint_copy = strdup(aws_string_c_str(prop_val))))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
+                            "couldn't copy AWS endpoint URL from AWS configuration file");
+    }
+
+done:
+    aws_profile_collection_destroy(config_coll);
+    aws_string_destroy(config_file_path);
+    aws_string_destroy(profile_name_str);
+    aws_string_destroy(prop_name_str);
+
+    if (ret_value < 0) {
+        free(endpoint_copy);
+        endpoint_copy = NULL;
+    }
+
+    *aws_endpoint_out = endpoint_copy;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_get_aws_endpoint() */
 
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_get_credentials_provider
