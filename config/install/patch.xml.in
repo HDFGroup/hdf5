@@ -8,11 +8,11 @@
              Action="set"
              System="yes"/>
     </CPackWiXFragment>
-    <!-- Appends this installation's plugin directory and the %ALLUSERSPROFILE%
-         fallback to the system HDF5_PLUGIN_PATH variable, only when the
-         checkbox on the HDF5PluginPathDlg page (HDF5PluginPathDlg.wxs) is
-         checked, or ADD_HDF5_PLUGIN_PATH=1 is given on the msiexec command
-         line. Uninstall removes only the part added here. -->
+    <!-- Appends this installation's plugin directory to the system
+         HDF5_PLUGIN_PATH variable, only when the checkbox on the
+         HDF5PluginPathDlg page (HDF5PluginPathDlg.wxs) is checked, or
+         ADD_HDF5_PLUGIN_PATH=1 is given on the msiexec command line.
+         Uninstall removes only the part added here. -->
     <CPackWiXFragment Id="#PRODUCTFEATURE">
         <Component Id="HDF5PluginPathEnv" Directory="INSTALL_ROOT" Guid="*">
             <Condition>ADD_HDF5_PLUGIN_PATH = "1"</Condition>
