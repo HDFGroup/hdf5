@@ -423,6 +423,14 @@ Fixes GitHub issue #6679.
 
 ## Java Library
 
+### Fixed crashes in binary output from `H5export_dataset()` and `H5export_attribute()`
+
+   Exporting as binary crashed when a dataset, attribute, array or sequence held more than
+   one variable-length string, because the string's length replaced the element size used
+   to step to the next element. Where it did not crash, it could write the wrong strings. It
+   also crashed on a NULL variable-length string. These strings are now exported correctly,
+   and a NULL string is written as nothing, the same as an empty string.
+
 ### Fixed a build ordering issue when the `HDF5_ENABLE_MAVEN_DEPLOY` option is enabled
 
    With the `HDF5_ENABLE_MAVEN_DEPLOY` option enabled, the Java test programs under

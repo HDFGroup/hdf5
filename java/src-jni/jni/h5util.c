@@ -2453,6 +2453,7 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
             unsigned int  i;
             H5T_str_t     pad;
             char         *s = NULL;
+            size_t        str_len;
             unsigned char tempuchar;
 
             if ((pad = H5Tget_strpad(tid)) < 0) {
@@ -2464,14 +2465,14 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
                 mem = ((unsigned char *)_mem) + block_index * size;
 
                 if (H5Tis_variable_str(tid)) {
-                    s = *(char **)((void *)mem);
-                    if (s != NULL)
-                        size = strlen(s);
+                    s       = *(char **)((void *)mem);
+                    str_len = (s != NULL) ? strlen(s) : 0;
                 }
                 else {
-                    s = (char *)mem;
+                    s       = (char *)mem;
+                    str_len = size;
                 }
-                for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
+                for (i = 0; i < str_len && (s[i] || pad != H5T_STR_NULLTERM); i++) {
                     memcpy(&tempuchar, &s[i], sizeof(unsigned char));
                     if (1 != fwrite(&tempuchar, sizeof(unsigned char), 1, stream)) {
                         ret_value = FAIL;
