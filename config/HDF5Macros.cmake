@@ -58,8 +58,10 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     cmake_dependent_option (HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path" OFF APPLE OFF)
     mark_as_advanced (HDF5_BUILD_WITH_INSTALL_NAME)
     if (HDF5_BUILD_WITH_INSTALL_NAME)
+      cmake_path (ABSOLUTE_PATH HDF5_INSTALL_LIB_DIR BASE_DIRECTORY "${CMAKE_INSTALL_PREFIX}"
+                  OUTPUT_VARIABLE _h5_install_name_dir)
       set_target_properties (${libtarget} PROPERTIES
-          INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_LIB_DIR}"
+          INSTALL_NAME_DIR "${_h5_install_name_dir}"
           BUILD_WITH_INSTALL_RPATH ${HDF5_BUILD_WITH_INSTALL_NAME}
       )
     endif ()
