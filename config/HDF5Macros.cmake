@@ -59,7 +59,7 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     mark_as_advanced (HDF5_BUILD_WITH_INSTALL_NAME)
     if (HDF5_BUILD_WITH_INSTALL_NAME)
       set_target_properties (${libtarget} PROPERTIES
-          INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+          INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_LIB_DIR}"
           BUILD_WITH_INSTALL_RPATH ${HDF5_BUILD_WITH_INSTALL_NAME}
       )
     endif ()
