@@ -431,6 +431,13 @@ Fixes GitHub issue #6679.
    also crashed on a NULL variable-length string. These strings are now exported correctly,
    and a NULL string is written as nothing, the same as an empty string.
 
+### Fixed empty text output from `H5export_dataset()` and `H5export_attribute()` on macOS
+
+   On macOS, exporting a dataset or attribute as text always wrote a single empty line,
+   with no error. The text formatting code branched on an uninitialized format string for
+   64-bit integers, which is undefined behavior and broke formatting for every type. That
+   format string was replaced with direct format specifiers.
+
 ### Fixed a build ordering issue when the `HDF5_ENABLE_MAVEN_DEPLOY` option is enabled
 
    With the `HDF5_ENABLE_MAVEN_DEPLOY` option enabled, the Java test programs under

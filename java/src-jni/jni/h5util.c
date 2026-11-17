@@ -191,8 +191,7 @@ h5str_append(h5str_t *str, const char *cstr)
 size_t
 h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf, size_t out_buf_offset)
 {
-    unsigned char *ucptr = NULL;
-    char           fmt_llong[8], fmt_ullong[8];
+    unsigned char *ucptr       = NULL;
     H5T_class_t    tclass      = H5T_NO_CLASS;
     const char     delimiter[] = " ," H5_COMPOUND_BEGIN_INDICATOR H5_COMPOUND_END_INDICATOR
         H5_ARRAY_BEGIN_INDICATOR H5_ARRAY_END_INDICATOR H5_VLEN_BEGIN_INDICATOR H5_VLEN_END_INDICATOR;
@@ -218,14 +217,6 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
         H5_LIBRARY_ERROR(ENVONLY);
     if (!(typeSize = H5Tget_size(tid)))
         H5_LIBRARY_ERROR(ENVONLY);
-
-    /* Build default formats for long long types */
-    if (!fmt_llong[0]) {
-        if (snprintf(fmt_llong, sizeof(fmt_llong), "%%lld") < 0)
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: snprintf failure");
-        if (snprintf(fmt_ullong, sizeof(fmt_ullong), "%%llu") < 0)
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: snprintf failure");
-    } /* end if */
 
     switch (tclass) {
         case H5T_FLOAT: {
@@ -365,11 +356,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                     long long          tmp_llong  = 0;
 
                     if (H5T_SGN_NONE == nsign) {
-                        sscanf(token, fmt_ullong, &tmp_ullong);
+                        sscanf(token, "%llu", &tmp_ullong);
                         memcpy(cptr, &tmp_ullong, sizeof(unsigned long long));
                     }
                     else {
-                        sscanf(token, fmt_llong, &tmp_llong);
+                        sscanf(token, "%lld", &tmp_llong);
                         memcpy(cptr, &tmp_llong, sizeof(long long));
                     }
 
@@ -869,8 +860,7 @@ done:
 size_t
 h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf, int expand_data)
 {
-    unsigned char *ucptr = (unsigned char *)in_buf;
-    char           fmt_llong[8], fmt_ullong[8];
+    unsigned char *ucptr    = (unsigned char *)in_buf;
     H5T_class_t    tclass   = H5T_NO_CLASS;
     size_t         typeSize = 0;
     H5T_sign_t     nsign    = H5T_SGN_ERROR;
@@ -890,13 +880,6 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
     if (!(typeSize = H5Tget_size(tid)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    /* Build default formats for long long types */
-    if (!fmt_llong[0]) {
-        if (snprintf(fmt_llong, sizeof(fmt_llong), "%%lld") < 0)
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
-        if (snprintf(fmt_ullong, sizeof(fmt_ullong), "%%llu") < 0)
-            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
-    } /* end if */
     switch (tclass) {
         case H5T_FLOAT: {
             switch (typeSize) {
@@ -1127,7 +1110,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                             H5_OUT_OF_MEMORY_ERROR(ENVONLY,
                                                    "h5str_sprintf: failed to allocate string buffer");
 
-                        if (snprintf(this_str, this_len, fmt_ullong, tmp_ullong) < 0)
+                        if (snprintf(this_str, this_len, "%llu", tmp_ullong) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
                     }
                     else {
@@ -1137,7 +1120,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                             H5_OUT_OF_MEMORY_ERROR(ENVONLY,
                                                    "h5str_sprintf: failed to allocate string buffer");
 
-                        if (snprintf(this_str, this_len, fmt_llong, tmp_llong) < 0)
+                        if (snprintf(this_str, this_len, "%lld", tmp_llong) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: snprintf failure");
                     }
 
