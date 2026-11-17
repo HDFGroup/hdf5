@@ -106,6 +106,10 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr)
     dblock->hdr = hdr;
 
     /* Set non-zero internal fields */
+    if (hdr->cparam.max_dblk_page_nelmts_bits >= (sizeof(size_t) * 8))
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL,
+                    "max_dblk_page_nelmts_bits %u is too large",
+                    (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
     dblock->dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
 
     /* Check if this data block should be paged */
@@ -137,7 +141,14 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr)
             dblock->last_page_nelmts = (size_t)(hdr->cparam.nelmts % dblock->dblk_page_nelmts);
     } /* end if */
     else {
-        hsize_t dblk_size = hdr->cparam.nelmts * hdr->cparam.cls->nat_elmt_size;
+        hsize_t dblk_size;
+
+        /* Check for overflow in nelmts * nat_elmt_size */
+        if (hdr->cparam.cls->nat_elmt_size > 0 &&
+            hdr->cparam.nelmts > ((hsize_t)SIZE_MAX / hdr->cparam.cls->nat_elmt_size))
+            HGOTO_ERROR(H5E_FARRAY, H5E_OVERFLOW, NULL,
+                        "data block element count overflows allocation size");
+        dblk_size = hdr->cparam.nelmts * hdr->cparam.cls->nat_elmt_size;
 
         /* Allocate buffer for elements in data block */
         H5_CHECK_OVERFLOW(dblk_size, /* From: */ hsize_t, /* To: */ size_t);
