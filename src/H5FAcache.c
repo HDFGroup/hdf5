@@ -268,6 +268,12 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
                                                          i.e. # of bits needed to store max. # of
                                                          elements in data block page. */
 
+    /* Validate max_dblk_page_nelmts_bits to prevent undefined-behavior shift */
+    if (hdr->cparam.max_dblk_page_nelmts_bits >= (sizeof(size_t) * 8))
+        HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL,
+                    "max_dblk_page_nelmts_bits %u exceeds addressable range",
+                    (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
+
     /* Array statistics */
     H5F_DECODE_LENGTH(udata->f, image, hdr->cparam.nelmts); /* Number of elements */
 
