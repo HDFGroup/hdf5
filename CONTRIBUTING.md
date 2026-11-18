@@ -251,6 +251,7 @@ Use HDF5's internal memory management instead of direct `malloc`/`free`:
 5. **Submit a pull request (PR)**
    - Address any formatting or testing issues reported by CI.
    - Make sure to include the issue that the PR addresses in the description.
+   - Describe how you verified the change: which tests or checks you ran and their results.
    - Work with HDF Group developers to meet acceptance criteria.
 
 ### Acceptance Criteria
@@ -262,6 +263,9 @@ For a pull request to be accepted, it must satisfy:
 * **Testing:** Must pass HDF5 regression testing and include appropriate tests.
   - We do not expect you to perform comprehensive testing across multiple platforms
     before we accept the pull request.
+* **Verification:** For bug fixes and new features, the pull request description must state what
+  you verified, which tests or checks you ran, and the results. Maintainers may return a pull
+  request that is missing this, or is otherwise incomplete, before reviewing it in detail.
 * **Compatibility:** Must not compromise HDF5's core principles:
   - 100% backward compatibility (any HDF5 file must remain readable).
     - If your patch's purpose is to modify the HDF5 data model or file format, **please** discuss
@@ -277,6 +281,70 @@ For a pull request to be accepted, it must satisfy:
 * **Small features:** Develop in forks of the main repository.
 * **Large collaborative work:** Use feature branches named `feature/<feature>` in the main repository.
 * Add `BRANCH.md` file explaining branch purpose and contact info for feature branches.
+
+### Use of AI Tools
+
+You may use AI coding assistants for any part of a contribution, including research, drafting,
+refactoring, tests, documentation, and review. A human must still take responsibility for every
+submission.
+
+#### Human Accountability
+
+* You are the author of your contribution, however it was produced. You must understand every line,
+  be able to explain why it is correct, and be able to debug it without the tool that generated it.
+* Answer review comments yourself. Maintainers may close a pull request if the submitter cannot
+  explain or defend the change.
+* Pull requests opened by autonomous agents, without a named human who will respond to review,
+  will be closed without review.
+* Treat AI output as untrusted. It can look plausible and be wrong, and it can reproduce code under
+  an incompatible license. Review and test it as thoroughly as code you wrote by hand, and do not
+  submit code whose origin you cannot identify.
+* AI-generated issues, pull request descriptions, and review comments are subject to the same
+  standard: check them for accuracy before posting, and keep them concise.
+
+#### Scope and Volume
+
+Reviewing a change costs maintainers far more than generating it. To keep review manageable:
+
+* Open an issue and discuss the approach before submitting any change that is not small and
+  self-contained, especially changes to core library internals, threading, platform-specific code,
+  the build system, or the file format.
+* New contributors should have only one or two pull requests open at a time. Get those reviewed
+  before submitting more.
+* Maintainers may close large batches of unsolicited pull requests without detailed review.
+
+#### Disclosure
+
+To record that a change was AI-assisted, you may add a trailer to your commit message:
+
+```
+Assisted-by: AI tool
+```
+
+Disclosure is optional and carries no stigma. `Co-authored-by:` is reserved for people and must not
+be used for AI tools. Deterministic tools such as compilers, sanitizers, fuzzers, and static
+analyzers do not need to be disclosed, but naming the tool that found a bug is helpful.
+
+Do not promote AI companies or products. If you mention AI use in commit messages, pull request
+descriptions, comments, or code, keep it generic, as in the `Assisted-by: AI tool` trailer above,
+and do not name a company, product, or model. Remove the "generated with" footers, badges, links,
+session URLs, and `Co-authored-by:` trailers that some tools add automatically.
+
+#### Licensing
+
+Before using a tool, make sure its terms do not restrict its output in ways that conflict with the
+HDF5 license (see [LICENSE](LICENSE)).
+
+#### AI-Assisted Review
+
+Automated reviews, including those run by GitHub Actions, are advisory. They do not count as an
+approval or as the required maintainer review, and they cannot authorize a merge.
+
+#### Security Reports
+
+Do not file vulnerability reports based only on unverified AI output. Reproduce the problem on the
+current `develop` branch or on a supported release, and include a minimal reproducer. See
+"Supported Versions" in [SECURITY.md](SECURITY.md#supported-versions).
 
 ---
 
@@ -420,6 +488,10 @@ Before submitting your pull request, verify:
 ### Testing
 - [ ] Pull request includes tests.
 - [ ] Consider performance impact.
+
+### AI Assistance
+- [ ] I understand every change and can respond to review without the tool
+      (see [Use of AI Tools](#use-of-ai-tools)).
 
 ---
 
