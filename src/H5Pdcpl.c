@@ -628,6 +628,11 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
             /* Decode the number of chunk dimensions */
             ndims = *(*pp)++;
 
+            /* Check for valid rank, matching the bound enforced by the object
+             * header layout message decoder (H5O__layout_decode) */
+            if (ndims > H5O_LAYOUT_NDIMS)
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad number of dimensions for chunked storage");
+
             /* default chunk layout */
             if (0 == ndims)
                 layout = &H5D_def_layout_chunk_g;
