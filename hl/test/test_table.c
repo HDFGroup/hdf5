@@ -1692,10 +1692,58 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * A table whose TITLE attribute is longer than the fixed buffer that
+ * H5TBinsert_field / H5TBdelete_field read it back into used to overrun that
+ * buffer. Round-trip a long title through both to make sure it no longer does.
+ *-------------------------------------------------------------------------
+ */
+static int
+test_table_long_title(void)
+{
+    hid_t       fid             = H5I_INVALID_HID;
+    const char *field_names[1]  = {"field"};
+    size_t      field_offset[1] = {0};
+    hid_t       field_types[1]  = {H5T_NATIVE_INT};
+    int         data            = 0;
+    int         fill            = 0;
+    int         newdata         = 1;
+    char        long_title[600];
+
+    HL_TESTING2("table title longer than internal buffer");
+
+    memset(long_title, 'A', sizeof(long_title));
+    long_title[sizeof(long_title) - 1] = '\0';
+
+    if ((fid = H5Fcreate("test_table_title.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+
+    if (H5TBmake_table(long_title, fid, "tbl", (hsize_t)1, (hsize_t)1, sizeof(int), field_names, field_offset,
+                       field_types, (hsize_t)10, NULL, 0, &data) < 0)
+        goto out;
+
+    if (H5TBinsert_field(fid, "tbl", "newf", H5T_NATIVE_INT, (hsize_t)1, &fill, &newdata) < 0)
+        goto out;
+
+    if (H5TBdelete_field(fid, "tbl", "newf") < 0)
+        goto out;
+
+    if (H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    if (fid != H5I_INVALID_HID)
+        H5Fclose(fid);
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * the main program
  *-------------------------------------------------------------------------
  */
-
 int
 main(void)
 {
@@ -1718,6 +1766,11 @@ main(void)
 
     /* close */
     H5Fclose(fid);
+
+    puts("Testing table with a title longer than the internal title buffer:");
+
+    if (test_table_long_title() < 0)
+        return 1;
 
     /*-------------------------------------------------------------------------
      * test2: open a file written in test1 on a big-endian machine

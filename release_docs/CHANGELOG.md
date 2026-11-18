@@ -561,6 +561,15 @@ Fixes #5723.
 
 ## High-Level Library
 
+### Bounded the table TITLE read in H5TBinsert_field/H5TBdelete_field
+
+   Both functions read a table's TITLE attribute back using H5TBAget_title(),
+   which passes the caller's buffer straight to H5Aread(). The buffer is a
+   fixed 255-byte stack array, but H5Aread() copies the whole stored
+   attribute. Consequently, opening a table with a TITLE longer than the
+   buffer overran the stack. The title is now read into a buffer sized to the
+   stored attribute and copied back with a length cap.
+
 ### Fixed leaked identifiers in H5DSattach_scale()
 
    When attaching a dimension scale that already had one or more datasets
