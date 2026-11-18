@@ -812,7 +812,7 @@ test_particular_fp_integer(void)
 
     /* Print errors */
     if (dst_s != s_fill_val) {
-        H5__Float16 x;
+        H5__Float16 x = (H5__Float16)0;
         short       y;
 
         if (0 == fails_this_test++)
@@ -977,6 +977,95 @@ error:
     reset_hdf5(); /*print statistics*/
 
     return MAX((int)fails_this_test, 1);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    neg_frac_except
+ *
+ * Purpose:     Gets called from test_soft_fp_int_neg_frac() for data type
+ *              conversion exceptions.  Counts range exceptions and leaves
+ *              the conversion to the library.
+ *
+ * Return:      H5T_CONV_UNHANDLED
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5T_conv_ret_t
+neg_frac_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id,
+                void H5_ATTR_UNUSED *src_buf, void H5_ATTR_UNUSED *dst_buf, void *user_data)
+{
+    if (except_type == H5T_CONV_EXCEPT_RANGE_HI || except_type == H5T_CONV_EXCEPT_RANGE_LOW)
+        (*(unsigned *)user_data)++;
+
+    return H5T_CONV_UNHANDLED;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_soft_fp_int_neg_frac
+ *
+ * Purpose:     Tests software conversions from float to int when the
+ *              source is negative with a magnitude below 1/2.  The result
+ *              should be 0, not INT_MIN, and no range exception should be
+ *              raised.  Must run after hardware conversions are disabled.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        1
+ *-------------------------------------------------------------------------
+ */
+static int
+test_soft_fp_int_neg_frac(void)
+{
+    const float   src[] = {-0.25F, -0.375F, -1.0e-30F, -FLT_MIN};
+    int           dst[NELMTS(src)];
+    unsigned char buf[NELMTS(src) * MAX(sizeof(float), sizeof(int))];
+    unsigned      nrange  = 0;
+    hid_t         dxpl_id = H5I_INVALID_HID;
+
+    TESTING("soft negative fraction float -> int conversions");
+
+    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+    if (H5Pset_type_conv_cb(dxpl_id, neg_frac_except, &nrange) < 0)
+        TEST_ERROR;
+
+    /* Convert without and then with an exception handler */
+    for (int with_cb = 0; with_cb < 2; with_cb++) {
+        memset(buf, 0, sizeof(buf));
+        memcpy(buf, src, sizeof(src));
+        if (H5Tconvert(H5T_NATIVE_FLOAT, H5T_NATIVE_INT, NELMTS(src), buf, NULL,
+                       with_cb ? dxpl_id : H5P_DEFAULT) < 0)
+            TEST_ERROR;
+        memcpy(dst, buf, sizeof(dst));
+
+        for (size_t i = 0; i < NELMTS(src); i++)
+            if (dst[i] != 0) {
+                H5_FAILED();
+                printf("    %g was converted to %d instead of 0\n", (double)src[i], dst[i]);
+                goto error;
+            }
+    }
+
+    if (nrange != 0) {
+        H5_FAILED();
+        printf("    %u range exception(s) raised for in-range values\n", nrange);
+        goto error;
+    }
+
+    if (H5Pclose(dxpl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
+    H5E_END_TRY
+
+    return 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -10824,6 +10913,7 @@ main(void)
 
     /* Test software float-integer conversion functions */
     nerrors += (unsigned long)run_fp_int_conv("soft");
+    nerrors += (unsigned long)test_soft_fp_int_neg_frac();
 
     /* Test software integer-float conversion functions */
     nerrors += (unsigned long)run_int_fp_conv("soft");
