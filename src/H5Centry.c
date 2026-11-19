@@ -774,7 +774,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
         if (f->shared->page_buf && (f->shared->page_buf->page_size >= entry_ptr->size))
             if (H5PB_update_entry(f->shared->page_buf, entry_ptr->addr, entry_ptr->size,
-                                  entry_ptr->image_ptr) > 0)
+                                  entry_ptr->image_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Failed to update PB with metadata cache");
     } /* end if */
 
