@@ -650,22 +650,16 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     /* Get pointer to first string */
                     s1 = (char *)mem1;
                     if (s1)
-                        size1 = strlen(s1);
+                        size1 = strnlen(s1, size_mtype);
                     else
                         size1 = 0;
-
-                    if (size1 > size_mtype)
-                        size1 = size_mtype;
 
                     /* Get pointer to second string */
                     s2 = (char *)mem2;
                     if (s2)
-                        size2 = strlen(s2);
+                        size2 = strnlen(s2, size_mtype);
                     else
                         size2 = 0;
-
-                    if (size2 > size_mtype)
-                        size2 = size_mtype;
                 }
                 else {
                     /* Get pointer to first string */
