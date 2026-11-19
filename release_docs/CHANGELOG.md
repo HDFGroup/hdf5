@@ -1,4 +1,4 @@
-HDF5 version 2.3.0 released on 2026-11-19
+HDF5 version 2.3.0 released on 2026-11-20
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
