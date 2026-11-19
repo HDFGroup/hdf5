@@ -1182,14 +1182,14 @@ herr_t
 H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters /*out*/,
                void *buf /*out*/, size_t *buf_size)
 {
-    H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
-    H5P_genplist_t                     *dxpl_plist = NULL;   /* DXPL for this operation */
-    H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
-    H5VL_native_dataset_optional_args_t dset_opt_args;       /* Arguments for optional operation */
-    size_t                              sub_chunk_byte_offset = 0; /* Raw chunk byte offset from DXPL */
-    size_t                              sub_chunk_byte_size   = 0; /* Raw chunk byte size from DXPL */
+    H5VL_object_t                      *vol_obj;                       /* Dataset for this operation   */
+    H5P_genplist_t                     *dxpl_plist = NULL;             /* DXPL for this operation */
+    H5VL_optional_args_t                vol_cb_args;                   /* Arguments to VOL callback */
+    H5VL_native_dataset_optional_args_t dset_opt_args;                 /* Arguments for optional operation */
+    size_t                              sub_chunk_byte_offset = 0;     /* Raw chunk byte offset from DXPL */
+    size_t                              sub_chunk_byte_size   = 0;     /* Raw chunk byte size from DXPL */
     bool                                use_sub_chunk         = false; /* Whether to read only a sub-range */
-    herr_t                              ret_value = SUCCEED; /* Return value */
+    herr_t                              ret_value             = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -1225,15 +1225,15 @@ H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
     use_sub_chunk = (sub_chunk_byte_size > 0);
 
     /* Set up VOL callback arguments */
-    dset_opt_args.chunk_read.offset   = offset;
-    dset_opt_args.chunk_read.filters  = 0;
-    dset_opt_args.chunk_read.buf      = buf;
-    dset_opt_args.chunk_read.buf_size = buf_size;
+    dset_opt_args.chunk_read.offset        = offset;
+    dset_opt_args.chunk_read.filters       = 0;
+    dset_opt_args.chunk_read.buf           = buf;
+    dset_opt_args.chunk_read.buf_size      = buf_size;
     dset_opt_args.chunk_read.use_sub_chunk = use_sub_chunk;
     dset_opt_args.chunk_read.byte_offset   = sub_chunk_byte_offset;
     dset_opt_args.chunk_read.byte_size     = sub_chunk_byte_size;
-    vol_cb_args.op_type               = H5VL_NATIVE_DATASET_CHUNK_READ;
-    vol_cb_args.args                  = &dset_opt_args;
+    vol_cb_args.op_type                    = H5VL_NATIVE_DATASET_CHUNK_READ;
+    vol_cb_args.args                       = &dset_opt_args;
 
     /* Read the raw chunk */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)

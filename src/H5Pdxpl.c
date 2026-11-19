@@ -403,8 +403,8 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     /* Register the direct chunk sub-range properties */
     if (H5P__register_real(pclass, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_SIZE,
                            &H5D_def_sub_chunk_byte_offset_g, NULL, NULL, NULL,
-                           H5D_XFER_SUB_CHUNK_BYTE_OFFSET_ENC, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_DEC, NULL,
-                           NULL, NULL, NULL) < 0)
+                           H5D_XFER_SUB_CHUNK_BYTE_OFFSET_ENC, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_DEC, NULL, NULL,
+                           NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     if (H5P__register_real(pclass, H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME, H5D_XFER_SUB_CHUNK_BYTE_SIZE_SIZE,
                            &H5D_def_sub_chunk_byte_size_g, NULL, NULL, NULL, H5D_XFER_SUB_CHUNK_BYTE_SIZE_ENC,

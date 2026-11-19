@@ -591,7 +591,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     hsize_t             scaled[H5S_MAX_RANK];                  /* Scaled coordinates for this chunk */
     size_t              read_size   = 0;                       /* Size of raw data to read */
     haddr_t             read_offset = HADDR_UNDEF;             /* File address to read from */
-    herr_t              ret_value = SUCCEED;                   /* Return value */
+    herr_t              ret_value   = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 

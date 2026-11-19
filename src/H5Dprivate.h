@@ -57,22 +57,22 @@
 #define H5D_ACS_USE_TREE_NAME             "tree"                 /* Whether to use spatial tree */
 
 /* ======== Data transfer properties ======== */
-#define H5D_XFER_MAX_TEMP_BUF_NAME          "max_temp_buf"        /* Maximum temp buffer size */
-#define H5D_XFER_TCONV_BUF_NAME             "tconv_buf"           /* Type conversion buffer */
-#define H5D_XFER_BKGR_BUF_NAME              "bkgr_buf"            /* Background buffer */
-#define H5D_XFER_BKGR_BUF_TYPE_NAME         "bkgr_buf_type"       /* Background buffer type */
-#define H5D_XFER_BTREE_SPLIT_RATIO_NAME     "btree_split_ratio"   /* B-tree node splitting ratio */
-#define H5D_XFER_VLEN_ALLOC_NAME            "vlen_alloc"          /* Vlen allocation function */
-#define H5D_XFER_VLEN_ALLOC_INFO_NAME       "vlen_alloc_info"     /* Vlen allocation info */
-#define H5D_XFER_VLEN_FREE_NAME             "vlen_free"           /* Vlen free function */
-#define H5D_XFER_VLEN_FREE_INFO_NAME        "vlen_free_info"      /* Vlen free info */
-#define H5D_XFER_VFL_ID_NAME                "vfl_id"              /* File driver ID */
-#define H5D_XFER_VFL_INFO_NAME              "vfl_info"            /* File driver info */
-#define H5D_XFER_HYPER_VECTOR_SIZE_NAME     "vec_size"            /* Hyperslab vector size */
+#define H5D_XFER_MAX_TEMP_BUF_NAME          "max_temp_buf"          /* Maximum temp buffer size */
+#define H5D_XFER_TCONV_BUF_NAME             "tconv_buf"             /* Type conversion buffer */
+#define H5D_XFER_BKGR_BUF_NAME              "bkgr_buf"              /* Background buffer */
+#define H5D_XFER_BKGR_BUF_TYPE_NAME         "bkgr_buf_type"         /* Background buffer type */
+#define H5D_XFER_BTREE_SPLIT_RATIO_NAME     "btree_split_ratio"     /* B-tree node splitting ratio */
+#define H5D_XFER_VLEN_ALLOC_NAME            "vlen_alloc"            /* Vlen allocation function */
+#define H5D_XFER_VLEN_ALLOC_INFO_NAME       "vlen_alloc_info"       /* Vlen allocation info */
+#define H5D_XFER_VLEN_FREE_NAME             "vlen_free"             /* Vlen free function */
+#define H5D_XFER_VLEN_FREE_INFO_NAME        "vlen_free_info"        /* Vlen free info */
+#define H5D_XFER_VFL_ID_NAME                "vfl_id"                /* File driver ID */
+#define H5D_XFER_VFL_INFO_NAME              "vfl_info"              /* File driver info */
+#define H5D_XFER_HYPER_VECTOR_SIZE_NAME     "vec_size"              /* Hyperslab vector size */
 #define H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME "sub_chunk_byte_offset" /* Direct chunk byte offset */
 #define H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME   "sub_chunk_byte_size"   /* Direct chunk byte size */
-#define H5D_XFER_IO_XFER_MODE_NAME          "io_xfer_mode"        /* I/O transfer mode */
-#define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME   "mpio_collective_opt" /* Optimization of MPI-IO transfer mode */
+#define H5D_XFER_IO_XFER_MODE_NAME          "io_xfer_mode"          /* I/O transfer mode */
+#define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME   "mpio_collective_opt"   /* Optimization of MPI-IO transfer mode */
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME   "mpio_chunk_opt_hard"
 #define H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME    "mpio_chunk_opt_num"
 #define H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME  "mpio_chunk_opt_ratio"
