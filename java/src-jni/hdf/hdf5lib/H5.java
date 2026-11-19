@@ -307,7 +307,8 @@ public class H5 implements java.io.Serializable {
      */
     public final static String H5_LIBRARY_NAME_PROPERTY_KEY = "hdf.hdf5lib.H5.loadLibraryName";
     private static String s_libraryName;
-    private static boolean isLibraryLoaded = false;
+    private static boolean isHdf5JavaLibraryLoaded = false; // hdf5_java load succeeded
+    private static boolean isInitialized           = false; // full loadH5Lib() completed
 
     private final static boolean IS_CRITICAL_PINNING  = true;
     private final static LinkedHashSet<Long> OPEN_IDS = new LinkedHashSet<Long>();
@@ -322,78 +323,124 @@ public class H5 implements java.io.Serializable {
     public static void loadH5Lib()
     {
         // Make sure that the library is loaded only once
-        if (isLibraryLoaded)
+        if (isInitialized)
             return;
 
-        // first try loading library by name from user supplied library path
-        s_libraryName     = System.getProperty(H5_LIBRARY_NAME_PROPERTY_KEY, null);
+        // A user-specified hdf5_java (by name or by path) is used with the libhdf5 that the OS
+        // loader finds for it, so the bundled native JARs are not used
+        String userLibraryName = System.getProperty(H5_LIBRARY_NAME_PROPERTY_KEY, null);
+        String userLibraryPath = System.getProperty(H5PATH_PROPERTY_KEY, null);
+        boolean useBundled     = (userLibraryName == null || userLibraryName.isEmpty()) &&
+                             (userLibraryPath == null || userLibraryPath.isEmpty());
+
+        // Bundled zlib, libaec/libsz, and libhdf5 (dependencies of hdf5_java)
+        if (useBundled) {
+            try {
+                Hdf5NativeLoader.loadBundledDependenciesBeforeHdf5();
+                if (Hdf5NativeLoader.bundledZlibLoadSucceeded())
+                    log.info("Loaded bundled zlib");
+                if (Hdf5NativeLoader.bundledSzipLoadSucceeded())
+                    log.info("Loaded bundled libaec/libsz");
+                if (Hdf5NativeLoader.bundledHdf5LoadSucceeded())
+                    log.info("Loaded bundled hdf5");
+            }
+            catch (NoClassDefFoundError err) {
+                log.debug("Bundled HDF5 native libraries not loaded: " + err.getMessage());
+            }
+            catch (Throwable err) {
+                log.warn("Bundled HDF5 native libraries not loaded", err);
+            }
+        }
+
+        // first try loading hdf5_java library by name from user supplied library path
+        s_libraryName     = userLibraryName;
         String mappedName = null;
         if ((s_libraryName != null) && (s_libraryName.length() > 0)) {
             try {
                 mappedName = System.mapLibraryName(s_libraryName);
                 System.loadLibrary(s_libraryName);
-                isLibraryLoaded = true;
+                isHdf5JavaLibraryLoaded = true;
             }
             catch (Throwable err) {
                 err.printStackTrace();
-                isLibraryLoaded = false;
+                isHdf5JavaLibraryLoaded = false;
             }
             finally {
                 log.info("HDF5 library: " + s_libraryName);
                 log.debug(" resolved to: " + mappedName + "; ");
-                log.info((isLibraryLoaded ? "" : " NOT") + " successfully loaded from system property");
+                log.info((isHdf5JavaLibraryLoaded ? "" : " NOT") +
+                         " successfully loaded from system property");
             }
         }
 
-        if (!isLibraryLoaded) {
-            // else try loading library via full path
-            String filename = System.getProperty(H5PATH_PROPERTY_KEY, null);
+        if (!isHdf5JavaLibraryLoaded) {
+            // else try loading hdf5_java library via full path
+            String filename = userLibraryPath;
             if ((filename != null) && (filename.length() > 0)) {
                 File h5dll = new File(filename);
                 if (h5dll.exists() && h5dll.canRead() && h5dll.isFile()) {
                     try {
                         System.load(filename);
-                        isLibraryLoaded = true;
+                        isHdf5JavaLibraryLoaded = true;
                     }
                     catch (Throwable err) {
                         err.printStackTrace();
-                        isLibraryLoaded = false;
+                        isHdf5JavaLibraryLoaded = false;
                     }
                     finally {
                         log.info("HDF5 library: ");
                         log.debug(filename);
-                        log.info((isLibraryLoaded ? "" : " NOT") + " successfully loaded.");
+                        log.info((isHdf5JavaLibraryLoaded ? "" : " NOT") + " successfully loaded.");
                     }
                 }
                 else {
-                    isLibraryLoaded = false;
+                    isHdf5JavaLibraryLoaded = false;
                     throw(new UnsatisfiedLinkError("Invalid HDF5 library, " + filename));
                 }
             }
         }
 
-        // else load standard library
-        if (!isLibraryLoaded) {
+        // Bundled hdf5_java (org.hdfgroup:hdf5-jni-native) before java.library.path; avoids a
+        // failed System.loadLibrary and noisy stack trace when only the Maven JAR is present.
+        if (!isHdf5JavaLibraryLoaded && useBundled) {
+            try {
+                if (Hdf5NativeLoader.loadBundledHdf5JavaIfPresent()) {
+                    log.info("Loaded bundled hdf5_java");
+                    isHdf5JavaLibraryLoaded = true;
+                }
+            }
+            catch (NoClassDefFoundError err) {
+                log.debug("Bundled hdf5_java not loaded: " + err.getMessage());
+            }
+            catch (Throwable err) {
+                log.warn("Bundled hdf5_java not loaded", err);
+            }
+        }
+
+        // else load standard hdf5_java library from java.library.path
+        if (!isHdf5JavaLibraryLoaded) {
             try {
                 s_libraryName = "hdf5_java";
                 mappedName    = System.mapLibraryName(s_libraryName);
                 System.loadLibrary("hdf5_java");
-                isLibraryLoaded = true;
+                isHdf5JavaLibraryLoaded = true;
             }
             catch (Throwable err) {
                 err.printStackTrace();
-                isLibraryLoaded = false;
+                isHdf5JavaLibraryLoaded = false;
             }
             finally {
                 log.info("HDF5 library: " + s_libraryName);
                 log.debug(" resolved to: " + mappedName + "; ");
-                log.info((isLibraryLoaded ? "" : " NOT") + " successfully loaded from java.library.path");
+                log.info((isHdf5JavaLibraryLoaded ? "" : " NOT") +
+                         " successfully loaded from java.library.path");
             }
         }
 
         /* Important! Exit quietly */
         try {
             H5.H5dont_atexit();
+            isInitialized = true;
         }
         catch (HDF5LibraryException e) {
             System.exit(1);

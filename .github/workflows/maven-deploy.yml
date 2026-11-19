@@ -136,8 +136,8 @@ jobs:
                 echo "  Platform: $PLATFORM, Implementation: auto"
               fi
 
-              # Find main HDF5 JAR files (jarhdf5-*.jar) and examples JAR files (hdf5-java-examples-*.jar)
-              artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
+              # Main Java JAR, examples, and native bundle JARs (libhdf5 / zlib / szip / JNI bridge)
+              artifact_jars=$(find "$artifact_dir" \( -name "jarhdf5-*.jar" -o -name "hdf5-java-examples-*.jar" -o -name "hdf5-native-*.jar" -o -name "hdf5-jni-native-*.jar" \) ! -name "*sources*" ! -name "*javadoc*" 2>/dev/null || true)
 
               # With HDF5_ENABLE_MAVEN_DEPLOY, CMake also copies jarhdf5-<v>-<os>-<arch>.jar
               # to jarhdf5-<v>.jar for examples and tests, and both get staged. Keep only the
@@ -270,6 +270,30 @@ jobs:
               continue
             fi
 
+            # Native bundles have no Java classes to detect; they carry their own
+            # pom-<artifactId>.xml beside the JAR
+            NATIVE_ID=""
+            case "${jar_name}" in
+              hdf5-native-*.jar) NATIVE_ID="hdf5-native" ;;
+              hdf5-jni-native-*.jar) NATIVE_ID="hdf5-jni-native" ;;
+            esac
+            if [ -n "${NATIVE_ID}" ]; then
+              pom_file="$(dirname "$jar_file")/pom-${NATIVE_ID}.xml"
+              if [ ! -f "$pom_file" ]; then
+                echo "ERROR: No pom-${NATIVE_ID}.xml staged alongside ${jar_name} (expected: ${pom_file})"
+                error_count=$((error_count + 1))
+                continue
+              fi
+              pom_artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "$pom_file" | head -1 | sed 's/<[^>]*>//g')
+              if [ "$pom_artifact_id" != "$NATIVE_ID" ]; then
+                echo "ERROR: Staged $(basename "$pom_file") artifactId ('${pom_artifact_id}') does not match '${NATIVE_ID}' for ${jar_name}"
+                error_count=$((error_count + 1))
+                continue
+              fi
+              echo "✓ [${platform}/${impl}] ${jar_name} -> ${NATIVE_ID} (POM: ${pom_file})"
+              continue
+            fi
+
             # Determine the expected artifactId the same way deploy-maven does
             if jar tf "$jar_file" | grep -q "org/hdfgroup/javahdf5/hdf5_h.class"; then
               DETECTED_IMPL="ffm"
@@ -399,6 +423,8 @@ jobs:
           # artifactIds whose POM has been uploaded (set only after a successful deploy,
           # so a failed upload doesn't leave an artifactId without a POM)
           declare -A pom_deployed
+          # artifactId:classifier pairs already deployed
+          declare -A jar_deployed
 
           echo "=== Starting JAR Deployment ==="
           # Parse jar-files output: format is "jar_path|platform|implementation,jar_path|platform|implementation,..."
@@ -438,6 +464,16 @@ jobs:
               # generate a minimal one with a description specific to this artifact
               # instead of (incorrectly) reusing the main library's pom.
               pom_opts="-DgeneratePom=true -DgeneratePom.description=\"Example programs demonstrating usage of HDF5 Java bindings\""
+            elif [[ "${jar_basename}" == hdf5-native-*.jar ]]; then
+              ARTIFACT_ID="hdf5-native"
+              CURRENT_CLASSIFIER="$platform"
+              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+              echo "Artifact type: HDF5 native shared library bundle"
+            elif [[ "${jar_basename}" == hdf5-jni-native-*.jar ]]; then
+              ARTIFACT_ID="hdf5-jni-native"
+              CURRENT_CLASSIFIER="$platform"
+              classifier_opts="-Dclassifier=${CURRENT_CLASSIFIER}"
+              echo "Artifact type: HDF5 JNI bridge native bundle"
             else
               # Main HDF5 Java library - determine implementation
               # Check JAR contents to detect FFM vs JNI
@@ -492,12 +528,33 @@ jobs:
               fi
             fi
 
+            # Native bundles carry their own POM beside the JAR (checked in validate-artifacts);
+            # never deploy one with the main POM, whose coordinates would override -DartifactId.
+            # As for the main library, the POM goes up with the first JAR of each artifact only
+            if [[ "${ARTIFACT_ID}" == hdf5-*native ]]; then
+              if [[ -z "${pom_deployed[$ARTIFACT_ID]:-}" ]]; then
+                pom_opts="-DpomFile=\"$(dirname "$jar_file")/pom-${ARTIFACT_ID}.xml\""
+              else
+                pom_opts="-DgeneratePom=false"
+              fi
+            fi
+
+            # The FFM and JNI builds of a platform both produce hdf5-native; a repository accepts
+            # each artifact and classifier only once
+            jar_key="${ARTIFACT_ID}:${CURRENT_CLASSIFIER}"
+            if [[ -n "${jar_deployed[$jar_key]:-}" ]]; then
+              echo "Skipping ${jar_basename}: ${ARTIFACT_ID} (${CURRENT_CLASSIFIER:-no classifier}) is already deployed"
+              total_count=$((total_count - 1)) # not a deployment, so not counted
+              continue
+            fi
+
             # Check if this is a dry run
             if [ "${{ inputs.dry_run }}" == "true" ]; then
               echo "🧪 DRY RUN: Would deploy ${jar_basename} as ${ARTIFACT_ID} with classifier ${CURRENT_CLASSIFIER:-none}"
               echo "Command would be: mvn deploy:deploy-file -DgroupId=org.hdfgroup -DartifactId=${ARTIFACT_ID} -Dversion=${HDF5_VERSION} -Dfile=${jar_file} ${pom_opts} ${classifier_opts}"
-              pom_deployed[$ARTIFACT_ID]=1
               success_count=$((success_count + 1))
+              jar_deployed[$jar_key]=1
+              pom_deployed[$ARTIFACT_ID]=1
             else
               echo "🚀 Deploying ${jar_basename}..."
 
@@ -517,9 +574,10 @@ jobs:
               echo "Command: $deploy_cmd"
 
               if eval $deploy_cmd; then
-                pom_deployed[$ARTIFACT_ID]=1
                 echo "✓ Successfully deployed: ${jar_basename}"
                 success_count=$((success_count + 1))
+                jar_deployed[$jar_key]=1
+                pom_deployed[$ARTIFACT_ID]=1
               else
                 deploy_exit_code=$?
                 echo "✗ Failed to deploy: ${jar_basename} (exit code: $deploy_exit_code)"

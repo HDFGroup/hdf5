@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
 
     <name>HDF5 Java JNI Bindings</name>
-    <description>Java Native Interface bindings for the HDF5 scientific data format library</description>
+    <description>Java Native Interface bindings for the HDF5 scientific data format library. Requires org.hdfgroup:hdf5-jni-native and org.hdfgroup:hdf5-native (transitive Maven dependencies), which bundle the JNI bridge and the libhdf5 it is built against.</description>
     <url>https://github.com/HDFGroup/hdf5</url>
 
     <licenses>
@@ -187,6 +187,8 @@
                 <classifier>macos-aarch64</classifier>
             </properties>
         </profile>
+
+@HDF5_MAVEN_NATIVE_PROFILES@
 
         <!-- Development snapshot profile -->
         <profile>
