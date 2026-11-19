@@ -31,7 +31,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (fuzz_h5_id != H5I_INVALID_HID) {
         hid_t dataset_id = H5Dopen2(fuzz_h5_id, "dsetname", H5P_DEFAULT);
         if (dataset_id != H5I_INVALID_HID) {
-            hid_t attribute_id = H5Aopen_name(dataset_id, "theattr");
+            hid_t attribute_id = H5Aopen(dataset_id, "theattr", H5P_DEFAULT);
             if (attribute_id != H5I_INVALID_HID) {
                 H5Aclose(attribute_id);
             }

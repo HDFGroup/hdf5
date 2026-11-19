@@ -1616,5 +1616,8 @@ mark_as_advanced (FETCHCONTENT_BASE_DIR FETCHCONTENT_FULLY_DISCONNECTED FETCHCON
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_FUZZERS "Build the libFuzzer harnesses in test/fuzzing" OFF)
 if (HDF5_ENABLE_FUZZERS)
+  if (NOT BUILD_STATIC_LIBS)
+    message (FATAL_ERROR "HDF5_ENABLE_FUZZERS requires the static HDF5 library (BUILD_STATIC_LIBS=ON); the harnesses link the static target only")
+  endif ()
   add_subdirectory (test/fuzzing)
 endif ()
