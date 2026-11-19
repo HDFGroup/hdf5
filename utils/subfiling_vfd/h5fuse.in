@@ -35,6 +35,10 @@ function usage {
    echo "-r           Remove subfiles after being processed. [no]"
    echo "-v           Verbose output. [no]"
    echo ""
+   echo "Environment:"
+   echo "H5FUSE_CC    MPI C compiler that -p uses to build a helper program."
+   echo "             [@H5FUSE_MPI_CC@]"
+   echo ""
 }
 
 function gen_mpi {
@@ -76,14 +80,31 @@ if [ "$parallel" == "true" ]; then
     # Generate and compile an MPI program to get MPI rank and size
     if [ ! -f "${c_src}" ]; then
         gen_mpi
-        CC=@CC@
-        ${CC} "${c_src}" -o "${c_exec}"
+        # H5FUSE_CC may include flags, so split it into words (without
+        # pathname expansion). The configured compiler is a single path.
+        if [ -n "${H5FUSE_CC}" ]; then
+            read -r -a cc_cmd <<< "${H5FUSE_CC}"
+        else
+            cc_cmd=("@H5FUSE_MPI_CC@")
+        fi
+        if ! "${cc_cmd[@]}" "${c_src}" -o "${c_exec}"; then
+            echo -e "$RED ERR: -p could not compile its MPI helper program with '${cc_cmd[*]}'. $NC" >&2
+            echo -e "$RED      Set H5FUSE_CC to an MPI C compiler wrapper, for example mpicc. $NC" >&2
+            rm -f "${c_src}" "${c_exec}"
+            exit 1
+        fi
     fi
     wait
     rank_size=$(./"${c_exec}")
     read -r mpi_rank mpi_size <<<"$rank_size"
 
     rm -f "${c_src}" "${c_exec}"
+
+    if ! [[ "$mpi_rank" =~ ^[0-9]+$ && "$mpi_size" =~ ^[1-9][0-9]*$ ]]; then
+        echo -e "$RED ERR: -p could not determine the MPI rank and size from its helper program $NC" >&2
+        echo -e "$RED      (it printed '${rank_size}'). $NC" >&2
+        exit 1
+    fi
 
     # Divide the subfiles among the ranks
     iwork1=$(( nsubfiles / mpi_size ))

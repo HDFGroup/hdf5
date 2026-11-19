@@ -224,6 +224,11 @@ foreach (h5_testp ${H5P_TESTS})
   ADD_H5P_EXE(${h5_testp})
 endforeach ()
 
+# Helper for the h5fuse -p (parallel mode) test in CMakeTests.cmake
+if (HDF5_ENABLE_SUBFILING_VFD)
+  ADD_H5P_EXE(t_h5fuse_parallel_mode)
+endif ()
+
 if (HDF5_TEST_PARALLEL)
   include (CMakeTests.cmake)
 endif ()

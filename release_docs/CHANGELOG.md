@@ -501,6 +501,21 @@ Fixes #5723.
 
 ## Tools
 
+### Fixed `h5fuse -p` (parallel mode) in CMake builds
+
+   `h5fuse -p` compiles a small MPI program at run time to find each rank's
+   share of the subfiles. Since the Autotools build was removed, the installed
+   script had no compiler set, so `h5fuse -p` failed and combined nothing.
+   Serial `h5fuse` wasn't affected.
+
+   `h5fuse` now uses the MPI C compiler that HDF5 was built with. Set the
+   `H5FUSE_CC` environment variable to use a different MPI compiler wrapper.
+   If the program can't be compiled, or `h5fuse -p` can't determine its rank
+   and size, it now reports an error and exits instead of failing with a
+   division by zero. A new test runs `h5fuse -p` on two ranks.
+
+   Fixes GitHub issue #6846
+
 ### Fixed a double free in h5repack
 
    The tool h5repack produced a double free crash on a malicious HDF5 file in copy_refs_attr()
