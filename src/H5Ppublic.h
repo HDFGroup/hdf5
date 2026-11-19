@@ -8010,7 +8010,7 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  *          A returned \p byte_offset of 0 and \p byte_size of 0 means that
  *          H5Dread_chunk2() will read the entire raw chunk.
  *
- * \since 2.2.0
+ * \since 2.4.0
  *
  */
 H5_DLL herr_t H5Pget_sub_chunk(hid_t plist_id, size_t *byte_offset /*out*/, size_t *byte_size /*out*/);
@@ -8337,7 +8337,7 @@ H5_DLL herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size);
  *          mode and restores the default behavior of reading the entire raw
  *          chunk.
  *
- * \since 2.2.0
+ * \since 2.4.0
  *
  */
 H5_DLL herr_t H5Pset_sub_chunk(hid_t plist_id, size_t byte_offset, size_t byte_size);
