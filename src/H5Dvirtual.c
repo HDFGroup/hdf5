@@ -1945,6 +1945,13 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
     storage = &dset->shared->layout.storage.u.virt;
     assert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
+    /* Once the layout is initialized, the extent only depends on the
+     * mappings with an unlimited dimension.  Without any, there is nothing to
+     * update, and iterating over every mapping on each call (H5Dget_space()
+     * makes this call) would cost time linear in the number of mappings. */
+    if (storage->init && !storage->has_unlim)
+        HGOTO_DONE(SUCCEED);
+
     /* Get rank of VDS */
     if ((rank = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get number of dimensions");
@@ -2739,8 +2746,13 @@ H5D__virtual_init(H5F_t *f, H5D_t *dset, hid_t dapl_id, bool H5_ATTR_UNUSED open
      * remove offset from selections.  We only have to update
      * source_space_status and virtual_space_status because others will be based
      * on these and should therefore already have been normalized. */
+    storage->has_unlim = false;
     for (i = 0; i < storage->list_nused; i++) {
         assert(storage->list[i].sub_dset_nalloc == 0);
+
+        /* Note whether a mapping has an unlimited dimension */
+        if (storage->list[i].unlim_dim_virtual >= 0)
+            storage->has_unlim = true;
 
         /* Patch extent */
         if (H5S_extent_copy(storage->list[i].source_dset.virtual_select, dset->shared->space) < 0)
