@@ -1,4 +1,4 @@
-v2.3.0 --- July X , 2026
+HDF5 version 2.3.0 released on 2026-11-19
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -641,6 +641,8 @@ A table of platforms tested can be seen on the [wiki](https://github.com/HDFGrou
 Current test results are available [here](https://my.cdash.org/index.php?project=HDF5).
 
 # ⛔ Known Problems
+
+- The h5fuse tool will not work in parallel mode in this release.  h5fuse in serial mode is unaffected.
 
 - When performing implicit datatype conversion on specific non-IEEE floating-point format data, HDF5 may improperly convert some data values:
 
