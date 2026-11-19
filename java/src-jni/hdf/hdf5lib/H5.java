@@ -11479,6 +11479,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
+     * @param initial_size
+     *            OUT: initial size of the backing memory buffer
      * @param increment
      *            OUT: how much to grow the memory each time
      * @param backing_store
@@ -11488,8 +11490,8 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-    public synchronized static native void H5Pget_fapl_core(long fapl_id, long[] increment,
-                                                            boolean[] backing_store)
+    public synchronized static native void H5Pget_fapl_core(long fapl_id, long[] initial_size,
+                                                            long[] increment, boolean[] backing_store)
         throws HDF5LibraryException, NullPointerException;
 
     /**
@@ -11499,6 +11501,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param fapl_id
      *            IN: File access property list identifier
+     * @param initial_size
+     *            IN: initial size of the backing memory buffer
      * @param increment
      *            IN: how much to grow the memory each time
      * @param backing_store
@@ -11510,7 +11514,7 @@ public class H5 implements java.io.Serializable {
      *            Error from the HDF5 Library.
      *
      **/
-    public synchronized static native int H5Pset_fapl_core(long fapl_id, long increment,
+    public synchronized static native int H5Pset_fapl_core(long fapl_id, long initial_size, long increment,
                                                            boolean backing_store)
         throws HDF5LibraryException, NullPointerException;
 

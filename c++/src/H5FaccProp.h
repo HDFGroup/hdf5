@@ -49,10 +49,10 @@ class H5CPP_DLL FileAccPropList : public PropList {
 
     // Modifies this file access property list to use the H5FD_CORE
     // driver.
-    void setCore(size_t increment, bool backing_store) const;
+    void setCore(size_t initial_size, size_t increment, bool backing_store) const;
 
     // Queries H5FD_CORE driver properties.
-    void getCore(size_t &increment, bool &backing_store) const;
+    void getCore(size_t &initial_size, size_t &increment, bool &backing_store) const;
 
     // Sets this file access properties list to the family driver.
     void setFamily(hsize_t memb_size, const FileAccPropList &memb_plist) const;

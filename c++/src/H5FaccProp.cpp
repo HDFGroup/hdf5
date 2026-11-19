@@ -197,6 +197,8 @@ FileAccPropList::getFamilyOffset() const
 // Function:    FileAccPropList::setCore
 ///\brief       Modifies this file access property list to use the \c H5FD_CORE
 ///             driver.
+///\param       initial_size - IN: Specifies the initial size of the backing
+///                                  memory buffer, in bytes
 ///\param       increment - IN: Specifies how much memory to increase each
 ///                             time more memory is needed, in bytes
 ///\param       backing_store - IN: Indicating whether to write the file
@@ -207,9 +209,9 @@ FileAccPropList::getFamilyOffset() const
 ///             refer to the H5Pset_fapl_core API in the HDF5 C Reference Manual.
 //--------------------------------------------------------------------------
 void
-FileAccPropList::setCore(size_t increment, bool backing_store) const
+FileAccPropList::setCore(size_t initial_size, size_t increment, bool backing_store) const
 {
-    herr_t ret_value = H5Pset_fapl_core(id, increment, backing_store);
+    herr_t ret_value = H5Pset_fapl_core(id, initial_size, increment, backing_store);
     if (ret_value < 0) {
         throw PropListIException("FileAccPropList::setCore", "H5Pset_fapl_core failed");
     }
@@ -218,15 +220,16 @@ FileAccPropList::setCore(size_t increment, bool backing_store) const
 //--------------------------------------------------------------------------
 // Function:    FileAccPropList::getCore
 ///\brief       Queries core file driver properties.
+///\param       initial_size - OUT: Initial size of the backing memory buffer, in bytes
 ///\param       increment - OUT: Size of memory increment, in bytes
 ///\param       backing_store - OUT: Indicating whether to write the file
 ///                                  contents to disk when the file is closed
 ///\exception   H5::PropListIException
 //--------------------------------------------------------------------------
 void
-FileAccPropList::getCore(size_t &increment, bool &backing_store) const
+FileAccPropList::getCore(size_t &initial_size, size_t &increment, bool &backing_store) const
 {
-    herr_t ret_value = H5Pget_fapl_core(id, &increment, &backing_store);
+    herr_t ret_value = H5Pget_fapl_core(id, &initial_size, &increment, &backing_store);
     if (ret_value < 0) {
         throw PropListIException("FileAccPropList::getCore", "H5Pget_fapl_core failed");
     }

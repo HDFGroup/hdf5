@@ -1588,17 +1588,21 @@ public class TestH5Pffm {
             assertTrue("H5Pcreate fapl failed", isValidId(fapl));
 
             // Set core (memory) VFD with 1MB increment and backing store enabled
+            long initialSize     = 0;
             long increment       = 1024 * 1024; // 1MB increments
             boolean backingStore = true;        // Enable backing store
-            int result           = hdf5_h.H5Pset_fapl_core(fapl, increment, backingStore);
+            int result           = hdf5_h.H5Pset_fapl_core(fapl, initialSize, increment, backingStore);
             assertTrue("H5Pset_fapl_core failed", isSuccess(result));
 
             // Get core VFD settings
+            MemorySegment initialSizeSeg  = arena.allocate(ValueLayout.JAVA_LONG);
             MemorySegment incrementSeg    = arena.allocate(ValueLayout.JAVA_LONG);
             MemorySegment backingStoreSeg = arena.allocate(ValueLayout.JAVA_BOOLEAN);
-            result                        = hdf5_h.H5Pget_fapl_core(fapl, incrementSeg, backingStoreSeg);
+            result = hdf5_h.H5Pget_fapl_core(fapl, initialSizeSeg, incrementSeg, backingStoreSeg);
             assertTrue("H5Pget_fapl_core failed", isSuccess(result));
 
+            long retInitialSize = initialSizeSeg.get(ValueLayout.JAVA_LONG, 0);
+            assertEquals("Initial size should match", initialSize, retInitialSize);
             long retIncrement = incrementSeg.get(ValueLayout.JAVA_LONG, 0);
             assertEquals("Increment should match", increment, retIncrement);
 
@@ -1702,7 +1706,7 @@ public class TestH5Pffm {
             assertTrue("Default driver ID should be valid", isValidId(driverId));
 
             // Set core VFD
-            int result = hdf5_h.H5Pset_fapl_core(fapl, 1024, false);
+            int result = hdf5_h.H5Pset_fapl_core(fapl, 0, 1024, false);
             assertTrue("H5Pset_fapl_core failed", isSuccess(result));
 
             // Get driver again (should be core)

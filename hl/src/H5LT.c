@@ -794,7 +794,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
         alloc_incr = min_incr;
 
     /* Configure FAPL to use the core file driver */
-    if (H5Pset_fapl_core(fapl, alloc_incr, false) < 0)
+    if (H5Pset_fapl_core(fapl, 0, alloc_incr, false) < 0)
         goto out;
 
     /* Set callbacks for file image ops ONLY if the file image is NOT copied */

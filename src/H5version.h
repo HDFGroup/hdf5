@@ -176,6 +176,10 @@
   #define H5Pencode_vers 1
 #endif /* !defined(H5Pencode_vers) */
 
+#if !defined(H5Pget_fapl_core_vers)
+  #define H5Pget_fapl_core_vers 1
+#endif /* !defined(H5Pget_fapl_core_vers) */
+
 #if !defined(H5Pget_filter_vers)
   #define H5Pget_filter_vers 1
 #endif /* !defined(H5Pget_filter_vers) */
@@ -191,6 +195,10 @@
 #if !defined(H5Pregister_vers)
   #define H5Pregister_vers 1
 #endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Pset_fapl_core_vers)
+  #define H5Pset_fapl_core_vers 1
+#endif /* !defined(H5Pset_fapl_core_vers) */
 
 #if !defined(H5Rdereference_vers)
   #define H5Rdereference_vers 1
@@ -360,6 +368,10 @@
   #define H5Pencode_vers 1
 #endif /* !defined(H5Pencode_vers) */
 
+#if !defined(H5Pget_fapl_core_vers)
+  #define H5Pget_fapl_core_vers 1
+#endif /* !defined(H5Pget_fapl_core_vers) */
+
 #if !defined(H5Pget_filter_vers)
   #define H5Pget_filter_vers 2
 #endif /* !defined(H5Pget_filter_vers) */
@@ -375,6 +387,10 @@
 #if !defined(H5Pregister_vers)
   #define H5Pregister_vers 2
 #endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Pset_fapl_core_vers)
+  #define H5Pset_fapl_core_vers 1
+#endif /* !defined(H5Pset_fapl_core_vers) */
 
 #if !defined(H5Rdereference_vers)
   #define H5Rdereference_vers 1
@@ -544,6 +560,10 @@
   #define H5Pencode_vers 1
 #endif /* !defined(H5Pencode_vers) */
 
+#if !defined(H5Pget_fapl_core_vers)
+  #define H5Pget_fapl_core_vers 1
+#endif /* !defined(H5Pget_fapl_core_vers) */
+
 #if !defined(H5Pget_filter_vers)
   #define H5Pget_filter_vers 2
 #endif /* !defined(H5Pget_filter_vers) */
@@ -559,6 +579,10 @@
 #if !defined(H5Pregister_vers)
   #define H5Pregister_vers 2
 #endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Pset_fapl_core_vers)
+  #define H5Pset_fapl_core_vers 1
+#endif /* !defined(H5Pset_fapl_core_vers) */
 
 #if !defined(H5Rdereference_vers)
   #define H5Rdereference_vers 2
@@ -728,6 +752,10 @@
   #define H5Pencode_vers 2
 #endif /* !defined(H5Pencode_vers) */
 
+#if !defined(H5Pget_fapl_core_vers)
+  #define H5Pget_fapl_core_vers 1
+#endif /* !defined(H5Pget_fapl_core_vers) */
+
 #if !defined(H5Pget_filter_vers)
   #define H5Pget_filter_vers 2
 #endif /* !defined(H5Pget_filter_vers) */
@@ -743,6 +771,10 @@
 #if !defined(H5Pregister_vers)
   #define H5Pregister_vers 2
 #endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Pset_fapl_core_vers)
+  #define H5Pset_fapl_core_vers 1
+#endif /* !defined(H5Pset_fapl_core_vers) */
 
 #if !defined(H5Rdereference_vers)
   #define H5Rdereference_vers 2
@@ -912,6 +944,10 @@
   #define H5Pencode_vers 2
 #endif /* !defined(H5Pencode_vers) */
 
+#if !defined(H5Pget_fapl_core_vers)
+  #define H5Pget_fapl_core_vers 1
+#endif /* !defined(H5Pget_fapl_core_vers) */
+
 #if !defined(H5Pget_filter_vers)
   #define H5Pget_filter_vers 2
 #endif /* !defined(H5Pget_filter_vers) */
@@ -927,6 +963,10 @@
 #if !defined(H5Pregister_vers)
   #define H5Pregister_vers 2
 #endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Pset_fapl_core_vers)
+  #define H5Pset_fapl_core_vers 1
+#endif /* !defined(H5Pset_fapl_core_vers) */
 
 #if !defined(H5Rdereference_vers)
   #define H5Rdereference_vers 2
@@ -1096,6 +1136,10 @@
   #define H5Pencode_vers 2
 #endif /* !defined(H5Pencode_vers) */
 
+#if !defined(H5Pget_fapl_core_vers)
+  #define H5Pget_fapl_core_vers 2
+#endif /* !defined(H5Pget_fapl_core_vers) */
+
 #if !defined(H5Pget_filter_vers)
   #define H5Pget_filter_vers 2
 #endif /* !defined(H5Pget_filter_vers) */
@@ -1111,6 +1155,10 @@
 #if !defined(H5Pregister_vers)
   #define H5Pregister_vers 2
 #endif /* !defined(H5Pregister_vers) */
+
+#if !defined(H5Pset_fapl_core_vers)
+  #define H5Pset_fapl_core_vers 2
+#endif /* !defined(H5Pset_fapl_core_vers) */
 
 #if !defined(H5Rdereference_vers)
   #define H5Rdereference_vers 2
@@ -1504,6 +1552,17 @@
   #error "H5Pencode_vers set to invalid value"
 #endif /* H5Pencode_vers */
 
+#if !defined(H5Pget_fapl_core_vers) || H5Pget_fapl_core_vers == 2
+  #ifndef H5Pget_fapl_core_vers
+    #define H5Pget_fapl_core_vers 2
+  #endif /* H5Pget_fapl_core_vers */
+  #define H5Pget_fapl_core H5Pget_fapl_core2
+#elif H5Pget_fapl_core_vers == 1
+  #define H5Pget_fapl_core H5Pget_fapl_core1
+#else /* H5Pget_fapl_core_vers */
+  #error "H5Pget_fapl_core_vers set to invalid value"
+#endif /* H5Pget_fapl_core_vers */
+
 #if !defined(H5Pget_filter_vers) || H5Pget_filter_vers == 2
   #ifndef H5Pget_filter_vers
     #define H5Pget_filter_vers 2
@@ -1547,6 +1606,17 @@
 #else /* H5Pregister_vers */
   #error "H5Pregister_vers set to invalid value"
 #endif /* H5Pregister_vers */
+
+#if !defined(H5Pset_fapl_core_vers) || H5Pset_fapl_core_vers == 2
+  #ifndef H5Pset_fapl_core_vers
+    #define H5Pset_fapl_core_vers 2
+  #endif /* H5Pset_fapl_core_vers */
+  #define H5Pset_fapl_core H5Pset_fapl_core2
+#elif H5Pset_fapl_core_vers == 1
+  #define H5Pset_fapl_core H5Pset_fapl_core1
+#else /* H5Pset_fapl_core_vers */
+  #error "H5Pset_fapl_core_vers set to invalid value"
+#endif /* H5Pset_fapl_core_vers */
 
 #if !defined(H5Rdereference_vers) || H5Rdereference_vers == 2
   #ifndef H5Rdereference_vers
