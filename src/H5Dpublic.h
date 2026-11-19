@@ -649,6 +649,10 @@ H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
  *          data if the chunk is filtered and the size may be zero if no
  *          storage is allocated yet for the dataset.
  *
+ *          If \p dset_id is a virtual dataset, \p offset is resolved to a
+ *          chunk of a source dataset under the conditions given for
+ *          H5Dread_chunk2(), and the size of that chunk is returned.
+ *
  * \since 1.10.2
  *
  */
@@ -713,6 +717,12 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  *          \p offset is a pointer to a one-dimensional array with a size
  *          equal to the dataset's rank. Each element is the logical
  *          position of the chunk's first element in a dimension.
+ *
+ *          If \p dset_id is a virtual dataset, \p offset is resolved to a
+ *          chunk of a source dataset under the conditions given for
+ *          H5Dread_chunk2(), and the information of that chunk is returned.
+ *          \p addr is then an address in the source dataset's file, and
+ *          \p filter_mask refers to the source dataset's filter pipeline.
  *
  * \note    Prior to HDF5 1.14.4, the reported address did not take the
  *          user block into account.
@@ -1369,6 +1379,27 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *
  *          \p buf is the memory buffer containing the chunk read from
  *          the dataset in the file.
+ *
+ *          If \p dset_id is a virtual dataset, \p offset is in the virtual
+ *          dataset's dataspace and must be the image, under one mapping, of
+ *          the first element of a chunk of that mapping's source dataset. The
+ *          chunk is then read from the source dataset. The mapping must be a
+ *          translation: its virtual and source selections must each be a
+ *          single block, and the two blocks must have the same shape once
+ *          dimensions of size 1 are left out. The mapping must cover the whole
+ *          source chunk, no other mapping may intersect the image of that
+ *          chunk, the source dataset must be chunked, and its datatype must be
+ *          the same as that of the virtual dataset. Mappings whose source file
+ *          or dataset name uses printf-style substitutions are not supported.
+ *          The function fails if any of these does not hold, or if the source
+ *          dataset cannot be opened. The source dataset is opened with the
+ *          virtual dataset's access properties, such as H5Pset_virtual_prefix(),
+ *          as H5Dread() would open it. \p filters then refers to the filter
+ *          pipeline of the source dataset, which the creation property list of
+ *          the virtual dataset does not describe: to decode the chunk, get the
+ *          pipeline from the source dataset's creation property list, for
+ *          example by opening the source named by H5Pget_virtual_filename()
+ *          and H5Pget_virtual_dsetname().
  *
  *          \p buf_size must be passed as a pointer to a variable holding the
  *          allocated size, in bytes, of the memory buffer \p buf. On exit,

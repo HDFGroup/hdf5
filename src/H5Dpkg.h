@@ -813,6 +813,8 @@ H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src, H5O_layout_t *layout_dst);
 H5_DLL herr_t H5D__virtual_hold_source_dset_files(const H5D_t *dset, H5D_virtual_held_file_t **head);
 H5_DLL herr_t H5D__virtual_refresh_source_dsets(H5D_t *dset);
 H5_DLL herr_t H5D__virtual_release_source_dset_files(H5D_virtual_held_file_t *head);
+H5_DLL herr_t H5D__virtual_chunk_source(const H5D_t *dset, const hsize_t *offset, H5D_t **src_dset,
+                                        hsize_t *src_offset);
 
 /* Functions that operate on EFL (External File List)*/
 H5_DLL bool   H5D__efl_is_space_alloc(const H5O_storage_t *storage);

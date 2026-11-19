@@ -146,6 +146,12 @@ static herr_t H5D__should_build_tree(H5O_storage_virtual_t *storage, hid_t dapl_
 static herr_t H5D__virtual_not_in_tree_grow(H5O_storage_virtual_ent_t ***list, size_t *nalloc);
 static herr_t H5D__virtual_not_in_tree_add(H5O_storage_virtual_ent_t ***list, size_t *nused, size_t *nalloc,
                                            H5O_storage_virtual_ent_t *mapping);
+static herr_t H5D__virtual_chunk_count_one(H5O_storage_virtual_ent_t *mapping, const hsize_t *start,
+                                           const hsize_t *end, H5O_storage_virtual_ent_t **first,
+                                           size_t *count);
+static herr_t H5D__virtual_chunk_count_mappings(H5O_storage_virtual_t *storage, const hsize_t *start,
+                                                const hsize_t *end, H5O_storage_virtual_ent_t **first,
+                                                size_t *count);
 /*********************/
 /* Package Variables */
 /*********************/
@@ -4388,3 +4394,304 @@ H5D__virtual_close_mapping(H5O_storage_virtual_ent_t *mapping)
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D__virtual_close_mapping() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_chunk_count_one
+ *
+ * Purpose:     Checks whether the virtual selection of one mapping
+ *              intersects the block from START to END (inclusive).  If it
+ *              does, increments *COUNT and stores the mapping in *FIRST
+ *              if *FIRST is NULL.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_chunk_count_one(H5O_storage_virtual_ent_t *mapping, const hsize_t *start, const hsize_t *end,
+                             H5O_storage_virtual_ent_t **first, size_t *count)
+{
+    H5S_t *virtual_space;       /* Virtual selection to test */
+    htri_t intersect;           /* Whether the selection intersects the block */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(mapping);
+
+    /* Use the clipped virtual selection when there is one, since it describes
+     * the elements that are mapped with the current extents.  A "printf"
+     * mapping is tested against its whole (unlimited) virtual selection. */
+    if (!(mapping->psfn_nsubs || mapping->psdn_nsubs) && mapping->source_dset.clipped_virtual_select)
+        virtual_space = mapping->source_dset.clipped_virtual_select;
+    else
+        virtual_space = mapping->source_dset.virtual_select;
+
+    if ((intersect = H5S_SELECT_INTERSECT_BLOCK(virtual_space, start, end)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, FAIL, "can't check virtual selection intersection");
+
+    if (intersect) {
+        if (!*first)
+            *first = mapping;
+        (*count)++;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_chunk_count_one() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_chunk_count_mappings
+ *
+ * Purpose:     Counts the mappings whose virtual selection intersects the
+ *              block from START to END (inclusive), using the spatial
+ *              tree when the virtual dataset has one.  The first such
+ *              mapping is returned in *FIRST.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_chunk_count_mappings(H5O_storage_virtual_t *storage, const hsize_t *start, const hsize_t *end,
+                                  H5O_storage_virtual_ent_t **first, size_t *count)
+{
+    H5RT_result_set_t *results = NULL;      /* Search results from the R-tree */
+    size_t             i;                   /* Local index variable */
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(storage);
+    assert(first);
+    assert(count);
+
+    *first = NULL;
+    *count = 0;
+
+    if (storage->tree) {
+        hsize_t min[H5S_MAX_RANK]; /* Search block start */
+        hsize_t max[H5S_MAX_RANK]; /* Search block end */
+
+        H5MM_memcpy(min, start, sizeof(min));
+        H5MM_memcpy(max, end, sizeof(max));
+
+        if (H5RT_search(storage->tree, min, max, &results) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "R-tree search failed");
+
+        if (results)
+            for (i = 0; i < results->count; i++)
+                if (H5D__virtual_chunk_count_one(results->results[i]->record, start, end, first, count) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, FAIL, "can't check mapping");
+
+        for (i = 0; i < storage->not_in_tree_nused; i++)
+            if (H5D__virtual_chunk_count_one(storage->not_in_tree_list[i], start, end, first, count) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, FAIL, "can't check mapping");
+    }
+    else
+        for (i = 0; i < storage->list_nused; i++)
+            if (H5D__virtual_chunk_count_one(&storage->list[i], start, end, first, count) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, FAIL, "can't check mapping");
+
+done:
+    if (results)
+        if (H5RT_free_results(results) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free R-tree search results");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_chunk_count_mappings() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_chunk_source
+ *
+ * Purpose:     Resolves a chunk offset in a virtual dataset to a chunk of
+ *              one source dataset, for the direct chunk operations
+ *              (H5Dread_chunk2, H5Dget_chunk_storage_size and
+ *              H5Dget_chunk_info_by_coord).
+ *
+ *              OFFSET is in the coordinates of the virtual dataset.  It
+ *              must be the image, under one mapping, of the first element
+ *              of a chunk of that mapping's source dataset.  The mapping
+ *              must be a translation: its virtual and source selections
+ *              are single blocks with the same shape once the dimensions
+ *              of size 1 are left out.  The mapping must cover the whole
+ *              source chunk, no other mapping may intersect the image of
+ *              that chunk, the source dataset must be chunked and its
+ *              datatype must equal the datatype of the virtual dataset.
+ *              "printf" mappings are not supported.
+ *
+ *              The source dataset is opened, if it is not open already,
+ *              with the access properties of the virtual dataset
+ *              (H5Pset_virtual_prefix() etc.) and stays open until the
+ *              virtual dataset is closed, as for H5Dread().
+ *
+ *              On success, *SRC_DSET is the source dataset, which the
+ *              caller must not close, and SRC_OFFSET (H5O_LAYOUT_NDIMS
+ *              elements) holds the offset of the chunk in the source
+ *              dataset, terminated as H5D__chunk_get_offset_copy() does.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__virtual_chunk_source(const H5D_t *dset, const hsize_t *offset, H5D_t **src_dset, hsize_t *src_offset)
+{
+    H5O_storage_virtual_t     *storage;                     /* Virtual storage of the dataset */
+    H5O_storage_virtual_ent_t *mapping = NULL;              /* Mapping that holds the chunk */
+    H5O_storage_virtual_ent_t *other   = NULL;              /* First mapping intersecting the chunk image */
+    H5D_t                     *source  = NULL;              /* Source dataset */
+    hsize_t                    virtual_start[H5S_MAX_RANK]; /* Start of the virtual block */
+    hsize_t                    virtual_end[H5S_MAX_RANK];   /* End of the virtual block */
+    hsize_t                    source_start[H5S_MAX_RANK];  /* Start of the source block */
+    hsize_t                    source_end[H5S_MAX_RANK];    /* End of the source block */
+    hsize_t                    chunk_offset[H5S_MAX_RANK];  /* Offset of the chunk in the source */
+    hsize_t                    image_end[H5S_MAX_RANK];     /* End of the chunk's image in the VDS */
+    int                        paired[H5S_MAX_RANK];        /* VDS dimension paired with a source one */
+    bool                       should_build_tree = false;   /* Whether to build the spatial tree */
+    size_t                     count;                       /* Number of intersecting mappings */
+    htri_t                     is_single;                   /* Whether a selection is a single block */
+    unsigned                   vds_rank;                    /* Rank of the virtual dataset */
+    unsigned                   source_rank;                 /* Rank of the source dataset */
+    unsigned                   u, v;                        /* Local index variables */
+    herr_t                     ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    assert(dset);
+    assert(dset->shared->layout.type == H5D_VIRTUAL);
+    assert(offset);
+    assert(src_dset);
+    assert(src_offset);
+
+    storage  = &dset->shared->layout.storage.u.virt;
+    vds_rank = dset->shared->ndims;
+
+    if (vds_rank == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "virtual dataset has no rank");
+    for (u = 0; u < vds_rank; u++)
+        if (offset[u] >= dset->shared->curr_dims[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "offset exceeds dimensions of dataset");
+
+#ifdef H5_HAVE_PARALLEL
+    if (H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                    "direct chunk access is not supported on parallel virtual datasets");
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Initialize the layout and the spatial tree as H5D__virtual_read() does */
+    if (!storage->init)
+        if (H5D__virtual_init_all(dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize virtual layout");
+    if (H5D__should_build_tree(storage, dset->shared->dapl_id, &should_build_tree) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't determine if should build VDS tree");
+    if (should_build_tree)
+        if (H5D__virtual_build_tree(storage, (int)vds_rank) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build virtual mapping tree");
+
+    /* Find the one mapping that holds the offset */
+    if (H5D__virtual_chunk_count_mappings(storage, offset, offset, &mapping, &count) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't search virtual mappings");
+    if (count == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "no mapping of the virtual dataset holds the offset");
+    if (count > 1)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                    "more than one mapping of the virtual dataset holds the offset");
+    if (mapping->psfn_nsubs || mapping->psdn_nsubs)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                    "direct chunk access through a printf-style mapping is not supported");
+
+    /* Open the source dataset */
+    if (!mapping->source_dset.dset)
+        if (H5D__virtual_open_source_dset(dset, mapping, &mapping->source_dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset");
+    if (NULL == (source = mapping->source_dset.dset))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL,
+                    "source dataset '%s' in file '%s' of the mapping can't be opened",
+                    mapping->source_dset.dset_name, mapping->source_dset.file_name);
+    if (!mapping->source_dset.clipped_virtual_select || !mapping->source_dset.clipped_source_select)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                    "selections of the mapping are not resolved for the current extent");
+
+    if (H5D_CHUNKED != source->shared->layout.type)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "source dataset is not chunked");
+    if (0 != H5T_cmp(dset->shared->type, source->shared->type, false))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL,
+                    "datatype of the source dataset differs from that of the virtual dataset");
+
+    /* Both selections must be single blocks */
+    if ((is_single = H5S_SELECT_IS_SINGLE(mapping->source_dset.clipped_virtual_select)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check virtual selection");
+    if (!is_single)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                    "virtual selection of the mapping is not a single block");
+    if ((is_single = H5S_SELECT_IS_SINGLE(mapping->source_dset.clipped_source_select)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check source selection");
+    if (!is_single)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                    "source selection of the mapping is not a single block");
+    if (H5S_SELECT_BOUNDS(mapping->source_dset.clipped_virtual_select, virtual_start, virtual_end) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get virtual selection bounds");
+    if (H5S_SELECT_BOUNDS(mapping->source_dset.clipped_source_select, source_start, source_end) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get source selection bounds");
+
+    /* Pair each source dimension longer than 1 with the next virtual
+     * dimension longer than 1.  The blocks must have the same length in each
+     * pair, which makes the mapping a translation. */
+    source_rank = source->shared->ndims;
+    v           = 0;
+    for (u = 0; u < source_rank; u++) {
+        hsize_t length = source_end[u] - source_start[u] + 1;
+
+        paired[u] = -1;
+        if (length == 1) {
+            chunk_offset[u] = source_start[u];
+            continue;
+        }
+        while (v < vds_rank && virtual_end[v] == virtual_start[v])
+            v++;
+        if (v == vds_rank || (virtual_end[v] - virtual_start[v] + 1) != length)
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "mapping is not a translation");
+        chunk_offset[u] = source_start[u] + (offset[v] - virtual_start[v]);
+        paired[u]       = (int)v;
+        v++;
+    }
+    while (v < vds_rank && virtual_end[v] == virtual_start[v])
+        v++;
+    if (v != vds_rank)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "mapping is not a translation");
+
+    /* The mapping must cover the whole source chunk, and the offset must be
+     * the image of its first element */
+    H5MM_memcpy(image_end, offset, vds_rank * sizeof(hsize_t));
+    for (u = 0; u < source_rank; u++) {
+        hsize_t chunk_dim   = source->shared->layout.u.chunk.dim[u];
+        hsize_t chunk_start = (chunk_offset[u] / chunk_dim) * chunk_dim;
+        hsize_t chunk_end   = MIN(chunk_start + chunk_dim, source->shared->curr_dims[u]) - 1;
+
+        if (chunk_start < source_start[u] || chunk_end > source_end[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "mapping covers only part of the source chunk");
+        if (chunk_start != chunk_offset[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                        "offset is not the image of the first element of a source chunk");
+        if (paired[u] >= 0)
+            image_end[paired[u]] = offset[paired[u]] + (chunk_end - chunk_start);
+    }
+
+    /* No other mapping may intersect the image of the chunk */
+    if (H5D__virtual_chunk_count_mappings(storage, offset, image_end, &other, &count) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't search virtual mappings");
+    if (count != 1)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                    "another mapping of the virtual dataset intersects the chunk");
+    assert(other == mapping);
+
+    /* Copy and check the source offset */
+    if (H5D__chunk_get_offset_copy(source, chunk_offset, src_offset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+
+    *src_dset = source;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_chunk_source() */

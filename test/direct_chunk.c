@@ -60,6 +60,15 @@
 #ifdef H5_HAVE_FILTER_DEFLATE
 #define DATASETNAME21 "sub_chunk_filtered"
 #endif
+#define DATASETNAME22   "virtual"
+#define DATASETNAME23   "virtual_printf"
+#define DATASETNAME24   "virtual_tree"
+#define VDS_SRC_FILE    "direct_chunk_vds_src.h5"
+#define VDS_NFRAMES     9
+#define VDS_NROWS       64
+#define VDS_NY          8
+#define VDS_NX          6
+#define VDS_CHUNK_BYTES 100
 
 #define RANK     2
 #define NX       16
@@ -2917,6 +2926,437 @@ error:
     return 1;
 } /* end test_direct_chunk_read_sub_chunk() */
 
+/*-------------------------------------------------------------------------
+ * Function:    vds_chunk_bytes
+ *
+ * Purpose:     Fills BUF with NBYTES bytes that depend on SEED, so that each
+ *              chunk written by test_direct_chunk_read_virtual() is
+ *              distinct.
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+vds_chunk_bytes(unsigned char *buf, size_t nbytes, unsigned seed)
+{
+    size_t i;
+
+    for (i = 0; i < nbytes; i++)
+        buf[i] = (unsigned char)((seed * 37 + i * 7) % 251);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    vds_add_mapping
+ *
+ * Purpose:     Maps the block of SRC_COUNT elements at SRC_START in source
+ *              dataset SRC_DSET (of rank SRC_RANK and dimensions SRC_DIMS)
+ *              onto the block of VDS_COUNT elements at VDS_START in the
+ *              virtual dataset space VSPACE.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+vds_add_mapping(hid_t dcpl, hid_t vspace, const hsize_t *vds_start, const hsize_t *vds_count,
+                const char *src_file, const char *src_dset, int src_rank, const hsize_t *src_dims,
+                const hsize_t *src_start, const hsize_t *src_count)
+{
+    hid_t src_space = H5I_INVALID_HID;
+
+    if (H5Sselect_hyperslab(vspace, H5S_SELECT_SET, vds_start, NULL, vds_count, NULL) < 0)
+        goto error;
+    if ((src_space = H5Screate_simple(src_rank, src_dims, NULL)) < 0)
+        goto error;
+    if (H5Sselect_hyperslab(src_space, H5S_SELECT_SET, src_start, NULL, src_count, NULL) < 0)
+        goto error;
+    if (H5Pset_virtual(dcpl, vspace, src_file, src_dset, src_space) < 0)
+        goto error;
+    if (H5Sclose(src_space) < 0)
+        goto error;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(src_space);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_direct_chunk_read_virtual
+ *
+ * Purpose:     Test direct chunk reads, H5Dget_chunk_storage_size and
+ *              H5Dget_chunk_info_by_coord on a virtual dataset whose
+ *              requested offset maps onto one whole chunk of one source
+ *              dataset, and that every other case fails.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_direct_chunk_read_virtual(hid_t fid)
+{
+    hid_t         src_fid   = H5I_INVALID_HID; /* Source file ID */
+    hid_t         sid       = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t         vspace    = H5I_INVALID_HID; /* Virtual dataspace ID */
+    hid_t         dcpl      = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t         vdcpl     = H5I_INVALID_HID; /* Virtual dataset creation property list */
+    hid_t         dxpl      = H5I_INVALID_HID; /* Dataset transfer property list */
+    hid_t         did       = H5I_INVALID_HID; /* Dataset ID */
+    hid_t         vdid      = H5I_INVALID_HID; /* Virtual dataset ID */
+    hsize_t       frame[2]  = {VDS_NY, VDS_NX};
+    hsize_t       stack[3]  = {2, VDS_NY, VDS_NX};
+    hsize_t       one[3]    = {1, VDS_NY, VDS_NX};
+    hsize_t       rows[2]   = {VDS_NROWS, VDS_NX};
+    hsize_t       row[2]    = {1, VDS_NX};
+    hsize_t       vdims[3]  = {VDS_NFRAMES, VDS_NY, VDS_NX};
+    hsize_t       vmax[3]   = {H5S_UNLIMITED, VDS_NY, VDS_NX};
+    hsize_t       zero[3]   = {0, 0, 0};
+    hsize_t       vstart[3] = {0, 0, 0};
+    hsize_t       vcount[3] = {1, VDS_NY, VDS_NX};
+    hsize_t       sstart[3] = {0, 0, 0};
+    hsize_t       scount[3] = {0, 0, 0};
+    hsize_t       offset[3] = {0, 0, 0};
+    hsize_t       storage_size;
+    haddr_t       addr;
+    hsize_t       info_size;
+    unsigned      info_mask;
+    uint32_t      filters;
+    size_t        buf_size;
+    unsigned char expected[VDS_CHUNK_BYTES + VDS_NROWS];
+    unsigned char rbuf[VDS_CHUNK_BYTES + VDS_NROWS];
+    herr_t        status;
+    unsigned      u;
+
+    TESTING("direct chunk reads through a virtual dataset");
+
+    /* Create the source datasets.  They use the Fletcher32 filter so that a
+     * chunk can hold any number of bytes and a non-zero filter mask. */
+    if ((src_fid = H5Fcreate(VDS_SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_fletcher32(dcpl) < 0)
+        TEST_ERROR;
+
+    /* frame0 and frame1: (VDS_NY, VDS_NX), one chunk each */
+    if (H5Pset_chunk(dcpl, 2, frame) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, frame, NULL)) < 0)
+        TEST_ERROR;
+    for (u = 0; u < 2; u++) {
+        char name[16];
+
+        snprintf(name, sizeof(name), "frame%u", u);
+        if ((did = H5Dcreate2(src_fid, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            TEST_ERROR;
+        vds_chunk_bytes(expected, VDS_CHUNK_BYTES + u, u);
+        if (H5Dwrite_chunk(did, H5P_DEFAULT, u, zero, VDS_CHUNK_BYTES + u, expected) < 0)
+            TEST_ERROR;
+        if (H5Dclose(did) < 0)
+            TEST_ERROR;
+    }
+
+    /* half: (VDS_NY, VDS_NX), one chunk, of which the VDS maps half */
+    if ((did = H5Dcreate2(src_fid, "half", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    vds_chunk_bytes(expected, VDS_CHUNK_BYTES, 9);
+    if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, zero, VDS_CHUNK_BYTES, expected) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* stack: (2, VDS_NY, VDS_NX), chunked (1, VDS_NY, VDS_NX) */
+    if (H5Pset_chunk(dcpl, 3, one) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(3, stack, NULL)) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(src_fid, "stack", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    for (u = 0; u < 2; u++) {
+        hsize_t chunk_offset[3] = {u, 0, 0};
+
+        vds_chunk_bytes(expected, VDS_CHUNK_BYTES + 2 + u, 2 + u);
+        if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, chunk_offset, VDS_CHUNK_BYTES + 2 + u, expected) < 0)
+            TEST_ERROR;
+    }
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* rows: (VDS_NROWS, VDS_NX), chunked (1, VDS_NX) */
+    if (H5Pset_chunk(dcpl, 2, row) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(2, rows, NULL)) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(src_fid, "rows", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    for (u = 0; u < VDS_NROWS; u++) {
+        hsize_t chunk_offset[2] = {u, 0};
+
+        vds_chunk_bytes(expected, VDS_CHUNK_BYTES + u, 100 + u);
+        if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, chunk_offset, VDS_CHUNK_BYTES + u, expected) < 0)
+            TEST_ERROR;
+    }
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* contig: (VDS_NY, VDS_NX), contiguous */
+    if ((sid = H5Screate_simple(2, frame, NULL)) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(src_fid, "contig", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Fclose(src_fid) < 0)
+        TEST_ERROR;
+    src_fid = H5I_INVALID_HID;
+
+    /* The virtual dataset (VDS_NFRAMES, VDS_NY, VDS_NX), one mapping per frame:
+     *   0, 1: frame0, frame1      (rank 2 source, readable)
+     *   2-3:  stack               (rank 3 source, one mapping, readable)
+     *   4:    contig              (contiguous source)
+     *   5:    a missing file
+     *   6:    the first half of the rows of half's only chunk
+     *   7:    frame0, overlapped in its last row by a row of rows
+     *   8:    frame0 rows 0-1 onto columns 0-1, which is not a translation
+     */
+    if ((vspace = H5Screate_simple(3, vdims, NULL)) < 0)
+        TEST_ERROR;
+    if ((vdcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    scount[0] = VDS_NY;
+    scount[1] = VDS_NX;
+    for (u = 0; u < 2; u++) {
+        char name[16];
+
+        snprintf(name, sizeof(name), "frame%u", u);
+        vstart[0] = u;
+        if (vds_add_mapping(vdcpl, vspace, vstart, vcount, VDS_SRC_FILE, name, 2, frame, sstart, scount) < 0)
+            TEST_ERROR;
+    }
+    vstart[0] = 2;
+    vcount[0] = 2;
+    if (vds_add_mapping(vdcpl, vspace, vstart, vcount, VDS_SRC_FILE, "stack", 3, stack, sstart, stack) < 0)
+        TEST_ERROR;
+    vcount[0] = 1;
+    vstart[0] = 4;
+    if (vds_add_mapping(vdcpl, vspace, vstart, vcount, VDS_SRC_FILE, "contig", 2, frame, sstart, scount) < 0)
+        TEST_ERROR;
+    vstart[0] = 5;
+    if (vds_add_mapping(vdcpl, vspace, vstart, vcount, "direct_chunk_vds_missing.h5", "frame0", 2, frame,
+                        sstart, scount) < 0)
+        TEST_ERROR;
+    vstart[0] = 6;
+    vcount[1] = VDS_NY / 2;
+    scount[0] = VDS_NY / 2;
+    if (vds_add_mapping(vdcpl, vspace, vstart, vcount, VDS_SRC_FILE, "half", 2, frame, sstart, scount) < 0)
+        TEST_ERROR;
+    vstart[0] = 7;
+    vcount[1] = VDS_NY;
+    scount[0] = VDS_NY;
+    if (vds_add_mapping(vdcpl, vspace, vstart, vcount, VDS_SRC_FILE, "frame0", 2, frame, sstart, scount) < 0)
+        TEST_ERROR;
+    vstart[1] = VDS_NY - 1;
+    vcount[1] = 1;
+    if (vds_add_mapping(vdcpl, vspace, vstart, vcount, VDS_SRC_FILE, "rows", 2, rows, sstart, row) < 0)
+        TEST_ERROR;
+    vstart[0] = 8;
+    vstart[1] = 0;
+    vcount[1] = VDS_NX;
+    vcount[2] = 2;
+    scount[0] = 2;
+    scount[1] = VDS_NX;
+    if (vds_add_mapping(vdcpl, vspace, vstart, vcount, VDS_SRC_FILE, "frame0", 2, frame, sstart, scount) < 0)
+        TEST_ERROR;
+    if ((vdid = H5Dcreate2(fid, DATASETNAME22, H5T_NATIVE_INT, vspace, H5P_DEFAULT, vdcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+
+    /* Frames 0-3 map onto whole source chunks */
+    for (u = 0; u < 4; u++) {
+        size_t nbytes = VDS_CHUNK_BYTES + u;
+
+        offset[0] = u;
+        vds_chunk_bytes(expected, nbytes, u);
+
+        if (H5Dget_chunk_storage_size(vdid, offset, &storage_size) < 0)
+            TEST_ERROR;
+        if (storage_size != nbytes)
+            TEST_ERROR;
+        if (H5Dget_chunk_info_by_coord(vdid, offset, &info_mask, &addr, &info_size) < 0)
+            TEST_ERROR;
+        if (info_size != nbytes || info_mask != (u == 1 ? 1 : 0) || !H5_addr_defined(addr))
+            TEST_ERROR;
+
+        memset(rbuf, 0, sizeof(rbuf));
+        buf_size = sizeof(rbuf);
+        if (H5Dread_chunk2(vdid, H5P_DEFAULT, offset, &filters, rbuf, &buf_size) < 0)
+            TEST_ERROR;
+        if (buf_size != nbytes || filters != (u == 1 ? 1 : 0))
+            TEST_ERROR;
+        if (memcmp(rbuf, expected, nbytes) != 0)
+            TEST_ERROR;
+
+        if (H5Pset_sub_chunk(dxpl, 3, 10) < 0)
+            TEST_ERROR;
+        memset(rbuf, 0, sizeof(rbuf));
+        buf_size = sizeof(rbuf);
+        if (H5Dread_chunk2(vdid, dxpl, offset, &filters, rbuf, &buf_size) < 0)
+            TEST_ERROR;
+        if (buf_size != 10 || memcmp(rbuf, expected + 3, 10) != 0)
+            TEST_ERROR;
+
+        if (H5Pset_sub_chunk(dxpl, nbytes - 5, 10) < 0)
+            TEST_ERROR;
+        H5E_BEGIN_TRY
+        {
+            buf_size = sizeof(rbuf);
+            status   = H5Dread_chunk2(vdid, dxpl, offset, &filters, rbuf, &buf_size);
+        }
+        H5E_END_TRY
+        if (status >= 0)
+            TEST_ERROR;
+    }
+
+    /* Every other offset fails: not the image of a chunk's first element,
+     * contiguous source, missing source file, part of a chunk, overlapping
+     * mappings, a mapping that is not a translation, an unmapped element and
+     * an offset outside the dataset */
+    {
+        hsize_t bad[][3] = {{0, 1, 0},          {3, 0, 3},          {4, 0, 0},          {5, 0, 0},
+                            {6, 0, 0},          {7, 0, 0},          {7, VDS_NY - 1, 0}, {8, 0, 0},
+                            {6, VDS_NY - 1, 0}, {VDS_NFRAMES, 0, 0}};
+
+        for (u = 0; u < sizeof(bad) / sizeof(bad[0]); u++) {
+            H5E_BEGIN_TRY
+            {
+                buf_size = sizeof(rbuf);
+                status   = H5Dread_chunk2(vdid, H5P_DEFAULT, bad[u], &filters, rbuf, &buf_size);
+                if (status >= 0)
+                    status = H5Dget_chunk_storage_size(vdid, bad[u], &storage_size);
+                if (status >= 0)
+                    status = H5Dget_chunk_info_by_coord(vdid, bad[u], &info_mask, &addr, &info_size);
+            }
+            H5E_END_TRY
+            if (status >= 0) {
+                printf("    offset {%llu, %llu, %llu} did not fail\n", (unsigned long long)bad[u][0],
+                       (unsigned long long)bad[u][1], (unsigned long long)bad[u][2]);
+                TEST_ERROR;
+            }
+        }
+    }
+    if (H5Dclose(vdid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(vdcpl) < 0)
+        TEST_ERROR;
+    if (H5Sclose(vspace) < 0)
+        TEST_ERROR;
+
+    /* A printf-style mapping, frame%b, fails */
+    if ((vspace = H5Screate_simple(3, one, vmax)) < 0)
+        TEST_ERROR;
+    if ((vdcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    {
+        hsize_t ucount[3] = {H5S_UNLIMITED, 1, 1};
+        hsize_t ublock[3] = {1, VDS_NY, VDS_NX};
+
+        if (H5Sselect_hyperslab(vspace, H5S_SELECT_SET, zero, NULL, ucount, ublock) < 0)
+            TEST_ERROR;
+    }
+    if ((sid = H5Screate_simple(2, frame, NULL)) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(vdcpl, vspace, VDS_SRC_FILE, "frame%b", sid) < 0)
+        TEST_ERROR;
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if ((vdid = H5Dcreate2(fid, DATASETNAME23, H5T_NATIVE_INT, vspace, H5P_DEFAULT, vdcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        buf_size = sizeof(rbuf);
+        status   = H5Dread_chunk2(vdid, H5P_DEFAULT, zero, &filters, rbuf, &buf_size);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Dclose(vdid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(vdcpl) < 0)
+        TEST_ERROR;
+    if (H5Sclose(vspace) < 0)
+        TEST_ERROR;
+
+    /* One mapping per row, enough for the library to use its spatial tree */
+    if ((vspace = H5Screate_simple(2, rows, NULL)) < 0)
+        TEST_ERROR;
+    if ((vdcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    for (u = 0; u < VDS_NROWS; u++) {
+        hsize_t row_start[2] = {u, 0};
+
+        if (vds_add_mapping(vdcpl, vspace, row_start, row, VDS_SRC_FILE, "rows", 2, rows, row_start, row) < 0)
+            TEST_ERROR;
+    }
+    if ((vdid = H5Dcreate2(fid, DATASETNAME24, H5T_NATIVE_INT, vspace, H5P_DEFAULT, vdcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    for (u = 0; u < VDS_NROWS; u += VDS_NROWS - 1) {
+        hsize_t row_offset[2] = {u, 0};
+
+        vds_chunk_bytes(expected, VDS_CHUNK_BYTES + u, 100 + u);
+        memset(rbuf, 0, sizeof(rbuf));
+        buf_size = sizeof(rbuf);
+        if (H5Dread_chunk2(vdid, H5P_DEFAULT, row_offset, &filters, rbuf, &buf_size) < 0)
+            TEST_ERROR;
+        if (buf_size != VDS_CHUNK_BYTES + u || memcmp(rbuf, expected, buf_size) != 0)
+            TEST_ERROR;
+    }
+    if (H5Dclose(vdid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(vdcpl) < 0)
+        TEST_ERROR;
+    if (H5Sclose(vspace) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dxpl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(vdid);
+        H5Dclose(did);
+        H5Pclose(dxpl);
+        H5Pclose(vdcpl);
+        H5Pclose(dcpl);
+        H5Sclose(vspace);
+        H5Sclose(sid);
+        H5Fclose(src_fid);
+    }
+    H5E_END_TRY
+
+    H5_FAILED();
+    return 1;
+} /* end test_direct_chunk_read_virtual() */
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 /*-------------------------------------------------------------------------
  * Function:    test_deprec
@@ -3229,6 +3669,7 @@ main(void)
     nerrors += test_read_unallocated_chunk(file_id);
     nerrors += test_direct_chunk_read_buf_size(file_id);
     nerrors += test_direct_chunk_read_sub_chunk(file_id);
+    nerrors += test_direct_chunk_read_virtual(file_id);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(file_id);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

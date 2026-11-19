@@ -631,6 +631,18 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         case H5VL_NATIVE_DATASET_GET_CHUNK_STORAGE_SIZE: {
             H5VL_native_dataset_get_chunk_storage_size_t *gcss_args = &opt_args->get_chunk_storage_size;
 
+            /* For a virtual dataset, use the chunk of the source dataset */
+            if (H5D_VIRTUAL == dset->shared->layout.type) {
+                H5D_t  *src_dset = NULL;
+                hsize_t src_offset[H5O_LAYOUT_NDIMS]; /* Chunk offset in the source dataset */
+
+                if (H5D__virtual_chunk_source(dset, gcss_args->offset, &src_dset, src_offset) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't find source chunk of virtual dataset");
+                if (H5D__get_chunk_storage_size(src_dset, src_offset, gcss_args->size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get storage size of chunk");
+                break;
+            }
+
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
@@ -701,6 +713,20 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
 
             assert(dset->shared);
 
+            /* For a virtual dataset, use the chunk of the source dataset */
+            if (H5D_VIRTUAL == dset->shared->layout.type) {
+                H5D_t  *src_dset = NULL;
+                hsize_t src_offset[H5O_LAYOUT_NDIMS]; /* Chunk offset in the source dataset */
+
+                if (H5D__virtual_chunk_source(dset, gcibc_args->offset, &src_dset, src_offset) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't find source chunk of virtual dataset");
+                if (H5D__get_chunk_info_by_coord(src_dset, src_offset, gcibc_args->filter_mask,
+                                                 gcibc_args->addr, gcibc_args->size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                "can't get chunk info by its logical coordinates");
+                break;
+            }
+
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
@@ -718,6 +744,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         case H5VL_NATIVE_DATASET_CHUNK_READ: {
             H5VL_native_dataset_chunk_read_t *chunk_read_args = &opt_args->chunk_read;
             hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
+            H5D_t  *read_dset             = dset;  /* Dataset that stores the chunk */
             size_t  sub_chunk_byte_offset = 0;     /* Raw chunk byte offset from the DXPL */
             size_t  sub_chunk_byte_size   = 0;     /* Raw chunk byte size from the DXPL */
 
@@ -746,19 +773,28 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             /* Check arguments */
             if (NULL == dset->oloc.file)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file");
-            if (H5D_CHUNKED != dset->shared->layout.type)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
 
-            /* Copy the user's offset array so we can be sure it's terminated properly.
-             * (we don't want to mess with the user's buffer).
-             */
-            if (H5D__chunk_get_offset_copy(dset, chunk_read_args->offset, offset_copy) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+            /* For a virtual dataset, read the chunk of the source dataset */
+            if (H5D_VIRTUAL == dset->shared->layout.type) {
+                if (H5D__virtual_chunk_source(dset, chunk_read_args->offset, &read_dset, offset_copy) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't find source chunk of virtual dataset");
+            }
+            else {
+                if (H5D_CHUNKED != dset->shared->layout.type)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
+
+                /* Copy the user's offset array so we can be sure it's terminated properly.
+                 * (we don't want to mess with the user's buffer).
+                 */
+                if (H5D__chunk_get_offset_copy(dset, chunk_read_args->offset, offset_copy) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+            }
 
             /* Read the raw chunk */
-            if (H5D__chunk_direct_read(dset, offset_copy, &chunk_read_args->filters, chunk_read_args->buf,
-                                       chunk_read_args->buf_size, sub_chunk_byte_size > 0,
-                                       sub_chunk_byte_offset, sub_chunk_byte_size) < 0)
+            if (H5D__chunk_direct_read(read_dset, offset_copy, &chunk_read_args->filters,
+                                       chunk_read_args->buf, chunk_read_args->buf_size,
+                                       sub_chunk_byte_size > 0, sub_chunk_byte_offset,
+                                       sub_chunk_byte_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
 
             break;
