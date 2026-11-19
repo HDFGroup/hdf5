@@ -192,6 +192,15 @@ We would like to thank the many HDF5 community members who contributed to this r
    a chunked dataset. Currently only the filter operations are executed
    concurrently, the others are serialized.
 
+### Added reads of a byte range of a raw chunk
+
+   Added H5Pset_sub_chunk() and H5Pget_sub_chunk(). They set, on a dataset
+   transfer property list, a byte range that H5Dread_chunk2() then reads from
+   the raw stored chunk instead of the whole chunk. A codec whose stream is
+   progressive, such as a JPEG 2000 codestream whose tile-parts are split by
+   resolution, can then read only the bytes that a reduced-resolution decode
+   needs. The range must lie within the chunk. H5Dread_chunk1() ignores it.
+
 
 ## Parallel Library
 
