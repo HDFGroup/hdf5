@@ -152,7 +152,13 @@ macro (H5_SET_LANG_SETTINGS)
   set (H5_FORTRAN_STATIC_LIB NO)
   if (HDF5_BUILD_FORTRAN)
     set (H5_FORTRAN_COMPILER "${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COMPILER_VERSION}")
-    set (H5_FORTRAN_MODULE_DIR "${CMAKE_Fortran_MODULE_DIRECTORY}")
+    # Where the modules are installed, not CMAKE_Fortran_MODULE_DIRECTORY,
+    # which is in the build tree
+    if (IS_ABSOLUTE "${HDF5_INSTALL_MODULE_DIR}")
+      set (H5_FORTRAN_MODULE_DIR "${HDF5_INSTALL_MODULE_DIR}")
+    else ()
+      set (H5_FORTRAN_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_MODULE_DIR}")
+    endif ()
     set (H5_FORTRAN_SHARED_LIB ${H5_ENABLE_SHARED_LIB})
     set (H5_FORTRAN_STATIC_LIB ${H5_ENABLE_STATIC_LIB})
   endif ()
@@ -165,6 +171,16 @@ macro (H5_SET_LANG_SETTINGS)
     set (H5_CPP_SHARED_LIB ${H5_ENABLE_SHARED_LIB})
     set (H5_CPP_STATIC_LIB ${H5_ENABLE_STATIC_LIB})
   endif ()
+
+  # Flags as recorded in the settings files. -f*-prefix-map=<build path>=...
+  # and -fprofile-prefix-path=<build path> options exist to keep build paths
+  # out of the binaries; recording them would put the build path back into
+  # H5build_settings.c.
+  foreach (_flags_var CMAKE_C_FLAGS CMAKE_CXX_FLAGS CMAKE_Fortran_FLAGS CMAKE_SHARED_LINKER_FLAGS)
+    string (REGEX REPLACE "-f((file|debug|macro|profile|coverage)-prefix-map|profile-prefix-path)=[^ ]*" "" H5_SETTINGS_${_flags_var} "${${_flags_var}}")
+    string (REGEX REPLACE "  +" " " H5_SETTINGS_${_flags_var} "${H5_SETTINGS_${_flags_var}}")
+    string (STRIP "${H5_SETTINGS_${_flags_var}}" H5_SETTINGS_${_flags_var})
+  endforeach ()
 endmacro ()
 
 # Given the name of a CMake target for an external VOL connector,

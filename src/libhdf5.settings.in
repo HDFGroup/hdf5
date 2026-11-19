@@ -6,7 +6,7 @@ General Information:
                    HDF5 Version: @HDF5_PACKAGE_VERSION_STRING@
                   Configured on: @CONFIG_DATE@
                   Configured by: @CMAKE_GENERATOR@
-                    Host system: @CMAKE_HOST_SYSTEM@
+                    Host system: @HDF5_BUILD_HOST_SYSTEM@
               Uname information: @CMAKE_SYSTEM_NAME@
                        Byte sex: @BYTESEX@
              Installation point: @CMAKE_INSTALL_PREFIX@
@@ -23,7 +23,7 @@ Linking Options:
 ----------------
                       Libraries: @BUILD_NAME_EXT@
   Statically Linked Executables: @BUILD_STATIC_EXECS@
-                        LDFLAGS: @CMAKE_SHARED_LINKER_FLAGS@
+                        LDFLAGS: @H5_SETTINGS_CMAKE_SHARED_LINKER_FLAGS@
                      H5_LDFLAGS: @H5_LDFLAGS@
                      AM_LDFLAGS: @AM_LDFLAGS@
                 Extra libraries: @LINK_LIBS_SETTINGS@
@@ -38,7 +38,7 @@ Languages:
                        CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
-                         CFLAGS: @CMAKE_C_FLAGS@ @HDF5_BUILD_MODE_C_FLAGS@
+                         CFLAGS: @H5_SETTINGS_CMAKE_C_FLAGS@ @HDF5_BUILD_MODE_C_FLAGS@
                       H5_CFLAGS: @HDF5_CMAKE_C_FLAGS@
                       AM_CFLAGS: @AM_CFLAGS@
                Shared C Library: @H5_ENABLE_SHARED_LIB@
@@ -46,7 +46,7 @@ Languages:
 
                         Fortran: @HDF5_BUILD_FORTRAN@
                Fortran Compiler: @H5_FORTRAN_COMPILER@
-                  Fortran Flags: @CMAKE_Fortran_FLAGS@ @HDF5_BUILD_MODE_Fortran_FLAGS@
+                  Fortran Flags: @H5_SETTINGS_CMAKE_Fortran_FLAGS@ @HDF5_BUILD_MODE_Fortran_FLAGS@
                H5 Fortran Flags: @HDF5_CMAKE_Fortran_FLAGS@
                AM Fortran Flags: @AM_FCFLAGS@
          Shared Fortran Library: @H5_FORTRAN_SHARED_LIB@
@@ -55,7 +55,7 @@ Languages:
 
                             C++: @HDF5_BUILD_CPP_LIB@
                    C++ Compiler: @H5_CPP_COMPILER@
-                      C++ Flags: @CMAKE_CXX_FLAGS@ @HDF5_BUILD_MODE_CXX_FLAGS@
+                      C++ Flags: @H5_SETTINGS_CMAKE_CXX_FLAGS@ @HDF5_BUILD_MODE_CXX_FLAGS@
                    H5 C++ Flags: @HDF5_CMAKE_CXX_FLAGS@
                    AM C++ Flags: @AM_CXXFLAGS@
              Shared C++ Library: @H5_CPP_SHARED_LIB@
@@ -71,7 +71,6 @@ Features:
                 Large Parallel I/O: @LARGE_PARALLEL_IO@
                 High-level library: @HDF5_BUILD_HL_LIB@
 Dimension scales w/ new references: @HDF5_DIMENSION_SCALES_NEW_REF@
-                  Build HDF5 Tests: @BUILD_TESTING@
                   Build HDF5 Tools: @HDF5_BUILD_TOOLS@
                            Threads: @HDF5_THREADS_SETTING@
                       Threadsafety: @HDF5_ENABLE_THREADSAFE@
