@@ -116,11 +116,11 @@ dump_cache(hid_t fid)
 
     /* Get Internal File / Cache Pointers */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Dump the cache */
     if (H5AC_dump_cache(f) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     return 0;
 
@@ -152,7 +152,7 @@ verify_no_unknown_tags(hid_t fid)
 
     /* Get Internal File / Cache Pointers */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -196,7 +196,7 @@ mark_all_entries_investigated(hid_t fid)
 
     /* Get Internal File / Cache Pointers */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -238,7 +238,7 @@ reset_all_entries_investigated(hid_t fid)
 
     /* Get Internal File / Cache Pointers */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -279,7 +279,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
 
     /* Get Internal File / Cache Pointers */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     cache_ptr = f->shared->cache;
 
     for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
@@ -319,14 +319,14 @@ evict_entries(hid_t fid)
 
     /* Get Internal File / Cache Pointers */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Mark all entries investigated */
     mark_all_entries_investigated(fid);
 
     /* setup the skip list prior to calling H5C_flush_cache() */
     if (H5C_set_slist_enabled(f->shared->cache, true, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Evict all we can from the cache to examine full tag creation tree */
     /* This function will likely return failure since the root group
@@ -336,7 +336,7 @@ evict_entries(hid_t fid)
 
     /* shutdown the slist */
     if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     return 0;
 
@@ -387,7 +387,7 @@ get_sbe_tag(hid_t fid, haddr_t *tag)
 {
     /* Retrieve the superblock extension's object header address for the file */
     if (H5F__get_sbe_addr_test(fid, tag) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     return 0;
 
@@ -4453,12 +4453,12 @@ check_invalid_tag_application(void)
 
     /* Push API context */
     if (H5CX_push(&api_ctx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 
     /* Get internal file pointer*/
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Call H5HL_create, an internal function that calls H5AC_insert_entry without setting up a tag */
     /* Ensure this returns FAILURE, as a tag has not been set up. */
@@ -4470,7 +4470,7 @@ check_invalid_tag_application(void)
 
     /* Verify the same call to H5HL_create now works as intended, with a tag set up. */
     if (H5HL_create(f, (size_t)1024, &addr) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Reset API context to use invalid tag. */
     H5AC_tag(H5AC__INVALID_TAG, NULL);
@@ -4485,15 +4485,15 @@ check_invalid_tag_application(void)
 
     /* Call H5HL_protect again to protect the local heap. This should succeed. */
     if ((lheap = H5HL_protect(f, addr, H5AC__NO_FLAGS_SET)) == NULL)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Now unprotect the heap, as we're done with the test. */
     if (H5HL_unprotect(lheap) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     api_ctx_pushed = false;
 
     /* Close open objects and file */

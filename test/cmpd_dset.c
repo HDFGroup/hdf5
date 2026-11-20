@@ -534,7 +534,7 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     /* Write to the dataset with rew_tid */
     if (H5Dwrite(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dread(did, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
@@ -547,22 +547,22 @@ test_select_src_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
 
     /* Finishing test and release resources */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(dxpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Tclose(src_tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Tclose(rew_tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     free(rbuf);
     free(rew_buf);
@@ -733,7 +733,7 @@ test_select_dst_subset(char *fname, hid_t fapl, hid_t in_dxpl, unsigned set_fill
         goto error;
 
     if (H5Pclose(dxpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Tclose(src_tid) < 0)
         goto error;
@@ -2495,32 +2495,32 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 
     /* Create xfer properties to preserve initialized data */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_preserve(dxpl, true) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Rewrite contiguous data set */
     if ((dataset = H5Dopen2(file, DSET_NAME[0], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the data to the dataset */
     if (H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Rewrite chunked data set */
     if ((dataset = H5Dopen2(file, DSET_NAME[1], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the data to the dataset */
     if (H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -2532,48 +2532,48 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 
     /* Check contiguous data set */
     if ((dataset = H5Dopen2(file, DSET_NAME[0], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check chunked data set */
     if ((dataset = H5Dopen2(file, DSET_NAME[1], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (compare_data(orig, rbuf, true) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Finishing test and release resources */
     if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(dxpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Tclose(src_tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(dst_tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(rew_tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     free(orig);
     free(rbuf);
@@ -3118,7 +3118,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
 
     /* Verify that the compound is not packed */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (dt->shared->u.compnd.packed)
         TEST_ERROR;
 
@@ -3150,7 +3150,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
 
     /* Verify that the compound is not packed */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype_tmp, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (dt->shared->u.compnd.packed)
         TEST_ERROR;
 
@@ -3170,7 +3170,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
 
     /* Verify that the compound is not packed */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (dt->shared->u.compnd.packed)
         TEST_ERROR;
 
@@ -3190,7 +3190,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
 
     /* Verify that the compound is packed */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!dt->shared->u.compnd.packed)
         TEST_ERROR;
 
@@ -3224,7 +3224,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
     if ((dtype_tmp = H5Topen2(file, "dtype2", H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype_tmp, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!dt->shared->u.compnd.packed)
         TEST_ERROR;
     if (H5Tget_member_offset(dtype_tmp, 0) != 8)
@@ -3242,7 +3242,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
     if ((dtype = H5Tcopy(dtype_tmp)) < 0)
         TEST_ERROR;
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!dt->shared->u.compnd.packed)
         TEST_ERROR;
     if (H5Tget_member_offset(dtype, 0) != 8)
@@ -3260,7 +3260,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
     if (H5Tset_size(dtype, (size_t)21) < 0)
         TEST_ERROR;
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (dt->shared->u.compnd.packed)
         TEST_ERROR;
     if (H5Tget_member_offset(dtype, 0) != 8)
@@ -3278,7 +3278,7 @@ test_ooo_order(char *filename, hid_t fapl_id)
     if (H5Tset_size(dtype, (size_t)20) < 0)
         TEST_ERROR;
     if (NULL == (dt = (H5T_t *)H5I_object_verify(dtype, H5I_DATATYPE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!dt->shared->u.compnd.packed)
         TEST_ERROR;
     if (H5Tget_member_offset(dtype, 0) != 8)

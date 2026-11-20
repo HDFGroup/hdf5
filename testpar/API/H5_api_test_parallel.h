@@ -54,6 +54,7 @@ extern char H5_api_test_parallel_filename[];
             fflush(stdout);                                                                                  \
         }                                                                                                    \
         n_tests_run_g++;                                                                                     \
+        h5_failure_reported_g = false;                                                                       \
     }
 #define TESTING_2(WHAT)                                                                                      \
     {                                                                                                        \
@@ -62,6 +63,7 @@ extern char H5_api_test_parallel_filename[];
             fflush(stdout);                                                                                  \
         }                                                                                                    \
         n_tests_run_g++;                                                                                     \
+        h5_failure_reported_g = false;                                                                       \
     }
 #define PASSED()                                                                                             \
     {                                                                                                        \
@@ -70,14 +72,18 @@ extern char H5_api_test_parallel_filename[];
             fflush(stdout);                                                                                  \
         }                                                                                                    \
         n_tests_passed_g++;                                                                                  \
+        h5_failure_reported_g = false;                                                                       \
     }
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
-        if (MAINPROCESS) {                                                                                   \
-            puts("*FAILED*");                                                                                \
-            fflush(stdout);                                                                                  \
+        if (!h5_failure_reported_g) {                                                                        \
+            if (MAINPROCESS) {                                                                               \
+                puts("*FAILED*");                                                                            \
+                fflush(stdout);                                                                              \
+            }                                                                                                \
+            n_tests_failed_g++;                                                                              \
+            h5_failure_reported_g = true;                                                                    \
         }                                                                                                    \
-        n_tests_failed_g++;                                                                                  \
     }
 #define H5_WARNING()                                                                                         \
     {                                                                                                        \
@@ -93,6 +99,7 @@ extern char H5_api_test_parallel_filename[];
             fflush(stdout);                                                                                  \
         }                                                                                                    \
         n_tests_skipped_g++;                                                                                 \
+        h5_failure_reported_g = false;                                                                       \
     }
 #define PUTS_ERROR(s)                                                                                        \
     {                                                                                                        \
@@ -142,6 +149,7 @@ extern char H5_api_test_parallel_filename[];
             puts("");                                                                                        \
             fflush(stdout);                                                                                  \
         }                                                                                                    \
+        h5_failure_reported_g = false;                                                                       \
     }
 
 /*

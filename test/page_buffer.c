@@ -90,10 +90,10 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
     char    dset_name[32];
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((grp_id = H5Gcreate2(file_id, "GROUP", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     num_elements = NX * NY;
     if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
@@ -102,80 +102,80 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
         data[i] = i;
 
     if ((filespace = H5Screate_simple(2, dimsf, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     for (i = 0; i < NUM_DSETS; i++) {
 
         snprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         snprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         snprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         snprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dcreate2(grp_id, dset_name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl,
                                   H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         memset(data, 0, (size_t)num_elements * sizeof(int));
         if ((dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         for (j = 0; j < num_elements; j++) {
             if (data[j] != j) {
                 fprintf(stderr, "Read different values than written\n");
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
         }
 
         snprintf(dset_name, sizeof(dset_name), "D1dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         snprintf(dset_name, sizeof(dset_name), "D2dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         snprintf(dset_name, sizeof(dset_name), "D3dset%d", i);
         if (H5Ldelete(grp_id, dset_name, H5P_DEFAULT) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
 
     if (H5Gclose(grp_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(filespace) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     free(data);
     return 0;
@@ -225,21 +225,21 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
     H5F_t *f = NULL;
 
     if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
     if (f->shared->page_buf == NULL)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (f->shared->page_buf->page_size != page_size)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (f->shared->page_buf->max_size != page_buffer_size)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((grp_id = H5Gopen2(file_id, "GROUP", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     num_elements = NX * NY;
     if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
@@ -249,26 +249,26 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
 
         snprintf(dset_name, sizeof(dset_name), "dset%d", i);
         if ((dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         for (j = 0; j < num_elements; j++) {
             if (data[j] != j) {
                 fprintf(stderr, "Read different values than written\n");
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
         }
     }
 
     if (H5Gclose(grp_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     free(data);
 
     return 0;
@@ -505,9 +505,9 @@ test_args(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -573,7 +573,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
@@ -610,7 +610,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
     page_count++;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* update elements 300 - 450, with values 300 -  - this will
        bring two more pages into the page buffer. */
@@ -620,7 +620,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
     page_count += 2;
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* update elements 100 - 300, this will go to disk but also update
        existing pages in the page buffer. */
@@ -629,7 +629,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 100), sizeof(int) * 200, data) < 0)
         FAIL_STACK_ERROR;
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Update elements 225-300 - this will update an existing page in the PB */
     /* Changes: 450 - 600; 150 */
@@ -638,7 +638,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 450), sizeof(int) * 150, data) < 0)
         FAIL_STACK_ERROR;
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Do a full page write to block 600-800 - should bypass the PB */
     for (i = 0; i < 200; i++)
@@ -646,7 +646,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 600), sizeof(int) * 200, data) < 0)
         FAIL_STACK_ERROR;
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* read elements 800 - 1200, this should not affect the PB, and should read -1s */
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 800), sizeof(int) * 400, data) < 0)
@@ -654,11 +654,11 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
     for (i = 0; i < 400; i++) {
         if (data[i] != -1) {
             fprintf(stderr, "Read different values than written\n");
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         }
     }
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count + base_page_cnt)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* read elements 1200 - 1201, this should read -1 and bring in an
      * entire page of addr 1200
@@ -761,11 +761,11 @@ test_raw_data_handling(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     free(data);
 
     PASSED();
@@ -820,7 +820,7 @@ test_lru_processing(hid_t orig_fapl, const char *driver_name)
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (set_multi_split(driver_name, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
@@ -829,20 +829,20 @@ test_lru_processing(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* keep 2 pages at max in the page buffer */
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 400, 20, 0) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
@@ -897,20 +897,20 @@ test_lru_processing(hid_t orig_fapl, const char *driver_name)
      * have been evicted -- thus no further need to consider base_page_cnt.
      */
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The two pages should be the ones with address 100 and 200; 0
        should have been evicted */
     /* Changes: 200, 400 */
     search_addr = addr;
     if (NULL != H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     search_addr = addr + sizeof(int) * 200;
     if (NULL == H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     search_addr = addr + sizeof(int) * 400;
     if (NULL == H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* update elements 150-151, this will update existing pages in the
        page buffer and move it to the top of the LRU. */
@@ -920,7 +920,7 @@ test_lru_processing(hid_t orig_fapl, const char *driver_name)
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 300), sizeof(int) * 1, data) < 0)
         FAIL_STACK_ERROR;
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* read elements 600 - 601, this should read -1 and bring in an
        entire page of addr 600, and evict page 200 */
@@ -934,22 +934,22 @@ test_lru_processing(hid_t orig_fapl, const char *driver_name)
         } /* end if */
     }     /* end for */
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 400 */
     search_addr = addr + sizeof(int) * 400;
     if (NULL != H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 200 */
     search_addr = addr + sizeof(int) * 200;
     if (NULL == H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 1200 */
     search_addr = addr + sizeof(int) * 1200;
     if (NULL == H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* read elements 175 - 225, this should move 100 to the top, evict 600 and bring in 200 */
     /* Changes: 350 - 450; 200, 1200, 400 */
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 350), sizeof(int) * 100, data) < 0)
@@ -961,22 +961,22 @@ test_lru_processing(hid_t orig_fapl, const char *driver_name)
         } /* end if */
     }     /* end for */
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 1200 */
     search_addr = addr + sizeof(int) * 1200;
     if (NULL != H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 200 */
     search_addr = addr + sizeof(int) * 200;
     if (NULL == H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 400 */
     search_addr = addr + sizeof(int) * 400;
     if (NULL == H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* update elements 200 - 700 to value 0, this will go to disk but
        also discarding existing pages from the PB (page 200). */
@@ -987,24 +987,24 @@ test_lru_processing(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
     page_count -= 1;
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 200 */
     search_addr = addr + sizeof(int) * 200;
     if (NULL == H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Changes: 400 */
     search_addr = addr + sizeof(int) * 400;
     if (NULL != H5SL_search(f->shared->page_buf->slist_ptr, &(search_addr)))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     free(data);
 
     PASSED();
@@ -1070,23 +1070,23 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     printf("\tMinimum metadata threshold = 100%%\n");
 
     /* keep 5 pages at max in the page buffer and 5 meta page minimum */
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 100, 0) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* create the file */
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
@@ -1148,7 +1148,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
     page_count += 5;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (page_buf->raw_count != 5 - base_meta_cnt)
         TEST_ERROR;
@@ -1170,7 +1170,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (page_buf->meta_count != 5)
         TEST_ERROR;
@@ -1198,7 +1198,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (page_buf->meta_count != 5)
         TEST_ERROR;
@@ -1207,7 +1207,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     printf("\tMinimum raw data threshold = 100%%\n");
 
@@ -1220,7 +1220,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
 
     /* create the file */
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
@@ -1247,13 +1247,13 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
     if (page_buf->min_meta_count != 0)
         TEST_ERROR;
     if (page_buf->min_raw_count != 5)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (HADDR_UNDEF == (meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int) * (size_t)num_elements)))
         FAIL_STACK_ERROR;
 
     if (HADDR_UNDEF == (raw_addr = H5MF_alloc(f, H5FD_MEM_DRAW, sizeof(int) * (size_t)num_elements)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* write all meta data, this would end up in page buffer since there
      * is no raw data yet
@@ -1279,7 +1279,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
     page_count += 5;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (page_buf->meta_count != 5 - base_raw_cnt)
         TEST_ERROR;
 
@@ -1300,7 +1300,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (page_buf->raw_count != 5)
         TEST_ERROR;
@@ -1328,7 +1328,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (page_buf->raw_count != 5)
         TEST_ERROR;
@@ -1337,7 +1337,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     printf("\tMinimum metadata threshold = 40%%, Minimum rawdata threshold = 40%%\n");
     page_count = 0;
@@ -1349,7 +1349,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
 
     /* create the file */
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
@@ -1429,7 +1429,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (f->shared->page_buf->meta_count != 3)
         TEST_ERROR;
@@ -1482,7 +1482,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     printf("\tMinimum metadata threshold = 20%%\n");
     page_count = 0;
@@ -1491,7 +1491,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
     /* create the file */
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
@@ -1540,7 +1540,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
     page_count += 5;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* add 2 meta entries evicting 2 raw entries */
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr, sizeof(int) * 100, data) < 0)
@@ -1550,7 +1550,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (f->shared->page_buf->meta_count != 2)
         TEST_ERROR;
@@ -1573,7 +1573,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (f->shared->page_buf->meta_count != 1)
         TEST_ERROR;
@@ -1588,7 +1588,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (f->shared->page_buf->meta_count != 1)
         TEST_ERROR;
@@ -1603,7 +1603,7 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         FAIL_STACK_ERROR;
 
     if (H5SL_count(f->shared->page_buf->slist_ptr) != page_count)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (f->shared->page_buf->meta_count != 1)
         TEST_ERROR;
@@ -1612,13 +1612,13 @@ test_min_threshold(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     free(data);
 
@@ -1709,20 +1709,20 @@ test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* 5 pages in the buffer, 40% of them reserved for metadata */
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 40, 0) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
@@ -1814,11 +1814,11 @@ test_min_threshold_all_meta_types(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     free(data);
 
@@ -1885,7 +1885,7 @@ test_pb_fapl_tolerance_at_open(void)
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE)
         TEST_ERROR;
     if (f->shared->page_buf != NULL)
@@ -1913,7 +1913,7 @@ test_pb_fapl_tolerance_at_open(void)
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (f->shared->fs_strategy != H5F_FSPACE_STRATEGY_PAGE)
         TEST_ERROR;
     if (f->shared->page_buf == NULL)
@@ -2006,7 +2006,7 @@ test_stats_collection(hid_t orig_fapl, const char *driver_name)
         TEST_ERROR;
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
@@ -2031,7 +2031,7 @@ test_stats_collection(hid_t orig_fapl, const char *driver_name)
 
     /* reset statistics before we begin the tests */
     if (H5Freset_page_buffering_stats(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (HADDR_UNDEF == (meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int) * (size_t)num_elements)))
         FAIL_STACK_ERROR;
@@ -2160,7 +2160,7 @@ test_stats_collection(hid_t orig_fapl, const char *driver_name)
         unsigned bypasses[2];
 
         if (H5Fget_page_buffering_stats(file_id, accesses, hits, misses, evictions, bypasses) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (accesses[0] != 8)
             TEST_ERROR;
@@ -2184,9 +2184,9 @@ test_stats_collection(hid_t orig_fapl, const char *driver_name)
             TEST_ERROR;
 
         if (H5Freset_page_buffering_stats(file_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Fget_page_buffering_stats(file_id, accesses, hits, misses, evictions, bypasses) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (accesses[0] != 0)
             TEST_ERROR;
@@ -2211,11 +2211,11 @@ test_stats_collection(hid_t orig_fapl, const char *driver_name)
     } /* end block */
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     free(data);
 
     PASSED();

@@ -132,9 +132,9 @@ create_btree(H5F_t *f, const H5B2_create_t *cparam, H5B2_t **bt2, haddr_t *bt2_a
     if (NULL == (*bt2 = H5B2_create(f, cparam, f)))
         FAIL_STACK_ERROR;
     if (H5B2_get_addr(*bt2, bt2_addr /*out*/) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (!H5_addr_defined(*bt2_addr))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Success */
     return (0);
@@ -228,7 +228,7 @@ check_stats(H5B2_t *bt2, const H5B2_stat_t *expected)
 
     /* Get current stats */
     if (H5B2_stat_info(bt2, &actual) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (actual.depth != expected->depth)
         TEST_ERROR;
     if (actual.nrecords != expected->nrecords)
@@ -606,7 +606,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     idx   = 0;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, NULL) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (found)
         TEST_ERROR;
 
@@ -641,7 +641,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     idx   = 41;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (found)
         TEST_ERROR;
 
@@ -649,7 +649,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     /* (Should not be found, but not fail) */
     found = false;
     if (H5B2_find(bt2, &idx, &found, NULL, NULL) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (found)
         TEST_ERROR;
 
@@ -657,14 +657,14 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     idx   = 42;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!found)
         TEST_ERROR;
 
     /* Try again with NULL 'op' */
     found = false;
     if (H5B2_find(bt2, &idx, &found, NULL, NULL) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!found)
         TEST_ERROR;
 
@@ -682,7 +682,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     /* Attempt to index existing record in B-tree with 1 record */
     idx = 42;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -721,7 +721,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     idx   = 41;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (found)
         TEST_ERROR;
 
@@ -729,7 +729,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     idx   = 56;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!found)
         TEST_ERROR;
 
@@ -747,16 +747,16 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     /* Attempt to index existing record in B-tree with several records */
     idx = 34;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     idx = 38;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     idx = 42;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)2, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     idx = 56;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)3, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the v2 B-tree */
     if (H5B2_close(bt2) < 0)
@@ -896,7 +896,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
     idx   = INSERT_SPLIT_ROOT_NREC + 10;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (found)
         TEST_ERROR;
 
@@ -1098,7 +1098,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, cons
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -1254,7 +1254,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam, const bt2
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -1394,7 +1394,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, cons
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -1627,7 +1627,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     idx   = INSERT_SPLIT_ROOT_NREC * 30;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (found)
         TEST_ERROR;
 
@@ -1703,7 +1703,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -2157,7 +2157,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam, const bt2
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -2853,7 +2853,7 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam, cons
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -2974,7 +2974,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3008,7 +3008,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     idx   = INSERT_MANY * 2;
     found = false;
     if (H5B2_find(bt2, &idx, &found, find_cb, &idx) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (found)
         TEST_ERROR;
 
@@ -3079,7 +3079,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != INSERT_MANY)
@@ -3337,7 +3337,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.val = (hsize_t)-1;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != (hsize_t)-1)
         TEST_ERROR;
     if (found)
@@ -3347,7 +3347,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = 56;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != 12)
         TEST_ERROR;
     if (!found)
@@ -3367,7 +3367,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 34)
         TEST_ERROR;
     if (find.val != 11)
@@ -3375,7 +3375,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 38)
         TEST_ERROR;
     if (find.val != 13)
@@ -3383,7 +3383,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)2, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 42)
         TEST_ERROR;
     if (find.val != 43)
@@ -3391,7 +3391,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)3, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 56)
         TEST_ERROR;
     if (find.val != 12)
@@ -3431,7 +3431,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.val = (hsize_t)-1;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != (hsize_t)-1)
         TEST_ERROR;
     if (found)
@@ -3441,7 +3441,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = 56;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != 22)
         TEST_ERROR;
     if (!found)
@@ -3461,7 +3461,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 34)
         TEST_ERROR;
     if (find.val != 21)
@@ -3469,7 +3469,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 38)
         TEST_ERROR;
     if (find.val != 23)
@@ -3477,7 +3477,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)2, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 42)
         TEST_ERROR;
     if (find.val != 24)
@@ -3485,7 +3485,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
     find.key = (hsize_t)-1;
     find.val = (hsize_t)-1;
     if (H5B2_index(bt2, H5_ITER_INC, (hsize_t)3, index_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.key != 56)
         TEST_ERROR;
     if (find.val != 22)
@@ -3679,7 +3679,7 @@ test_update_split_root(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_p
     find.val = (hsize_t)-1;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != (hsize_t)-1)
         TEST_ERROR;
     if (found)
@@ -3911,7 +3911,7 @@ test_update_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, cons
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -4071,7 +4071,7 @@ test_update_level1_side_split(hid_t fapl, const H5B2_create_t *cparam, const bt2
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -4215,7 +4215,7 @@ test_update_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam, cons
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -4460,7 +4460,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     find.val = (hsize_t)-1;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != (hsize_t)-1)
         TEST_ERROR;
     if (found)
@@ -4637,7 +4637,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     find.val = (hsize_t)-1;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != (hsize_t)-1)
         TEST_ERROR;
     if (found)
@@ -4824,7 +4824,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
     find.val = (hsize_t)-1;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != (hsize_t)-1)
         TEST_ERROR;
     if (found)
@@ -4925,7 +4925,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -5067,7 +5067,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     find.val = (hsize_t)-1;
     found    = false;
     if (H5B2_find(bt2, &find, &found, find_rec_cb, &find) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (find.val != (hsize_t)-1)
         TEST_ERROR;
     if (found)
@@ -5157,7 +5157,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != INSERT_MANY_REC)
@@ -5228,7 +5228,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 0)
@@ -5260,7 +5260,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 1)
@@ -5268,7 +5268,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -5305,7 +5305,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 0)
@@ -5313,7 +5313,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the root node has been freed */
     if (H5_addr_defined(root_addr))
@@ -5344,7 +5344,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 4)
@@ -5389,7 +5389,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 3)
@@ -5397,7 +5397,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the root node has not been freed */
     if (!H5_addr_defined(root_addr))
@@ -5414,7 +5414,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 2)
@@ -5422,7 +5422,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the root node has not been freed */
     if (!H5_addr_defined(root_addr))
@@ -5439,7 +5439,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 1)
@@ -5447,7 +5447,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the root node has not been freed */
     if (!H5_addr_defined(root_addr))
@@ -5464,7 +5464,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != 0)
@@ -5472,7 +5472,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the root node has been freed */
     if (H5_addr_defined(root_addr))
@@ -5485,7 +5485,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -5546,7 +5546,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -5554,7 +5554,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -5573,7 +5573,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -5617,7 +5617,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - 1))
@@ -5655,7 +5655,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - 2))
@@ -5693,7 +5693,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - 3))
@@ -5706,7 +5706,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -5774,7 +5774,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -5782,7 +5782,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -5805,7 +5805,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -5841,7 +5841,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 2) - 8) - (u + 1)))
@@ -5877,7 +5877,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((((INSERT_SPLIT_ROOT_NREC * 2) - 47)) - (u + 1)))
@@ -5969,7 +5969,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -5977,7 +5977,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -6000,7 +6000,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -6053,7 +6053,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -6144,7 +6144,7 @@ test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -6152,7 +6152,7 @@ test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -6175,7 +6175,7 @@ test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -6272,7 +6272,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 4))
@@ -6280,7 +6280,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -6318,7 +6318,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 4) - 1)
@@ -6364,7 +6364,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 4) - 2)
@@ -6406,7 +6406,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 4) - 3)
@@ -6490,7 +6490,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -6498,7 +6498,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -6523,7 +6523,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -6551,7 +6551,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2) - 8)
@@ -6635,7 +6635,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -6643,7 +6643,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -6668,7 +6668,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -6696,7 +6696,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2) - 8)
@@ -6780,7 +6780,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -6788,7 +6788,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -6813,7 +6813,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -6838,7 +6838,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2) - 15)
@@ -6922,7 +6922,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2))
@@ -6930,7 +6930,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -6955,7 +6955,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != ((INSERT_SPLIT_ROOT_NREC * 2) - (u + 1)))
@@ -6980,7 +6980,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 2) - 51)
@@ -7060,7 +7060,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_t
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != INSERT_SPLIT_ROOT_NREC)
@@ -7068,7 +7068,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_t
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -7091,7 +7091,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_t
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (INSERT_SPLIT_ROOT_NREC - (u + 1)))
@@ -7107,7 +7107,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_t
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC - u))
@@ -7115,7 +7115,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_t
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -7198,7 +7198,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -7206,7 +7206,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -7242,7 +7242,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59))
@@ -7282,7 +7282,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 1)
@@ -7322,7 +7322,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 2)
@@ -7362,7 +7362,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 3)
@@ -7397,7 +7397,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 4)
@@ -7481,7 +7481,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -7489,7 +7489,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -7520,7 +7520,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -7545,7 +7545,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 8)
@@ -7629,7 +7629,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -7637,7 +7637,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -7668,7 +7668,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -7693,7 +7693,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 38)
@@ -7777,7 +7777,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -7785,7 +7785,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -7816,7 +7816,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -7842,7 +7842,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 15)
@@ -7926,7 +7926,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -7934,7 +7934,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -7965,7 +7965,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -7991,7 +7991,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != (INSERT_SPLIT_ROOT_NREC * 59) - 112)
@@ -8075,7 +8075,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -8083,7 +8083,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -8106,7 +8106,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -8198,7 +8198,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -8206,7 +8206,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -8229,7 +8229,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -8320,7 +8320,7 @@ test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam, cons
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -8328,7 +8328,7 @@ test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam, cons
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -8352,7 +8352,7 @@ test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam, cons
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -8444,7 +8444,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam, const
 
     /* Query the number of records in the B-tree */
     if (H5B2_get_nrec(bt2, &nrec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the # of records is correct */
     if (nrec != ((INSERT_SPLIT_ROOT_NREC * 59) + 1))
@@ -8452,7 +8452,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam, const
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (!H5_addr_defined(root_addr))
@@ -8475,7 +8475,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam, const
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (((INSERT_SPLIT_ROOT_NREC * 59) + 1) - (u + 1)))
@@ -8484,7 +8484,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam, const
 
     /* Check up on B-tree */
     if (H5B2_stat_info(bt2, &bt2_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (bt2_stat.depth != 1)
         TEST_ERROR;
 
@@ -8558,7 +8558,7 @@ gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam, had
 
     /* Check up on B-tree */
     if (H5B2_stat_info(bt2, &bt2_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (bt2_stat.depth != 4)
         TEST_ERROR;
 
@@ -8688,7 +8688,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -8726,7 +8726,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (INSERT_MANY - (u + 1)))
@@ -8735,7 +8735,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (H5_addr_defined(root_addr))
@@ -8780,7 +8780,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -8810,7 +8810,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (INSERT_MANY - (u + 1)))
@@ -8819,7 +8819,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (H5_addr_defined(root_addr))
@@ -8865,7 +8865,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -8892,7 +8892,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (INSERT_MANY - (u + 1)))
@@ -8901,7 +8901,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (H5_addr_defined(root_addr))
@@ -8947,7 +8947,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -8974,7 +8974,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
         /* Query the number of records in the B-tree */
         if (H5B2_get_nrec(bt2, &nrec) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Make certain that the # of records is correct */
         if (nrec != (INSERT_MANY - (u + 1)))
@@ -8983,7 +8983,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     /* Query the address of the root node in the B-tree */
     if (H5B2__get_root_addr_test(bt2, &root_addr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the address of the root node is defined */
     if (H5_addr_defined(root_addr))
@@ -9361,7 +9361,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
 
     /* Check up on B-tree */
     if (H5B2_stat_info(bt2, &bt2_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (bt2_stat.depth != 0)
         TEST_ERROR;
 
@@ -9418,7 +9418,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
 
     /* Check up on B-tree */
     if (H5B2_stat_info(bt2, &bt2_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (bt2_stat.depth != 1)
         TEST_ERROR;
 
@@ -9475,7 +9475,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
 
     /* Check up on B-tree */
     if (H5B2_stat_info(bt2, &bt2_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (bt2_stat.depth != 2)
         TEST_ERROR;
 
@@ -9566,7 +9566,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
 
     /* Check up on B-tree */
     if (H5B2_stat_info(bt2, &bt2_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (bt2_stat.depth != 2)
         TEST_ERROR;
 
@@ -9795,7 +9795,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -9823,7 +9823,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
      *  array is closed)
      */
     if ((file0 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the first v2 B-tree wrapper */
     if (H5B2_close(bt2) < 0)
@@ -9835,7 +9835,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
      *  shared file information)
      */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     file = -1;
 
     /* Open a different file */
@@ -9845,11 +9845,11 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
      */
     h5_fixname(FILENAME[1], fapl, filename_tmp, sizeof(filename_tmp));
     if ((file00 = H5Fcreate(filename_tmp, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the file with the v2 B-tree array */
     if ((file2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f2 = (H5F_t *)H5VL_object(file2)))
@@ -9861,9 +9861,9 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
 
     /* Close the extra file handles */
     if (H5Fclose(file0) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file00) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the second v2 B-tree */
     if (H5B2_close(bt2_2) < 0)
@@ -9872,7 +9872,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
 
     /* Close file */
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* All tests passed */
     PASSED();

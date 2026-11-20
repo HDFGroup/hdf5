@@ -93,13 +93,13 @@ test_s3r_get_filesize(void)
         FAIL_PUTS_ERROR("filesize of the null handle should be 0");
 
     if (NULL == (handle = H5FD__s3comms_s3r_open(url_raven, &anonymous_fa, NULL, NULL)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("incorrect file size - fragile, make sure the file size didn't change");
 
     if (H5FD__s3comms_s3r_close(handle) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
@@ -232,32 +232,32 @@ test_s3r_open(void)
     fa->authenticate = false;
     handle           = H5FD__s3comms_s3r_open(url_raven, fa, NULL, NULL);
     if (handle == NULL)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     handle = NULL;
 
     /* Using authentication on anonymously-accessible file? */
     fa->authenticate = true;
     handle           = H5FD__s3comms_s3r_open(url_raven, fa, s3_test_aws_session_token, NULL);
     if (handle == NULL)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     handle = NULL;
 
     /* Authenticating */
     handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token, NULL);
     if (handle == NULL)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     handle = NULL;
 
     free(fa);
@@ -315,7 +315,7 @@ test_s3r_read(void)
     /* Open file */
     handle = H5FD__s3comms_s3r_open(url_raven, &anonymous_fa, NULL, NULL);
     if (handle == NULL)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         TEST_ERROR;
 
@@ -326,7 +326,7 @@ test_s3r_read(void)
     /* Read from start of file */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\n"
                "Over many a quaint and curious volume of forgotten lore",
                buffer))
@@ -335,21 +335,21 @@ test_s3r_read(void)
     /* Read arbitrary range */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)54, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (strcmp("the grave and stern decorum of the countenance it wore", buffer))
         TEST_ERROR;
 
     /* Read one character */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)1, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (strcmp("t", buffer))
         TEST_ERROR;
 
     /* Read to EOF */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (strncmp(buffer,
                 "And my soul from out that shadow that lies floating on the floor\nShall be "
                 "lifted—nevermore!\n",
@@ -407,7 +407,7 @@ test_s3r_read(void)
      *************/
 
     if (H5FD__s3comms_s3r_close(handle) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;

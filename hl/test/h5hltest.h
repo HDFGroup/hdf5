@@ -29,11 +29,13 @@
     do {                                                                                                     \
         printf("Testing %-62s", WHAT);                                                                       \
         fflush(stdout);                                                                                      \
+        h5_failure_reported_g = false;                                                                       \
     } while (0)
 #define HL_TESTING3(WHAT)                                                                                    \
     do {                                                                                                     \
         printf("Testing %-62s", WHAT);                                                                       \
         fflush(stdout);                                                                                      \
+        h5_failure_reported_g = false;                                                                       \
     } while (0)
 
 /* Implements verbose 'assert' with 'goto error' exit  */

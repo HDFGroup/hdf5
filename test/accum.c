@@ -94,12 +94,12 @@ main(void)
     /* File access property list */
     h5_test_init();
     if ((fapl = h5_fileaccess()) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create a test file */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Push API context */
     if (H5CX_push(&api_ctx) < 0)
@@ -2087,29 +2087,29 @@ test_swmr_write_big(bool newest_format)
 
     /* File access property list */
     if ((fapl = h5_fileaccess()) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     /* Both cases will result in v3 superblock and version 2 object header for SWMR */
     if (newest_format) { /* latest format */
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
     else { /* non-latest-format */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     } /* end if */
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the file with SWMR_WRITE */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Push API context */
     if (H5CX_push(&api_ctx) < 0)
@@ -2126,7 +2126,7 @@ test_swmr_write_big(bool newest_format)
         FAIL_STACK_ERROR;
 
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Reset metadata accumulator for the file */
     if (accum_reset(rf) < 0)
@@ -2134,9 +2134,9 @@ test_swmr_write_big(bool newest_format)
 
     /* Allocate space for the write & read buffers */
     if ((wbuf2 = (uint8_t *)malloc((size_t)BIG_BUF_SIZE)) == NULL)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((rbuf = (uint8_t *)malloc((size_t)BIG_BUF_SIZE)) == NULL)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Initialize wbuf with "0, 1, 2...1024"*/
     for (u = 0; u < 1024; u++)
@@ -2196,7 +2196,7 @@ test_swmr_write_big(bool newest_format)
 
         if (0 == CreateProcess(NULL, SWMR_READER, NULL, NULL, false, 0, NULL, NULL, &si, &pi)) {
             printf("CreateProcess failed (%lu).\n", GetLastError());
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         }
 
         (void)WaitForSingleObject(pi.hProcess, INFINITE);
@@ -2217,7 +2217,7 @@ test_swmr_write_big(bool newest_format)
         /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
         if ((pid = fork()) < 0) {
             perror("fork");
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         }
         else if (0 == pid) { /* Child process */
             /* By convention, argv[0] tells the name of program invoked.
@@ -2230,7 +2230,7 @@ test_swmr_write_big(bool newest_format)
             /* Run the reader */
             status = execv(SWMR_READER, new_argv);
             printf("errno from execv = %s\n", strerror(errno));
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         } /* end if */
 
         /* Parent process -- wait for the child process to complete */
@@ -2253,11 +2253,11 @@ test_swmr_write_big(bool newest_format)
 
     /* Close and remove the file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the property list */
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(false) < 0)

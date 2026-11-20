@@ -551,10 +551,10 @@ static hid_t
 close_reopen_file(hid_t file, const char *filename, hid_t fapl_id)
 {
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
     if (file < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     return (file);
 
 error:
@@ -645,14 +645,14 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, bool test_file_clo
 
     dset_id = H5Dcreate2(file, DSETNAME[0], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset_id < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test writing and reading */
     if (H5Dwrite(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     TSOHM_S1H_VERIFY_DATA(dset_id, dtype1_id)
     if (H5Dclose(dset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (test_file_closing)
         if ((file = close_reopen_file(file, filename, fapl_id)) < 0)
@@ -662,12 +662,12 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, bool test_file_clo
     for (x = 1; x < 4; x++) {
         dset_id = H5Dcreate2(file, DSETNAME[x], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (0 > dset_id)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (x == 3)
             if (H5Dwrite(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
                 TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (test_file_closing)
             if ((file = close_reopen_file(file, filename, fapl_id)) < 0)

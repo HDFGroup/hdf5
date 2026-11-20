@@ -438,19 +438,19 @@ test_direct_chunk_overwrite_data(hid_t fid)
 
     /* Create the dataset's data space */
     if ((sid = H5Screate_simple(OVERWRITE_NDIMS, dset_dims, dset_max_dims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set chunk size and fill value */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_fill_value(dcpl_id, tid, &fill_value) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl_id, OVERWRITE_NDIMS, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create dataset */
     if ((did = H5Dcreate2(fid, DATASETNAME7, tid, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Initialize data buffers */
     n = 0;
@@ -463,21 +463,21 @@ test_direct_chunk_overwrite_data(hid_t fid)
 
     /* Write chunk data using the direct write function. */
     if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write second chunk. */
     offset[2] = OVERWRITE_CHUNK_NX;
     if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, data_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Overwrite first chunk. */
     offset[2] = 0;
     if (H5Dwrite_chunk(did, H5P_DEFAULT, filter_mask, offset, buf_size, overwrite_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the data back out */
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Ensure that the data are correct in chunk 1 */
     for (i = 0; i < OVERWRITE_CHUNK_NY; i++)
@@ -487,11 +487,11 @@ test_direct_chunk_overwrite_data(hid_t fid)
         }
 
     if (H5Pclose(dcpl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -2179,19 +2179,19 @@ short_chunk_case(hid_t file, const char *name, hid_t dcpl, hsize_t nelmts, const
         TEST_ERROR;
 
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did = H5Dcreate2(file, name, H5T_NATIVE_UINT32, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* A filter mask of 0 means every filter in the pipeline was applied, so the
      * read side runs the whole pipeline over these bytes */
     if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, raw_len, raw) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((did = H5Dopen2(file, name, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY
     {
@@ -2203,9 +2203,9 @@ short_chunk_case(hid_t file, const char *name, hid_t dcpl, hsize_t nelmts, const
         TEST_ERROR;
 
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     free(rdata);
 
@@ -2259,11 +2259,11 @@ test_short_filtered_chunk(hid_t file)
     /* scaleoffset writes a 21 byte parameter block ahead of the compressed
      * stream: 4 bytes of minbits, 1 byte of sizeof(minval), then minval */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 1, chunk) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 0) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* minbits below full precision, chunk shorter than the parameter block */
     raw[0] = 2;
@@ -2277,38 +2277,38 @@ test_short_filtered_chunk(hid_t file)
     nerrs += short_chunk_case(file, DATASETNAME16, dcpl, SHORT_CHUNK_NELMTS, raw, 25);
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     dcpl = H5I_INVALID_HID;
 
     /* Same truncated chunk, but on a dataset whose unfiltered chunk is much
      * larger than the bytes stored for it.
      */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 1, big_chunk) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 0) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     raw[0] = 2;
     raw[1] = raw[2] = raw[3] = 0;
     nerrs += short_chunk_case(file, DATASETNAME18, dcpl, SHORT_CHUNK_BIG_NELMTS, raw, 25);
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     dcpl = H5I_INVALID_HID;
 
     /* fletcher32 stores its 4 byte checksum after the data */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 1, chunk) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_fletcher32(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     nerrs += short_chunk_case(file, DATASETNAME17, dcpl, SHORT_CHUNK_NELMTS, raw, 2);
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     dcpl = H5I_INVALID_HID;
 
 #ifdef H5_HAVE_FILTER_SZIP
@@ -2320,20 +2320,20 @@ test_short_filtered_chunk(hid_t file)
         unsigned filter_config = 0;
 
         if (H5Zget_filter_info(H5Z_FILTER_SZIP, &filter_config) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((filter_config & H5Z_FILTER_CONFIG_ENCODE_ENABLED) &&
             (filter_config & H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
             if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pset_chunk(dcpl, 1, big_chunk) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Pset_szip(dcpl, H5_SZIP_NN_OPTION_MASK, 4) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             nerrs += short_chunk_case(file, DATASETNAME19, dcpl, SHORT_CHUNK_BIG_NELMTS, raw, 2);
 
             if (H5Pclose(dcpl) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             dcpl = H5I_INVALID_HID;
         }
     }
@@ -2390,23 +2390,23 @@ test_read_unallocated_chunk(hid_t file)
 
     /* Create the data space with unlimited dimensions. */
     if ((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Modify dataset creation properties, i.e. enable chunking, no compression */
     if ((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((status = H5Pset_chunk(cparms, RANK, chunk_dims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a new dataset within the file using cparms creation properties. */
     if ((dataset = H5Dcreate2(file, DATASETNAME11, H5T_NATIVE_INT, dataspace, H5P_DEFAULT, cparms,
                               H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write a single chunk to initialize the chunk storage */
     memset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
@@ -2414,7 +2414,7 @@ test_read_unallocated_chunk(hid_t file)
     offset[1] = 0;
 
     if (H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, direct_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Attempt to read each chunk in the dataset. Chunks are not allocated,
      * therefore we expect the result of H5Dread_chunk2 to fail. Chunk idx
@@ -2456,15 +2456,15 @@ test_read_unallocated_chunk(hid_t file)
 
     /* Close/release resources. */
     if (H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(mem_space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(dataspace) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(cparms) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dxpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -2811,64 +2811,64 @@ test_single_chunk(unsigned config)
 
     /* Create a new file with the latest format  */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (config & CONFIG_LATEST)
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     if ((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create dataspace */
     if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset creation property list and set the chunk size */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (config & CONFIG_DIRECT_WRITE) {
         /* Write the data directly to the dataset */
         if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0 * CHUNK1 * sizeof(int), (void *)wdata) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     } /* end if */
     else
         /* Write the data to the dataset */
         if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)wdata) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /*
      * Close and release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (config & CONFIG_REOPEN_DSET)
         if (H5Dclose(did) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (config & CONFIG_REOPEN_FILE)
         if (H5Fclose(fid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Open the file and dataset with default properties  */
     if (config & CONFIG_REOPEN_FILE)
         if ((fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     if (config & CONFIG_REOPEN_DSET)
         if ((did = H5Dopen2(fid, DATASET, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Retrieve dataset creation property list */
     if ((dcpl = H5Dget_create_plist(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (config & CONFIG_DIRECT_READ) {
         size_t tmp_buf_size = sizeof(rdata);
@@ -2888,7 +2888,7 @@ test_single_chunk(unsigned config)
     else
         /* Read the data */
         if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Verify that the data read was correct.  */
     for (i = 0; i < DIM0; i++)
@@ -2900,11 +2900,11 @@ test_single_chunk(unsigned config)
      * Close and release resources
      */
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;

@@ -125,6 +125,9 @@ size_t     n_tests_failed_g  = 0;
 size_t     n_tests_skipped_g = 0;
 uint64_t   vol_cap_flags_g   = H5VL_CAP_FLAG_NONE;
 
+/* Set once the current test's failure has been reported */
+bool h5_failure_reported_g = false;
+
 /* Whether h5_cleanup should clean up temporary testing files */
 static bool do_test_file_cleanup_g = true;
 

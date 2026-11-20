@@ -54,19 +54,19 @@ test_dataset_append_notset(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with extendible dimensions */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DNAME_NOTSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Append 6 rows to the dataset */
     for (i = 0; i < 6; i++) {
@@ -74,7 +74,7 @@ test_dataset_append_notset(hid_t fid)
             lbuf[j] = (i * 10) + (j + 1);
         /* Append without boundary, callback and flush */
         if (H5DOappend(did, H5P_DEFAULT, 0, (size_t)1, H5T_NATIVE_INT, lbuf) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     } /* end for */
 
     /* File size when not flushed */
@@ -84,7 +84,7 @@ test_dataset_append_notset(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* File size after flushing */
     memset(&sb2, 0, sizeof(h5_stat_t));
@@ -97,11 +97,11 @@ test_dataset_append_notset(hid_t fid)
 
     /* Closing */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -175,21 +175,21 @@ test_dataset_append_rows_columns(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with 2 extendible dimensions */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set append flush property */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_append_flush(dapl, 2, boundary, append_func, &append_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DNAME_UNLIM, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -209,7 +209,7 @@ test_dataset_append_rows_columns(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 6)
         TEST_ERROR;
 
@@ -227,13 +227,13 @@ test_dataset_append_rows_columns(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 9)
         TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -246,15 +246,15 @@ test_dataset_append_rows_columns(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset again */
     if ((did = H5Dopen2(fid, DNAME_UNLIM, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -264,15 +264,15 @@ test_dataset_append_rows_columns(hid_t fid)
 
     /* Closing */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -328,21 +328,21 @@ test_dataset_append_rows(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with 1 extendible dimension */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set append flush property */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_append_flush(dapl, 2, boundary, append_func, &append_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DNAME_ROW, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -361,13 +361,13 @@ test_dataset_append_rows(hid_t fid)
         TEST_ERROR;
 
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 6)
         TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -380,15 +380,15 @@ test_dataset_append_rows(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset again */
     if ((did = H5Dopen2(fid, DNAME_ROW, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -398,15 +398,15 @@ test_dataset_append_rows(hid_t fid)
 
     /* Closing */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -462,21 +462,21 @@ test_dataset_append_columns(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with 1 extendible dimension */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set append flush property */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_append_flush(dapl, 2, boundary, append_func, &append_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DNAME_COLUMN, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -496,13 +496,13 @@ test_dataset_append_columns(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 3)
         TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -515,15 +515,15 @@ test_dataset_append_columns(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset again */
     if ((did = H5Dopen2(fid, DNAME_COLUMN, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -533,15 +533,15 @@ test_dataset_append_columns(hid_t fid)
 
     /* Closing */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -606,21 +606,21 @@ test_dataset_append_BUG1(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with 2 extendible dimensions */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set append flush property */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_append_flush(dapl, 2, boundary, append_func, &append_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DBUGNAME1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -640,7 +640,7 @@ test_dataset_append_BUG1(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 6)
         TEST_ERROR;
 
@@ -658,13 +658,13 @@ test_dataset_append_BUG1(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 9)
         TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -676,15 +676,15 @@ test_dataset_append_BUG1(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset again */
     if ((did = H5Dopen2(fid, DBUGNAME1, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -694,15 +694,15 @@ test_dataset_append_BUG1(hid_t fid)
 
     /* Closing */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -767,21 +767,21 @@ test_dataset_append_BUG2(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with 2 extendible dimensions */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set append flush property */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_append_flush(dapl, 2, boundary, append_func, &append_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DBUGNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -801,7 +801,7 @@ test_dataset_append_BUG2(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 6)
         TEST_ERROR;
 
@@ -819,13 +819,13 @@ test_dataset_append_BUG2(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 9)
         TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -837,15 +837,15 @@ test_dataset_append_BUG2(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset again */
     if ((did = H5Dopen2(fid, DBUGNAME2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -855,15 +855,15 @@ test_dataset_append_BUG2(hid_t fid)
 
     /* Closing */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -920,21 +920,21 @@ test_dataset_append_less(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with 2 extendible dimensions */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set append flush property */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_append_flush(dapl, 2, boundary, append_func, &append_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DNAME_LESS, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -958,7 +958,7 @@ test_dataset_append_less(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 2)
         TEST_ERROR;
 
@@ -975,13 +975,13 @@ test_dataset_append_less(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 3)
         TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -994,15 +994,15 @@ test_dataset_append_less(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset again */
     if ((did = H5Dopen2(fid, DNAME_LESS, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -1012,15 +1012,15 @@ test_dataset_append_less(hid_t fid)
 
     /* Closing */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -1080,21 +1080,21 @@ test_dataset_append_vary(hid_t fid)
 
     /* Get the file's file access property list */
     if ((ffapl = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to create a chunked dataset with 2 extendible dimensions */
     if ((sid = H5Screate_simple(2, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set append flush property */
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_append_flush(dapl, 2, boundary, append_func, &append_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DNAME_VARY, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0)
@@ -1113,7 +1113,7 @@ test_dataset_append_vary(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 1)
         TEST_ERROR;
 
@@ -1130,13 +1130,13 @@ test_dataset_append_vary(hid_t fid)
 
     /* Retrieve and verify object flush counts */
     if (H5Pget_object_flush_cb(ffapl, NULL, (void **)&flush_ptr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (*flush_ptr != 1)
         TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -1149,15 +1149,15 @@ test_dataset_append_vary(hid_t fid)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset again */
     if ((did = H5Dopen2(fid, DNAME_VARY, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the data */
     for (i = 0; i < 6; i++)
@@ -1167,15 +1167,15 @@ test_dataset_append_vary(hid_t fid)
 
     /* Closing */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(ffapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -1215,19 +1215,19 @@ main(void)
 
     /* Get a copy of file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to use the latest library format */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set object flush property */
     if (H5Pset_object_flush_cb(fapl, flush_func, &flush_ct) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the test file */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     nerrors += test_dataset_append_notset(fid);
 
@@ -1259,9 +1259,9 @@ main(void)
 
     /* Closing */
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check for errors */
     if (nerrors)
