@@ -243,7 +243,7 @@ test_s3r_open(void)
     fa->authenticate = true;
     handle           = H5FD__s3comms_s3r_open(url_raven, fa, s3_test_aws_session_token, NULL);
     if (handle == NULL)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle))
@@ -253,7 +253,7 @@ test_s3r_open(void)
     /* Authenticating */
     handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token, NULL);
     if (handle == NULL)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle) < 0)

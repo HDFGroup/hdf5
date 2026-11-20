@@ -978,7 +978,7 @@ test_header_encode_decode(void)
     /* Valid header can be decoded */
 
     if (H5FD__onion_header_decode(buf, &hdr_out) != H5FD_ONION_ENCODED_SIZE_HEADER)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5FD_ONION_HEADER_VERSION_CURR != hdr_out.version)
         TEST_ERROR;
     if (hdr.flags != hdr_out.flags)
@@ -1090,7 +1090,7 @@ test_history_encode_decode_empty(void)
     /* Valid summary can be decoded */
 
     if (H5FD__onion_history_decode(buf, &history_out) != H5FD_ONION_ENCODED_SIZE_HISTORY)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5FD_ONION_HISTORY_VERSION_CURR != history_out.version)
         TEST_ERROR;
     if (history.n_revisions != history_out.n_revisions)
@@ -1200,7 +1200,7 @@ test_history_encode_decode(void)
 
     history_out.n_revisions = 0; /* must be initialized to 0 */
     if (H5FD__onion_history_decode(exp, &history_out) != exp_size)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5FD_ONION_HISTORY_VERSION_CURR != history_out.version)
         TEST_ERROR;
     if (history.n_revisions != history_out.n_revisions)
@@ -1216,7 +1216,7 @@ test_history_encode_decode(void)
         TEST_ERROR;
 
     if (H5FD__onion_history_decode(exp, &history_out) != exp_size)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5FD_ONION_HISTORY_VERSION_CURR != history_out.version)
         TEST_ERROR;
     if (history.n_revisions != history_out.n_revisions)
@@ -1451,7 +1451,7 @@ test_revision_record_encode_decode(void)
 
     /* Initial decode; get variable-length component sizes */
     if (H5FD__onion_revision_record_decode(exp, &r_out) != exp_size)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (record.comment_size != r_out.comment_size)
         TEST_ERROR;
     if (record.archival_index.n_entries != r_out.archival_index.n_entries)
@@ -1467,7 +1467,7 @@ test_revision_record_encode_decode(void)
 
     /* Decode into all components */
     if (H5FD__onion_revision_record_decode(exp, &r_out) != exp_size)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5FD_ONION_REVISION_RECORD_VERSION_CURR != r_out.version)
         TEST_ERROR;
     if (record.revision_num != r_out.revision_num)
@@ -1676,7 +1676,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     if (NULL == history_out.record_locs)
         TEST_ERROR;
     if (H5FD__onion_history_decode(buf, &history_out) != readsize)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Reuse buffer space to sanity-check checksum for record pointer(s). */
     assert(readsize >= sizeof(H5FD_onion_record_loc_t));
@@ -2781,7 +2781,7 @@ test_page_aligned_history_create(void)
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, H5FD_ONION_ENCODED_SIZE_HEADER, buf) < 0)
         TEST_ERROR;
     if (H5FD__onion_header_decode(buf, &hdr_out) != H5FD_ONION_ENCODED_SIZE_HEADER)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (hdr_out.history_addr & ((1 << 5) - 1)) /* 5::PAGE_SIZE_5 */
         TEST_ERROR;
     free(buf);
@@ -2792,14 +2792,14 @@ test_page_aligned_history_create(void)
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, hdr_out.history_addr, hdr_out.history_size, buf) < 0)
         TEST_ERROR;
     if (H5FD__onion_history_decode(buf, &history_out) != hdr_out.history_size)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (history_out.n_revisions != 2)
         TEST_ERROR;
     history_out.record_locs = calloc(history_out.n_revisions, sizeof(H5FD_onion_record_loc_t));
     if (NULL == history_out.record_locs)
         TEST_ERROR;
     if (H5FD__onion_history_decode(buf, &history_out) != hdr_out.history_size)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     free(buf);
     buf = NULL;
 

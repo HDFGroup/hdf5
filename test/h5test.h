@@ -163,7 +163,10 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
     part_##part_name##_end:
 #define PART_ERROR(part_name)                                                                                \
     do {                                                                                                     \
-        n_tests_failed_g++;                                                                                  \
+        if (!h5_failure_reported_g) {                                                                        \
+            n_tests_failed_g++;                                                                              \
+            h5_failure_reported_g = true;                                                                    \
+        }                                                                                                    \
         part_nerrors++;                                                                                      \
         goto part_##part_name##_end;                                                                         \
     } while (0)

@@ -3038,7 +3038,7 @@ external_link_root_deprec(hid_t fapl, bool new_format)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Open first file again with read-only access and check on objects created */
@@ -3073,7 +3073,7 @@ external_link_root_deprec(hid_t fapl, bool new_format)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Verify that new objects can't be created through a read-only external
@@ -3096,7 +3096,7 @@ external_link_root_deprec(hid_t fapl, bool new_format)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -7407,7 +7407,7 @@ external_link_root(hid_t fapl, bool new_format)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Open first file again with read-only access and check on objects created */
@@ -7442,7 +7442,7 @@ external_link_root(hid_t fapl, bool new_format)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Verify that new objects can't be created through a read-only external
@@ -7465,7 +7465,7 @@ external_link_root(hid_t fapl, bool new_format)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -14265,7 +14265,7 @@ external_link_public_macros(hid_t fapl, bool new_format)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();

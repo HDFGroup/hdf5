@@ -1342,7 +1342,7 @@ test_close(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Build the virtual file again */
@@ -1364,7 +1364,7 @@ test_close(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Shut down */
@@ -2004,7 +2004,7 @@ test_missing_unmount(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2132,7 +2132,7 @@ test_hold_open_file(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2282,7 +2282,7 @@ test_hold_open_group(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2422,7 +2422,7 @@ test_fcdegree_same(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2560,7 +2560,7 @@ test_fcdegree_semi(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2695,7 +2695,7 @@ test_fcdegree_strong(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2894,7 +2894,7 @@ test_acc_perm(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -3109,7 +3109,7 @@ test_mult_mount(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -3323,7 +3323,7 @@ test_nested_survive(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -3429,7 +3429,7 @@ test_close_parent(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Both underlying shared files should be open still */
     H5F_sfile_assert_num(2);
@@ -3760,7 +3760,7 @@ test_cut_graph(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Unmount file #2 from file #1, cutting the graph */
     if (H5Funmount(gidM, "/A") < 0)
@@ -4143,7 +4143,7 @@ test_sharedacc(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -4252,7 +4252,7 @@ test_sharedclose(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Create file #1 & its group */
@@ -4295,7 +4295,7 @@ test_sharedclose(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -4447,7 +4447,7 @@ test_multisharedclose(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();

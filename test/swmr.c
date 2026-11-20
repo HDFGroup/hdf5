@@ -1683,7 +1683,7 @@ test_start_swmr_write(hid_t in_fapl, bool new_format)
     H5E_END_TRY
     if (new_format) {
         if (ret < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
     else if (ret >= 0)
         TEST_ERROR;
@@ -2190,7 +2190,7 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
     H5E_END_TRY
     if (new_format) {
         if (ret < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
     else if (ret >= 0)
         TEST_ERROR;
@@ -2231,7 +2231,7 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
     H5E_END_TRY
     if (new_format) {
         if (ret < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
     else if (ret >= 0)
         TEST_ERROR;
@@ -2264,7 +2264,7 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
     H5E_END_TRY
     if (new_format) {
         if (ret < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
     else if (ret >= 0)
         TEST_ERROR;
@@ -2307,7 +2307,7 @@ test_err_start_swmr_write(hid_t in_fapl, bool new_format)
     H5E_END_TRY
     if (new_format) {
         if (ret < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
     else if (ret >= 0)
         TEST_ERROR;

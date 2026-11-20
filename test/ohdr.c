@@ -121,9 +121,9 @@ test_cont(char *filename, hid_t fapl)
         FAIL_STACK_ERROR;
 
     if (1 != H5O_link(&oh_locA, 1))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (1 != H5O_link(&oh_locB, 1))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5AC_prep_for_file_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (H5AC_flush(f) < 0)
@@ -223,9 +223,9 @@ test_bad_cont_chunk_size(char *filename, hid_t fapl)
     if (H5AC_secure_from_file_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (1 != H5O_link(&oh_loc, 1))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (1 != H5O_link(&block_loc, 1))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (NULL == (oh = H5O_protect(&oh_loc, H5AC__READ_ONLY_FLAG, false)))
         FAIL_STACK_ERROR;
@@ -286,7 +286,7 @@ test_bad_cont_chunk_size(char *filename, hid_t fapl)
     }
     H5E_END_TRY
     if (reopened < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (NULL == (f = (H5F_t *)H5VL_object(reopened)))
         FAIL_STACK_ERROR;
     oh_loc.file         = f;
@@ -2198,7 +2198,7 @@ main(void)
             if (H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR;
             if (1 != H5O_link(&oh_loc, 1))
-                TEST_ERROR;
+                FAIL_STACK_ERROR;
             if (H5AC_prep_for_file_flush(f) < 0)
                 FAIL_STACK_ERROR;
             if (H5AC_flush(f) < 0)

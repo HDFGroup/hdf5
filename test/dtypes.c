@@ -4127,7 +4127,7 @@ test_compound_member_convert_id_leak(void)
 
     /* Make sure the number of datatype IDs registered didn't change */
     if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Register a custom conversion function from float to double
      * and convert the value again
@@ -4150,7 +4150,7 @@ test_compound_member_convert_id_leak(void)
 
     /* Make sure the number of datatype IDs registered is correct */
     if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
                       test_compound_member_convert_id_leak_func1) < 0)
@@ -4171,7 +4171,7 @@ test_compound_member_convert_id_leak(void)
 
     /* Make sure the number of datatype IDs registered didn't change */
     if (num_dtype_ids != H5I_nmembers(H5I_DATATYPE))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (H5Tunregister(H5T_PERS_HARD, "myflttodbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
                       test_compound_member_convert_id_leak_func2) < 0)

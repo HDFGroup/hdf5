@@ -294,7 +294,7 @@ test_large(hid_t fcpl, hid_t fapl, bool new_format)
         TEST_ERROR;
     if (new_format)
         if (H5G__has_stab_test(cwg) != false)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     for (i = 0; i < LARGE_NOBJS; i++) {
         snprintf(name, sizeof(name), "%05d%05d", (rand() % 100000), i);
         if ((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -479,7 +479,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if (nmsgs != LIFECYCLE_MAX_COMPACT)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != false)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Check that the object header is only one chunk and the space has been allocated correctly */
     if (H5Oget_native_info(gid, &ninfo, H5O_NATIVE_INFO_HDR) < 0)

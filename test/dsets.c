@@ -16955,7 +16955,7 @@ test_compact_open_close_dirty(hid_t fapl)
         }
         H5E_END_TRY
         if (did < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (H5Dclose(did) < 0)
             TEST_ERROR;
     }
