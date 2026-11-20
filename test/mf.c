@@ -164,7 +164,7 @@ check_stats(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *state)
 
     /* Get statistics for free-space and verify they are correct */
     if (H5FS_stat_info(f, frsp, &frspace_stats) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (frspace_stats.tot_space != state->tot_space) {
         fprintf(stdout, "frspace_stats.tot_space = %" PRIuHSIZE ", state->tot_space = %" PRIuHSIZE "\n",
@@ -239,11 +239,11 @@ test_mf_eoa(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -255,7 +255,7 @@ test_mf_eoa(const char *driver_name, hid_t fapl)
 
         /* Re-open the file with meta/small data setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -285,7 +285,7 @@ test_mf_eoa(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -297,7 +297,7 @@ test_mf_eoa(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -307,7 +307,7 @@ test_mf_eoa(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, type, addr2, (hsize_t)TBLOCK_SIZE50);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -318,7 +318,7 @@ test_mf_eoa(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Pclose(fapl_new) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -388,11 +388,11 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -404,7 +404,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
 
         /* Re-open the file with meta/small data setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -426,7 +426,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -438,7 +438,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -448,7 +448,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
 
         /* should succeed */
         if (H5MF_try_shrink(f, type, addr, (hsize_t)TBLOCK_SIZE30) <= 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* nothing should be changed in meta_aggr */
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
@@ -458,7 +458,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -483,7 +483,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
     if (suitable_vfd) {
         /* Re-open the file with meta/small data setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -508,7 +508,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -533,7 +533,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
     if (suitable_vfd) {
         /* Re-open the file with meta/small data setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -553,7 +553,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -578,7 +578,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
     if (suitable_vfd) {
         /* Re-open the file with meta/small data setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -588,7 +588,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
 
         /* should succeed in shrinking */
         if (H5MF_try_shrink(f, type, addr + 10, (hsize_t)(TBLOCK_SIZE30 - 10)) <= 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* nothing should be changed in meta_aggr */
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &ma_size);
@@ -598,7 +598,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -609,7 +609,7 @@ test_mf_eoa_shrink(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Pclose(fapl_new) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -676,11 +676,11 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of a file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -688,13 +688,13 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
 
         /* Turn off using meta/small data aggregator */
         if (H5Pset_meta_block_size(fapl_new, (hsize_t)0) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Pset_small_data_block_size(fapl_new, (hsize_t)0) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Re-open the file with meta/small data setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -713,7 +713,7 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -725,7 +725,7 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -744,7 +744,7 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -769,7 +769,7 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
     if (suitable_vfd) {
         /* Re-open the file with meta/small data setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -805,7 +805,7 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -816,7 +816,7 @@ test_mf_eoa_extend(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Pclose(fapl_new) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -888,27 +888,27 @@ test_mf_tmp(const char *driver_name, hid_t fapl, bool new_format)
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (new_format) {
             /* Copy the file access property list */
             if ((fapl2 = H5Pcopy(fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Set the "use the latest version of the format" bounds for creating objects in the file */
             if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1);
         } /* end if */
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, new_format ? fapl2 : fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -916,7 +916,7 @@ test_mf_tmp(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -963,7 +963,7 @@ test_mf_tmp(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Close the file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -975,7 +975,7 @@ test_mf_tmp(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1017,7 +1017,7 @@ test_mf_tmp(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Close the file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -1073,11 +1073,11 @@ test_mf_fs_start(hid_t fapl)
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file  */
     if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -1089,7 +1089,7 @@ test_mf_fs_start(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1110,7 +1110,7 @@ test_mf_fs_start(hid_t fapl)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1121,7 +1121,7 @@ test_mf_fs_start(hid_t fapl)
         TEST_ERROR;
 
     if (H5Pclose(fapl_new) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -1187,11 +1187,11 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of a file */
     if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -1203,7 +1203,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1259,13 +1259,13 @@ test_mf_fs_alloc_free(hid_t fapl)
     /* Remove section A from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
         true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (tmp != TBLOCK_ADDR70)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1281,7 +1281,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1335,13 +1335,13 @@ test_mf_fs_alloc_free(hid_t fapl)
     /* Remove section A from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
         true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (tmp != TBLOCK_ADDR70)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1357,7 +1357,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1405,7 +1405,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     /* Remove section A from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
         true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify that the block is section A in free-space */
     if (tmp != TBLOCK_ADDR70)
@@ -1427,7 +1427,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1438,7 +1438,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         TEST_ERROR;
 
     if (H5Pclose(fapl_new) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -1517,11 +1517,11 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of a file */
     if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -1533,7 +1533,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1621,13 +1621,13 @@ test_mf_fs_extend(hid_t fapl)
     /* Remove the extended block */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 + TBLOCK_SIZE50),
                         f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (tmp != TBLOCK_ADDR70)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1643,7 +1643,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1726,13 +1726,13 @@ test_mf_fs_extend(hid_t fapl)
     /* Remove the merged sections A & B from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 + TBLOCK_SIZE50),
                         f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (tmp != addr)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1748,7 +1748,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1831,13 +1831,13 @@ test_mf_fs_extend(hid_t fapl)
     /* Remove the merged sections A & B from free-space */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 + TBLOCK_SIZE50),
                         f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (tmp != addr)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1853,7 +1853,7 @@ test_mf_fs_extend(hid_t fapl)
 
     /* Re-open the file with meta/small data setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_new)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -1937,7 +1937,7 @@ test_mf_fs_extend(hid_t fapl)
     /* Remove section A from free-space manager */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 - 10), f->shared->fs_man[H5FD_MEM_SUPER],
                         &tmp) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (tmp != addr)
         TEST_ERROR;
@@ -1945,10 +1945,10 @@ test_mf_fs_extend(hid_t fapl)
     /* Remove section B from free-space manager */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE50, f->shared->fs_man[H5FD_MEM_SUPER], &tmp) !=
         true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file */
     if ((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
@@ -1959,7 +1959,7 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR;
 
     if (H5Pclose(fapl_new) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -2024,15 +2024,15 @@ test_mf_fs_absorb(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -2063,7 +2063,7 @@ test_mf_fs_absorb(const char *driver_name, hid_t fapl)
         /* Verify that the section did absorb the aggregator */
         if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(ma_addr + ma_size),
                             f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         if (tmp != ma_addr)
             TEST_ERROR;
@@ -2076,7 +2076,7 @@ test_mf_fs_absorb(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, H5FD_MEM_SUPER, addr, (hsize_t)TBLOCK_SIZE30);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -2091,7 +2091,7 @@ test_mf_fs_absorb(const char *driver_name, hid_t fapl)
     if (contig_addr_vfd) {
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -2123,7 +2123,7 @@ test_mf_fs_absorb(const char *driver_name, hid_t fapl)
         /* Verify that the section did absorb the aggregator */
         if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(ma_size + TBLOCK_SIZE30),
                             f->shared->fs_man[H5FD_MEM_SUPER], &tmp) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         if ((tmp + TBLOCK_SIZE30) != ma_addr)
             TEST_ERROR;
@@ -2138,7 +2138,7 @@ test_mf_fs_absorb(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, H5FD_MEM_DRAW, saddr, (hsize_t)TBLOCK_SIZE50);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -2209,7 +2209,7 @@ test_mf_aggr_alloc1(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
@@ -2225,12 +2225,12 @@ test_mf_aggr_alloc1(const char *driver_name, hid_t fapl)
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Allocate first block from meta_aggr */
         type = H5FD_MEM_SUPER;
         if ((addr1 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE30)) == HADDR_UNDEF)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if ((addr1 + TBLOCK_SIZE30) != ma_addr)
@@ -2238,7 +2238,7 @@ test_mf_aggr_alloc1(const char *driver_name, hid_t fapl)
 
         /* Allocate second block from meta_aggr */
         if ((addr2 = H5MF_alloc(f, type, (hsize_t)TBLOCK_SIZE50)) == HADDR_UNDEF)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
         if ((addr2 + TBLOCK_SIZE50) != ma_addr)
@@ -2263,13 +2263,13 @@ test_mf_aggr_alloc1(const char *driver_name, hid_t fapl)
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Free the two blocks: order matters because of H5F_FSPACE_STRATEGY_AGGR strategy */
         if (H5MF_xfree(f, type, addr2, (hsize_t)TBLOCK_SIZE50) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (H5MF_xfree(f, type, addr1, (hsize_t)TBLOCK_SIZE30) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         if (H5Fclose(file) < 0)
             TEST_ERROR;
@@ -2353,11 +2353,11 @@ test_mf_aggr_alloc2(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of a file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2365,7 +2365,7 @@ test_mf_aggr_alloc2(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -2398,7 +2398,7 @@ test_mf_aggr_alloc2(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2411,7 +2411,7 @@ test_mf_aggr_alloc2(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -2420,7 +2420,7 @@ test_mf_aggr_alloc2(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, type, addr1, (hsize_t)TBLOCK_SIZE30 + TBLOCK_SIZE50 + TBLOCK_SIZE2058);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2511,11 +2511,11 @@ test_mf_aggr_alloc3(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2523,7 +2523,7 @@ test_mf_aggr_alloc3(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -2586,7 +2586,7 @@ test_mf_aggr_alloc3(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, stype, saddr1, (hsize_t)TBLOCK_SIZE30);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2679,11 +2679,11 @@ test_mf_aggr_alloc4(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file  */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2691,7 +2691,7 @@ test_mf_aggr_alloc4(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -2754,7 +2754,7 @@ test_mf_aggr_alloc4(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, stype, saddr3, (hsize_t)TBLOCK_SIZE50);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2828,11 +2828,11 @@ test_mf_aggr_alloc5(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2840,7 +2840,7 @@ test_mf_aggr_alloc5(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -2880,7 +2880,7 @@ test_mf_aggr_alloc5(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, type, addr3, (hsize_t)TBLOCK_SIZE1970);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2966,11 +2966,11 @@ test_mf_aggr_alloc6(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -2978,7 +2978,7 @@ test_mf_aggr_alloc6(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3043,7 +3043,7 @@ test_mf_aggr_alloc6(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, stype, saddr1, (hsize_t)TBLOCK_SIZE30);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((new_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3140,11 +3140,11 @@ test_mf_aggr_alloc7(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((empty_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3152,7 +3152,7 @@ test_mf_aggr_alloc7(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3235,7 +3235,7 @@ test_mf_aggr_alloc7(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, stype, saddr3, (hsize_t)TBLOCK_SIZE50);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3311,11 +3311,11 @@ test_mf_aggr_extend(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((empty_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3323,7 +3323,7 @@ test_mf_aggr_extend(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3394,7 +3394,7 @@ test_mf_aggr_extend(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, type, addr, (hsize_t)TBLOCK_SIZE2058);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3417,7 +3417,7 @@ test_mf_aggr_extend(const char *driver_name, hid_t fapl)
     if (contig_addr_vfd) {
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3464,7 +3464,7 @@ test_mf_aggr_extend(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, stype, saddr, (hsize_t)TBLOCK_SIZE50);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3487,7 +3487,7 @@ test_mf_aggr_extend(const char *driver_name, hid_t fapl)
     if (contig_addr_vfd) {
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3534,7 +3534,7 @@ test_mf_aggr_extend(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, stype, saddr, (hsize_t)TBLOCK_SIZE50);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3609,11 +3609,11 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((empty_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3621,7 +3621,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3638,7 +3638,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
 
         /* should succeed */
         if (H5MF_try_shrink(f, type, addr1, (hsize_t)TBLOCK_SIZE30) <= 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         H5MF__aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
 
@@ -3646,7 +3646,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3669,7 +3669,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
     if (contig_addr_vfd) {
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3693,7 +3693,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
 
         /* should succeed */
         if (H5MF_try_shrink(f, stype, saddr1, (hsize_t)TBLOCK_SIZE50) <= 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         H5MF__aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
         if (new_sdata_addr != saddr1)
@@ -3711,7 +3711,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, type, addr1, (hsize_t)TBLOCK_SIZE30);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3734,7 +3734,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
     if (contig_addr_vfd) {
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3774,7 +3774,7 @@ test_mf_aggr_absorb(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, type, addr3, (hsize_t)(TBLOCK_SIZE30 + TBLOCK_SIZE50));
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3872,11 +3872,11 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Create the file to work on (without alignment) */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -3888,7 +3888,7 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment and meta/sdata setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3951,7 +3951,7 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
         H5MF_xfree(f, type, addr2, (hsize_t)TBLOCK_SIZE50);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((new_file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR;
@@ -3975,7 +3975,7 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
     if (suitable_vfd) {
         /* Re-open the file with alignment and meta/sdata setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -3991,14 +3991,14 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4006,10 +4006,10 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* shrink the block */
         if (H5MF_try_shrink(f, type, addr1, (hsize_t)TBLOCK_SIZE50) <= 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((new_file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR;
@@ -4033,7 +4033,7 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
     if (suitable_vfd) {
         /* Re-open the file with alignment and meta/sdata setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4049,14 +4049,14 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4070,7 +4070,7 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((new_file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR;
@@ -4086,7 +4086,7 @@ test_mf_align_eoa(const char *driver_name, hid_t fapl, hid_t new_fapl)
     } /* end else */
 
     if (fapl1 >= 0 && H5Pclose(fapl1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     return (0);
 
@@ -4152,11 +4152,11 @@ test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get alignment setting */
     if (H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
@@ -4164,7 +4164,7 @@ test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
     /* Re-open the file with alignment setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4220,7 +4220,7 @@ test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -4228,7 +4228,7 @@ test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
     /* Re-open the file with alignment setting */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4297,7 +4297,7 @@ test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -4315,7 +4315,7 @@ test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4374,7 +4374,7 @@ test_mf_align_fs(const char *driver_name, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -4522,11 +4522,11 @@ test_mf_align_alloc1(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Create the file to work on (without alignment) */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -4538,7 +4538,7 @@ test_mf_align_alloc1(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4650,7 +4650,7 @@ test_mf_align_alloc1(const char *driver_name, hid_t fapl, hid_t new_fapl)
         H5MF_xfree(f, type, addr3, (hsize_t)TBLOCK_SIZE1970);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -4785,11 +4785,11 @@ test_mf_align_alloc2(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Create the file to work on (without alignment) */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -4801,7 +4801,7 @@ test_mf_align_alloc2(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -4944,7 +4944,7 @@ test_mf_align_alloc2(const char *driver_name, hid_t fapl, hid_t new_fapl)
         H5MF_xfree(f, stype, saddr1, (hsize_t)TBLOCK_SIZE30);
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -5131,11 +5131,11 @@ test_mf_align_alloc3(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Create the file to work on (without alignment) */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -5147,7 +5147,7 @@ test_mf_align_alloc3(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -5330,7 +5330,7 @@ test_mf_align_alloc3(const char *driver_name, hid_t fapl, hid_t new_fapl)
         }
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -5445,11 +5445,11 @@ test_mf_align_alloc4(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Create the file to work on (without alignment) */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -5457,7 +5457,7 @@ test_mf_align_alloc4(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment setting and meta/sdata setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -5546,7 +5546,7 @@ test_mf_align_alloc4(const char *driver_name, hid_t fapl, hid_t new_fapl)
         }
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -5664,11 +5664,11 @@ test_mf_align_alloc5(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Create the file to work on (without alignment) */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -5676,7 +5676,7 @@ test_mf_align_alloc5(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment setting and meta/sdata setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -5776,7 +5776,7 @@ test_mf_align_alloc5(const char *driver_name, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -5935,11 +5935,11 @@ test_mf_align_alloc6(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Create the file to work on (without alignment) */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -5947,7 +5947,7 @@ test_mf_align_alloc6(const char *driver_name, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file with alignment setting and meta/sdata setting */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6091,7 +6091,7 @@ test_mf_align_alloc6(const char *driver_name, hid_t fapl, hid_t new_fapl)
         }
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     } /* end if */
@@ -6213,7 +6213,7 @@ test_mf_bug1(const char *driver_name, hid_t fapl)
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Allocate a block of size align from meta_aggr.  This should create an
      * aggregator that extends to the end of the file, with
@@ -6331,25 +6331,25 @@ test_mf_fs_persist_split(void)
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
 
         if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Set up split driver */
     if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* File creation property list template */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6390,11 +6390,11 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6410,7 +6410,7 @@ test_mf_fs_persist_split(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[type], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < (TBLOCK_SIZE1 + TBLOCK_SIZE3))
@@ -6434,7 +6434,7 @@ test_mf_fs_persist_split(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[stype], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < (TBLOCK_SIZE1 + TBLOCK_SIZE3))
@@ -6474,11 +6474,11 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6498,7 +6498,7 @@ test_mf_fs_persist_split(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[type], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < (TBLOCK_SIZE3 + TBLOCK_SIZE5 + TBLOCK_SIZE7))
@@ -6518,11 +6518,11 @@ test_mf_fs_persist_split(void)
 
     /* There should still be block #5 of H5FD_MEM_BTREE in H5FD_MEM_BTREE free-space manager */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6538,7 +6538,7 @@ test_mf_fs_persist_split(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[type], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < TBLOCK_SIZE5)
@@ -6546,11 +6546,11 @@ test_mf_fs_persist_split(void)
 
     /* Closing */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -6649,13 +6649,13 @@ test_mf_fs_persist_multi(void)
 
     /* File creation property list template */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)
 
@@ -6667,7 +6667,7 @@ test_mf_fs_persist_multi(void)
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6708,11 +6708,11 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6728,7 +6728,7 @@ test_mf_fs_persist_multi(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[type], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < (TBLOCK_SIZE1 + TBLOCK_SIZE3))
@@ -6752,7 +6752,7 @@ test_mf_fs_persist_multi(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[stype], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < (TBLOCK_SIZE1 + TBLOCK_SIZE3))
@@ -6790,11 +6790,11 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6810,7 +6810,7 @@ test_mf_fs_persist_multi(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[type], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < TBLOCK_SIZE3)
@@ -6836,7 +6836,7 @@ test_mf_fs_persist_multi(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[btype], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < (TBLOCK_SIZE1 + TBLOCK_SIZE3))
@@ -6856,11 +6856,11 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the file */
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -6895,7 +6895,7 @@ test_mf_fs_persist_multi(void)
 
     /* Get free-space info */
     if (H5FS_stat_info(f, f->shared->fs_man[gtype], &fs_stat) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify free-space info */
     if (fs_stat.tot_space < TBLOCK_SIZE2)
@@ -6903,11 +6903,11 @@ test_mf_fs_persist_multi(void)
 
     /* Closing */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -6953,16 +6953,16 @@ test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format)
 
         /* File creation property list template */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Copy the file access property list */
         if ((fapl2 = H5Pcopy(fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (new_format) {
             /* Latest format */
             if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             /* Set to paged aggregation and persisting free-space */
             if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, true, (hsize_t)1) < 0)
                 TEST_ERROR;
@@ -6978,7 +6978,7 @@ test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl2)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7008,11 +7008,11 @@ test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format)
             FAIL_STACK_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7031,7 +7031,7 @@ test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Get info for free-space manager */
         if (H5FS_stat_info(f, f->shared->fs_man[tt], &fs_stat) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Verify free-space info */
         if (fs_stat.tot_space < (TBLOCK_SIZE1 + TBLOCK_SIZE3 + TBLOCK_SIZE5))
@@ -7053,11 +7053,11 @@ test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7074,11 +7074,11 @@ test_mf_fs_persist(const char *driver_name, hid_t fapl, bool new_format)
             TEST_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Pclose(fcpl) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Pclose(fapl2) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     }
@@ -7132,31 +7132,31 @@ test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format)
 
         /* File creation property list template */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Copy the file access property list */
         if ((fapl2 = H5Pcopy(fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (new_format) {
             if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
         }
         else {
             if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
         }
 
         /* Set to aggregation and persisting free-space */
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, true, (hsize_t)1) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl2, filename, sizeof(filename));
 
         /* Create the file to work on */
         if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl2)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7186,11 +7186,11 @@ test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format)
             FAIL_STACK_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7207,11 +7207,11 @@ test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format)
             FAIL_STACK_ERROR;
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7228,7 +7228,7 @@ test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Get info for H5FD_MEM_SUPER free-space manager */
         if (H5FS_stat_info(f, f->shared->fs_man[fs_type], &fs_stat) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if (!H5_addr_defined(fs_stat.addr))
             TEST_ERROR;
@@ -7248,11 +7248,11 @@ test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format)
 
         /* The H5FD_MEM_SUPER free-space manager will go away at H5MF_close() */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Re-open the file */
         if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7263,11 +7263,11 @@ test_mf_fs_gone(const char *driver_name, hid_t fapl, bool new_format)
 
         /* Closing */
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Pclose(fcpl) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Pclose(fapl2) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     }
@@ -7324,11 +7324,11 @@ test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (new_format)
         if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Test with true or false for persisting free-space */
     for (fs_persist = false; fs_persist <= true; fs_persist++) {
@@ -7343,15 +7343,15 @@ test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format
 
                 /* Create file-creation template */
                 if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Set default file space information */
                 if (H5Pset_file_space_strategy(fcpl, fs_type, (bool)fs_persist, fs_threshold) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Create the file to work on */
                 if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl2)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Get a pointer to the internal file object */
                 if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7382,11 +7382,11 @@ test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format
 
                 /* Close the file */
                 if (H5Fclose(file) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Re-open the file */
                 if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Get a pointer to the internal file object */
                 if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7405,7 +7405,7 @@ test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format
 
                     /* Get the # of free-space sections in the file */
                     if ((nsects = H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)0, NULL)) < 0)
-                        FAIL_STACK_ERROR;
+                        TEST_ERROR;
 
                     /* Verify no free-space sections */
                     /* paged aggregation has 1 section for last_small */
@@ -7433,15 +7433,15 @@ test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format
 
                 /* Closing */
                 if (H5Fclose(file) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
                 if (H5Pclose(fcpl) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
             } /* end for fs_type */
         }     /* end for fs_threshold */
     }         /* end for fs_persist */
 
     if (H5Pclose(fapl2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -7496,11 +7496,11 @@ test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format)
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (new_format)
         if (H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Test with true or false for persisting free-space */
     for (fs_persist = false; fs_persist <= true; fs_persist++) {
@@ -7516,15 +7516,15 @@ test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format)
 
             /* Create file-creation template */
             if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Set default file space information */
             if (H5Pset_file_space_strategy(fcpl, fs_type, fs_persist, (hsize_t)TEST_THRESHOLD3) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create the file to work on */
             if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Get a pointer to the internal file object */
             if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7550,7 +7550,7 @@ test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format)
             /* For paged aggregation, the section in the page at EOF for small meta fs is not shrunk away */
             if (fs_type == H5F_FSPACE_STRATEGY_PAGE)
                 if (H5FS_stat_info(f, f->shared->fs_man[tt], &fs_state) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
             /* Put block #3, #5 to H5FD_MEM_SUPER free-space manager */
             if (H5MF_xfree(f, type, addr3, (hsize_t)TBLOCK_SIZE3) < 0)
@@ -7605,11 +7605,11 @@ test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format)
                 TEST_ERROR;
 
             if (H5Fclose(file) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Re-open the file */
             if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Get a pointer to the internal file object */
             if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7622,15 +7622,15 @@ test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format)
 
             /* Closing */
             if (H5Fclose(file) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Pclose(fcpl) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
         } /* end for fs_type */
     }     /* end for fs_persist */
 
     if (H5Pclose(fapl2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -7685,7 +7685,7 @@ test_dichotomy(hid_t fapl)
 
     /* Create the file to work on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
@@ -7723,7 +7723,7 @@ test_dichotomy(hid_t fapl)
         TEST_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -7854,7 +7854,7 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
 
             /* Get a pointer to the internal file object */
             if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-                TEST_ERROR;
+                FAIL_STACK_ERROR;
 
             /* Allocate 3 small metadata blocks: addr1, addr2, addr3 */
             H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE30);
@@ -7870,7 +7870,7 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
                 /* Verify that the freed block with addr2 is found from the small metadata manager */
                 if (H5MF__find_sect(f, H5FD_MEM_OHDR, (hsize_t)TBLOCK_SIZE1034, f->shared->fs_man[fs_type],
                                     &found_addr) < 0)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
                 if (found_addr != addr2)
                     TEST_ERROR;
             } /* end if */
@@ -7886,7 +7886,7 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
                 /* Verify that the freed block with saddr1 is found from the small raw data manager */
                 if (H5MF__find_sect(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE30,
                                     f->shared->fs_man[H5F_MEM_PAGE_DRAW], &found_addr) < 0)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
                 if (found_addr != saddr1)
                     TEST_ERROR;
             } /* end if */
@@ -7904,7 +7904,7 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
                 /* Verify that the freed block with gaddr1 is found from the large data manager */
                 if (H5MF__find_sect(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE8192, f->shared->fs_man[fs_type],
                                     &found_addr) < 0)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
                 if (found_addr != gaddr1)
                     TEST_ERROR;
             } /* end if */
@@ -7926,7 +7926,7 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
 
                 /* Get a pointer to the internal file object */
                 if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Set the freespace tag for the metadata cache */
                 H5AC_tag(H5AC__FREESPACE_TAG, &prv_tag);
@@ -7945,13 +7945,13 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
                 /* Set up to use the small metadata manager */
                 if (!(f->shared->fs_man[fs_type]))
                     if (H5MF__open_fstype(f, fs_type) < 0)
-                        TEST_ERROR;
+                        FAIL_STACK_ERROR;
 
                 /* Verify that the freed block with addr2 is found from the small metadata manager */
                 if (H5MF__find_sect(f, H5FD_MEM_OHDR,
                                     (hsize_t)(f->shared->fs_page_size - (addr3 + TBLOCK_SIZE50)),
                                     f->shared->fs_man[fs_type], &found_addr) < 0)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 if (found_addr != (addr3 + TBLOCK_SIZE50))
                     TEST_ERROR;
@@ -7963,12 +7963,12 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
                 /* Set up to use the small raw data manager */
                 if (!(f->shared->fs_man[H5F_MEM_PAGE_DRAW]))
                     if (H5MF__open_fstype(f, H5F_MEM_PAGE_DRAW) < 0)
-                        TEST_ERROR;
+                        FAIL_STACK_ERROR;
 
                 /* Verify that the freed block with saddr1 is found from the small raw data manager */
                 if (H5MF__find_sect(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE30,
                                     f->shared->fs_man[H5F_MEM_PAGE_DRAW], &found_addr) < 0)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
                 if (found_addr != saddr1)
                     TEST_ERROR;
 
@@ -7977,12 +7977,12 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
                 if (!(f->shared->fs_man[fs_type]))
                     /* Set up to use the large data manager */
                     if (H5MF__open_fstype(f, fs_type) < 0)
-                        TEST_ERROR;
+                        FAIL_STACK_ERROR;
 
                 /* Verify that the freed block with gaddr1 is found from the large data manager */
                 if (H5MF__find_sect(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE8192, f->shared->fs_man[fs_type],
                                     &found_addr) < 0)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
                 if (found_addr != gaddr1)
                     TEST_ERROR;
 
@@ -8057,15 +8057,15 @@ test_page_try_shrink(const char *driver_name, hid_t fapl)
 
         /* File creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set the strategy to paged aggregation */
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create the file to work on */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -8114,7 +8114,7 @@ test_page_try_shrink(const char *driver_name, hid_t fapl)
         H5MF_xfree(f, H5FD_MEM_OHDR, gaddr1, (hsize_t)TBLOCK_SIZE5000);
 
         if (H5Fclose(fid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -8126,7 +8126,7 @@ test_page_try_shrink(const char *driver_name, hid_t fapl)
 
         /* Close the property list */
         if (H5Pclose(fcpl) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     }
@@ -8185,15 +8185,15 @@ test_page_small_try_extend(const char *driver_name, hid_t fapl)
 
         /* File creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set the strategy to paged aggregation */
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create the file to work on */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -8300,11 +8300,11 @@ test_page_small_try_extend(const char *driver_name, hid_t fapl)
 
         /* Close the file */
         if (H5Fclose(fid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close the property list */
         if (H5Pclose(fcpl) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     }
@@ -8361,15 +8361,15 @@ test_page_large_try_extend(const char *driver_name, hid_t fapl)
 
         /* File creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set the strategy to paged aggregation */
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create the file to work on */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -8461,11 +8461,11 @@ test_page_large_try_extend(const char *driver_name, hid_t fapl)
 
         /* Close file */
         if (H5Fclose(fid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close the property list */
         if (H5Pclose(fcpl) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     }
@@ -8523,15 +8523,15 @@ test_page_large(const char *driver_name, hid_t fapl)
 
         /* File creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set the strategy to paged aggregation */
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create the file to work on */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -8564,7 +8564,7 @@ test_page_large(const char *driver_name, hid_t fapl)
 
         /* Get free-space info */
         if (H5FS_stat_info(f, f->shared->fs_man[H5F_MEM_PAGE_GENERIC], &fs_stat) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Verify that the manager contains 2 free-space sections: 10384 and 288 */
         if (fs_stat.tot_sect_count != 2)
@@ -8585,7 +8585,7 @@ test_page_large(const char *driver_name, hid_t fapl)
 
         /* Get free-space info */
         if (H5FS_stat_info(f, f->shared->fs_man[H5F_MEM_PAGE_GENERIC], &fs_stat) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         /* Verify that that there are 3 free-space sections */
         if (fs_stat.tot_sect_count != 3)
             TEST_ERROR;
@@ -8598,7 +8598,7 @@ test_page_large(const char *driver_name, hid_t fapl)
 
         /* Get free-space info */
         if (H5FS_stat_info(f, f->shared->fs_man[H5F_MEM_PAGE_GENERIC], &fs_stat) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         /* Verify that that there are 2 free-space sections: 16384 (4 pages) + 288 */
         if (fs_stat.tot_sect_count != 2)
             TEST_ERROR;
@@ -8607,11 +8607,11 @@ test_page_large(const char *driver_name, hid_t fapl)
 
         /* Close file */
         if (H5Fclose(fid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close the property list */
         if (H5Pclose(fcpl) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of the file */
         if ((file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -8680,15 +8680,15 @@ test_page_small(const char *driver_name, hid_t fapl)
 
         /* File creation property list */
         if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set the strategy to paged aggregation */
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, (hsize_t)1) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create the file to work on */
         if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
@@ -8763,7 +8763,7 @@ test_page_small(const char *driver_name, hid_t fapl)
         if (!f->shared->fs_man[H5F_MEM_PAGE_GENERIC])
             TEST_ERROR;
         if (H5FS_stat_info(f, f->shared->fs_man[H5F_MEM_PAGE_GENERIC], &fs_stat) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (fs_stat.tot_space != TBLOCK_SIZE4096)
             TEST_ERROR;
 
@@ -8784,11 +8784,11 @@ test_page_small(const char *driver_name, hid_t fapl)
 
         /* Close file */
         if (H5Fclose(fid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close the property list */
         if (H5Pclose(fcpl) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         PASSED();
     }
@@ -8859,7 +8859,7 @@ test_page_alignment(const char *driver_name, hid_t fapl)
 
         /* The alignment to use will be the library's default file space page size */
         if (H5Pset_libver_bounds(fapl_new, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set alignment value to 16 */
         if (H5Pset_alignment(fapl_new, (hsize_t)0, (hsize_t)TEST_ALIGN16) < 0)
@@ -8948,7 +8948,7 @@ test_page_alignment(const char *driver_name, hid_t fapl)
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Allocate 2 small raw data blocks */
         saddr1 = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE30);
@@ -9000,7 +9000,7 @@ test_page_alignment(const char *driver_name, hid_t fapl)
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Allocate 2 small metadata blocks */
         addr1 = H5MF_alloc(f, H5FD_MEM_SUPER, (hsize_t)TBLOCK_SIZE30);
@@ -9061,7 +9061,7 @@ test_page_alignment(const char *driver_name, hid_t fapl)
 
         /* Get a pointer to the internal file object */
         if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Allocate 2 small raw data blocks */
         saddr1 = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE30);
@@ -9261,7 +9261,7 @@ main(void)
     nerrors += test_mf_bug1(driver_name, fapl);
 
     if (H5Pclose(new_fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_cleanup(FILENAME, fapl);
 
     /* Pop API context */

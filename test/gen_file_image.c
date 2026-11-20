@@ -48,27 +48,27 @@ main(void)
 
     /* Create the file */
     if ((fid = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataspace */
     if ((sid = H5Screate_simple(SPACE_RANK, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the compressed dataset */
     if ((did = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the data to the dataset */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close everything */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     return EXIT_SUCCESS;
 

@@ -68,12 +68,12 @@ main(void)
     }
 
     if ((fapl = h5_fileaccess()) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     /* Open the file with SWMR_READ */
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Push API context */
     if (H5CX_push(&api_ctx) < 0)
@@ -94,9 +94,9 @@ main(void)
 
     /* CLose the file */
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(false) < 0)

@@ -280,7 +280,7 @@ main(void)
     TESTING("H5Fflush (part2 without flush)");
     /* Turn the error stack off (failures expected) */
     if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
     h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
@@ -305,7 +305,7 @@ main(void)
     if (vfd_supports_swmr) {
         /* Turn the error stack off (failures expected) */
         if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
             FAIL_STACK_ERROR;
         h5_fixname(FILENAME[3], fapl_id, filename, sizeof(filename));
@@ -366,7 +366,7 @@ main(void)
     TESTING("H5Fflush (part2 with flush and later addition)");
     /* Turn the error stack off (failures expected) */
     if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
     h5_fixname(FILENAME[6], fapl_id, filename, sizeof(filename));
@@ -393,7 +393,7 @@ main(void)
     if (vfd_supports_swmr) {
         /* Turn the error stack off (failures expected) */
         if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
             FAIL_STACK_ERROR;
         h5_fixname(FILENAME[7], fapl_id, filename, sizeof(filename));

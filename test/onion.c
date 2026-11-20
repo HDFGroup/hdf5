@@ -322,7 +322,7 @@ test_revision_index(void)
     /* Test index creation */
 
     if (NULL == (rix_p = H5FD__onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5FD_ONION_REVISION_INDEX_VERSION_CURR != rix_p->version)
         TEST_ERROR;
     if (0 != rix_p->n_entries)
@@ -337,7 +337,7 @@ test_revision_index(void)
 
     /* Insertion failed */
     if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (1 != rix_p->n_entries)
         TEST_ERROR;
     /* Lookup failed */
@@ -357,7 +357,7 @@ test_revision_index(void)
     entry.logical_page = 100;
     entry.phys_addr    = 101;
     if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (2 != rix_p->n_entries)
         TEST_ERROR;
     entry.logical_page = 500;
@@ -381,7 +381,7 @@ test_revision_index(void)
     entry.logical_page = 100;
     entry.phys_addr    = 101;
     if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Should still be two unique entries, not three */
     if (2 != rix_p->n_entries)
@@ -429,13 +429,13 @@ test_revision_index_collisions(void)
     TESTING("revision index collisions");
 
     if (NULL == (rix_p = H5FD__onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     for (uint64_t i = 0; i < n_insert; i++) {
         entry.phys_addr    = i;
         entry.logical_page = U64_EXP2(i) + offset_from_power;
         if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
 
     if (n_insert != rix_p->n_entries)
@@ -489,13 +489,13 @@ test_revision_index_resizing(void)
     TESTING("revision index resizing");
 
     if (NULL == (rix_p = H5FD__onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     for (uint64_t i = 0; i < n_insert; i++) {
         entry.logical_page = i;
         entry.phys_addr    = ((uint64_t)(-1) - i);
         if (H5FD__onion_revision_index_insert(rix_p, &entry) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
 
     if (n_insert != rix_p->n_entries)
@@ -555,7 +555,7 @@ test_revision_index_to_archival_index(void)
      */
 
     if (NULL == (rix_p = H5FD__onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Add scattered entries in reverse order. */
     for (uint64_t i = 0; i < n_insert; i++) {
@@ -564,7 +564,7 @@ test_revision_index_to_archival_index(void)
         rix_entry.logical_page = n;
         rix_entry.phys_addr    = n * 13;
         if (H5FD__onion_revision_index_insert(rix_p, &rix_entry) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
 
     if (n_insert != rix_p->n_entries)
@@ -576,7 +576,7 @@ test_revision_index_to_archival_index(void)
     /* Successful merge into empty archival index */
 
     if (H5FD__onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (!H5FD__onion_archival_index_is_valid(&aix))
         TEST_ERROR;
@@ -612,7 +612,7 @@ test_revision_index_to_archival_index(void)
         TEST_ERROR;
 
     if (H5FD__onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (!H5FD__onion_archival_index_is_valid(&aix))
         TEST_ERROR;
 
@@ -648,7 +648,7 @@ test_revision_index_to_archival_index(void)
         TEST_ERROR;
 
     if (H5FD__onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (!H5FD__onion_archival_index_is_valid(&aix))
         TEST_ERROR;

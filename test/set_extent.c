@@ -1824,17 +1824,17 @@ test_external(hid_t fapl, bool use_select_io)
     /* create a new file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* modify dataset creation properties */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_external(dcpl, EXT_FILE_NAME1, 0, size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_external(dcpl, EXT_FILE_NAME2, 0, size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     {
 
@@ -1843,7 +1843,7 @@ test_external(hid_t fapl, bool use_select_io)
         hsize_t file_size;   /*sizeof external file segment    */
 
         if (H5Pget_external(dcpl, 0, sizeof(name), name, &file_offset, &file_size) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
 
     /*-------------------------------------------------------------------------
@@ -1861,13 +1861,13 @@ test_external(hid_t fapl, bool use_select_io)
 
     /* create the data space with unlimited dimensions. */
     if ((sid = H5Screate_simple(RANK2, dims_o, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did = H5Dcreate2(fid, "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, H5S_ALL, dxpl, buf_o) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*-------------------------------------------------------------------------
      * read
@@ -1876,7 +1876,7 @@ test_external(hid_t fapl, bool use_select_io)
 
     /* read */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, buf_ro) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
 #if defined(H5_SET_EXTENT_DEBUG)
     printf("\n");
@@ -1910,18 +1910,18 @@ test_external(hid_t fapl, bool use_select_io)
 
     /* set new dimensions for the array. */
     if (H5Dset_extent(did, dims_e) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get the space */
     if ((sid = H5Dget_space(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get dimensions */
     if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* check dimensions */
     for (i = 0; i < RANK2; i++) {
@@ -1931,7 +1931,7 @@ test_external(hid_t fapl, bool use_select_io)
 
     /* read */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, buf_e) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
 #if defined(H5_SET_EXTENT_DEBUG)
     printf("\n");
@@ -1973,18 +1973,18 @@ test_external(hid_t fapl, bool use_select_io)
 
     /* set new dimensions for the array. */
     if (H5Dset_extent(did, dims_s) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get the space */
     if ((sid = H5Dget_space(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get dimensions */
     if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* check dimensions */
     for (i = 0; i < RANK2; i++) {
@@ -1999,7 +1999,7 @@ test_external(hid_t fapl, bool use_select_io)
 
     /* read */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, buf_s) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
 #if defined(H5_SET_EXTENT_DEBUG)
     printf("\n");
@@ -2046,13 +2046,13 @@ test_external(hid_t fapl, bool use_select_io)
      */
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 

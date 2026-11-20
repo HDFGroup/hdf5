@@ -112,11 +112,11 @@ verify_old_dset_cork(void)
 
     /* Create dcpl */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to use chunked dataset */
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create chunked dataset with v1-btree indexing: DSET_BT1 */
     if ((sid = H5Screate_simple(2, dims, max_dims)) < 0)
@@ -134,7 +134,7 @@ verify_old_dset_cork(void)
 
     /* Verify cork status */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Set up data array */
     if (NULL == (buf_data = (int *)calloc(100 * 20, sizeof(int))))
@@ -155,19 +155,19 @@ verify_old_dset_cork(void)
 
     /* Verify the cork status for DSET_BT1 */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create compact dataset: DSET_COMPACT */
     if ((sid2 = H5Screate_simple(2, dims2, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_layout(dcpl2, H5D_COMPACT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_alloc_time(dcpl2, H5D_ALLOC_TIME_EARLY) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did2 = H5Dcreate2(fid, DSET_COMPACT, H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get dataset object address */
     if (H5Oget_info3(did2, &oinfo2, H5O_INFO_BASIC) < 0)
@@ -179,7 +179,7 @@ verify_old_dset_cork(void)
 
     /* Verify cork status */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Dclose(did) < 0)
@@ -209,13 +209,13 @@ verify_old_dset_cork(void)
 
     /* Create contiguous dataset: DSET_CONTIG */
     if ((sid3 = H5Screate_simple(2, dims2, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl3 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_layout(dcpl3, H5D_CONTIGUOUS) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did3 = H5Dcreate2(fid, DSET_CONTIG, H5T_NATIVE_INT, sid3, H5P_DEFAULT, dcpl3, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get dataset object address: DSET_CONTIG */
     if (H5Oget_info3(did3, &oinfo3, H5O_INFO_BASIC) < 0)
@@ -227,11 +227,11 @@ verify_old_dset_cork(void)
 
     /* Verify the cork status for DSET_CONTIG */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify the cork status for DSET_BT1 */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Un-cork the dataset: DSET_CONTIG */
     if (H5Oenable_mdc_flushes(did3) < 0)
@@ -239,7 +239,7 @@ verify_old_dset_cork(void)
 
     /* Verify the cork status for DSET_CONTIG */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Dclose(did3) < 0)
@@ -343,7 +343,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Verify cork status of the dataset: DSET */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Cork the dataset: DSET */
     if (H5Odisable_mdc_flushes(did) < 0)
@@ -355,7 +355,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Verify cork status of the dataset: DSET */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the attribute */
     if (H5Aclose(aid) < 0)
@@ -363,7 +363,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Verify cork status of the dataset: DSET */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create dcpl */
     if ((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -374,7 +374,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Create chunked dataset with implicit indexing: DSET_NONE */
     if (H5Pset_chunk(dcpl2, 1, chunk_dim) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((sid2 = H5Screate_simple(1, dim, NULL)) < 0)
         TEST_ERROR;
     if ((did2 = H5Dcreate2(fid, DSET_NONE, H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
@@ -401,7 +401,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Verify cork status of the dataset: DSET_NONE */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Oclose(did) < 0)
@@ -430,7 +430,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Verify cork status of the dataset: DSET */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Open the attribute attached to the dataset object: DSET_NONE */
     if ((aid = H5Aopen_by_idx(oid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)4, H5P_DEFAULT, H5P_DEFAULT)) <
@@ -443,7 +443,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Verify cork status of the dataset: DSET_NONE */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the attribute */
     if (H5Aclose(aid) < 0)
@@ -451,7 +451,7 @@ verify_obj_dset_cork(bool swmr)
 
     /* Verify cork status of the dataset: DSET */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Oclose(oid) < 0)
@@ -547,11 +547,11 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Create dcpl */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set to use chunked dataset */
     if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create chunked dataset with extensive array indexing: DSET_EA */
     if ((sid = H5Screate_simple(2, dims, max_dims)) < 0)
@@ -569,7 +569,7 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Verify cork status */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create chunked dataset with fixed array indexing: DSET_FA */
     if ((sid2 = H5Screate_simple(2, dims, NULL)) < 0)
@@ -591,11 +591,11 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Verify the cork status for DSET_FA */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify the cork status for DSET_EA */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create chunked dataset with v2-Btree indexing */
     max_dims[0] = H5S_UNLIMITED;
@@ -614,7 +614,7 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Verify the cork status for DSET_BT2 */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Dclose(did3) < 0)
@@ -665,7 +665,7 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Verify the cork status for DSET_EA */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Open and write to the dataset: DSET_FA */
     if ((did2 = H5Dopen2(fid, DSET_FA, H5P_DEFAULT)) < 0)
@@ -679,7 +679,7 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Verify the cork status for DSET_FA */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Open and write to the dataset: DSET_BT2 */
     if ((did3 = H5Dopen2(fid, DSET_BT2, H5P_DEFAULT)) < 0)
@@ -689,7 +689,7 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Verify the cork status for DSET_BT2 */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Cork the dataset: DSET_BT2 */
     if (H5Odisable_mdc_flushes(did3) < 0)
@@ -697,7 +697,7 @@ verify_dset_cork(bool swmr, bool new_format)
 
     /* Verify the cork status for DSET_BT2 */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Dclose(did) < 0)
@@ -807,11 +807,11 @@ verify_group_cork(bool swmr)
 
     /* Verify cork status of the groups */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the second group: GRP2 */
     if (H5Gclose(gid2) < 0)
@@ -819,11 +819,11 @@ verify_group_cork(bool swmr)
 
     /* Re-open the second group: GRP2 */
     if ((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify cork status of the second group: GRP2 */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Gclose(gid) < 0)
@@ -840,13 +840,13 @@ verify_group_cork(bool swmr)
     if (swmr)
         flags |= H5F_ACC_SWMR_WRITE;
     if ((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gid3 = H5Gopen2(gid2, GRP3, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create dataspace */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
@@ -864,7 +864,7 @@ verify_group_cork(bool swmr)
             if (H5Odisable_mdc_flushes(gid3) < 0)
                 TEST_ERROR;
             if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-                TEST_ERROR;
+                FAIL_STACK_ERROR;
         }
         if (H5Aclose(aid) < 0)
             TEST_ERROR;
@@ -872,7 +872,7 @@ verify_group_cork(bool swmr)
 
     /* Verify cork status of the third group: GRP3 */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Gclose(gid) < 0)
@@ -996,11 +996,11 @@ verify_named_cork(bool swmr)
 
     /* Verify cork status of the named datatypes */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the datatypes */
     if (H5Tclose(tid) < 0)
@@ -1012,19 +1012,19 @@ verify_named_cork(bool swmr)
 
     /* Re-open the named datatypes */
     if ((tid = H5Topen2(fid, DT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid2 = H5Topen2(gid, DT2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid3 = H5Topen2(gid2, DT3, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify cork status of the named datatypes */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Tclose(tid) < 0)
@@ -1045,19 +1045,19 @@ verify_named_cork(bool swmr)
     if (swmr)
         flags |= H5F_ACC_SWMR_WRITE;
     if ((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gid2 = H5Gopen2(gid, GRP2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open the named datatypes */
     if ((tid = H5Topen2(fid, DT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid2 = H5Topen2(gid, DT2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid3 = H5Topen2(gid2, DT3, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Cork the datatype: DT2 */
     if (H5Odisable_mdc_flushes(tid2) < 0)
@@ -1079,7 +1079,7 @@ verify_named_cork(bool swmr)
             if (H5Odisable_mdc_flushes(tid3) < 0)
                 TEST_ERROR;
             if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-                TEST_ERROR;
+                FAIL_STACK_ERROR;
         }
         if (H5Aclose(aid) < 0)
             TEST_ERROR;
@@ -1087,7 +1087,7 @@ verify_named_cork(bool swmr)
 
     /* Create a dataset with named datatype: DT */
     if ((did = H5Dcreate2(fid, DSET, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get dataset object header address */
     if (H5Oget_info3(did, &oinfo4, H5O_INFO_BASIC) < 0)
@@ -1099,20 +1099,20 @@ verify_named_cork(bool swmr)
 
     /* Verify cork status of the datatype: DT */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     /* Verify cork status of the datatype: DT2 */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     /* Verify cork status of the datatype: DT3 */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Un-cork the datatype: DT3 */
     if (H5Oenable_mdc_flushes(tid3) < 0)
         TEST_ERROR;
     /* Verify cork status of the datatype: DT3 */
     if (H5C__verify_cork_tag_test(fid, oinfo3.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Cork the datatype: DT */
     if (H5Odisable_mdc_flushes(tid) < 0)
@@ -1120,14 +1120,14 @@ verify_named_cork(bool swmr)
 
     /* Verify cork status of the datatype: DT */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     /* Verify cork status of the datatype: DT2 */
     if (H5C__verify_cork_tag_test(fid, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify cork status of the dataset: DSET */
     if (H5C__verify_cork_tag_test(fid, oinfo4.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -1135,11 +1135,11 @@ verify_named_cork(bool swmr)
 
     /* Verify cork status of the datatype: DT */
     if (H5C__verify_cork_tag_test(fid, oinfo.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify cork status of the dataset: DSET */
     if (H5C__verify_cork_tag_test(fid, oinfo4.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Closing */
     if (H5Tclose(tid) < 0)
@@ -1307,7 +1307,7 @@ verify_multiple_cork(bool swmr)
     if (H5Oget_info3(gid2, &oinfo1, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
     if (H5C__verify_cork_tag_test(fid2, oinfo1.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Check cork status of the group: gid1 */
     if (H5Oare_mdc_flushes_disabled(gid1, &corked) < 0)
@@ -1335,7 +1335,7 @@ verify_multiple_cork(bool swmr)
     if (H5Oget_info3(did1, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
     if (H5C__verify_cork_tag_test(fid1, oinfo2.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Check cork status of the dataset: did2 */
     if (H5Oare_mdc_flushes_disabled(did2, &corked) < 0)
@@ -1363,7 +1363,7 @@ verify_multiple_cork(bool swmr)
     if (H5Oget_info3(tid2, &oinfo3, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
     if (H5C__verify_cork_tag_test(fid2, oinfo3.token, true) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Check cork status of the datatype: tid1 */
     if (H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
@@ -1379,7 +1379,7 @@ verify_multiple_cork(bool swmr)
     if (H5Oget_info3(gid1, &oinfo1, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
     if (H5C__verify_cork_tag_test(fid1, oinfo1.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Check cork status of the group: gid2 */
     if (H5Oare_mdc_flushes_disabled(gid2, &corked) < 0)
@@ -1399,7 +1399,7 @@ verify_multiple_cork(bool swmr)
 
     /* Verify cork status of the group: gid1 */
     if (H5C__verify_cork_tag_test(fid1, oinfo1.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the group: gid1 */
     if (H5Gclose(gid1) < 0)
@@ -1413,7 +1413,7 @@ verify_multiple_cork(bool swmr)
     if (H5Oget_info3(did2, &oinfo2, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
     if (H5C__verify_cork_tag_test(fid2, oinfo2.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Check cork status of the dataset: did1 */
     if (H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
@@ -1433,7 +1433,7 @@ verify_multiple_cork(bool swmr)
 
     /* Verify cork status of the dataset: did1 */
     if (H5C__verify_cork_tag_test(fid1, oinfo2.token, false) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the dataset: did1 */
     if (H5Dclose(did1) < 0)

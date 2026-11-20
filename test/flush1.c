@@ -202,7 +202,7 @@ main(void)
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     PASSED();
 
     /* Create a file and flush w/ SWMR I/O */
@@ -213,7 +213,7 @@ main(void)
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         PASSED();
     } /* end if */
     else
@@ -246,11 +246,11 @@ main(void)
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (add_dset_to_file(fid, SECOND_DSET_NAME) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     PASSED();
 
     /* Create a file, flush, add a dataset, flush w/ SWMR I/O */
@@ -261,11 +261,11 @@ main(void)
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (add_dset_to_file(fid, SECOND_DSET_NAME) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         PASSED();
     } /* end if */
     else
@@ -278,7 +278,7 @@ main(void)
     if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
         TEST_ERROR;
     if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (add_dset_to_file(fid, SECOND_DSET_NAME) < 0)
         TEST_ERROR;
     PASSED();
@@ -291,7 +291,7 @@ main(void)
         if ((fid = create_file(filename, fapl_id, use_swmr)) < 0)
             TEST_ERROR;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (add_dset_to_file(fid, SECOND_DSET_NAME) < 0)
             TEST_ERROR;
         PASSED();

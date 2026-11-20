@@ -304,7 +304,7 @@ test_large(hid_t fcpl, hid_t fapl, bool new_format)
     }
     if (new_format)
         if (H5G__is_new_dense_test(cwg) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     if (H5Gclose(cwg) < 0)
         TEST_ERROR;
 
@@ -432,7 +432,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Use internal testing routine to check that the group has no links or symbol table */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create first "bottom" group */
     snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
@@ -441,7 +441,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Check on bottom group's status */
     if (H5G__is_empty_test(gid2) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close bottom group */
     if (H5Gclose(gid2) < 0)
@@ -451,7 +451,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
     if (H5G__has_links_test(gid, &nmsgs) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nmsgs != 1)
         TEST_ERROR;
 
@@ -464,7 +464,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
         /* Check on bottom group's status */
         if (H5G__is_empty_test(gid2) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Close bottom group */
         if (H5Gclose(gid2) < 0)
@@ -475,7 +475,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
     if (H5G__has_links_test(gid, &nmsgs) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nmsgs != LIFECYCLE_MAX_COMPACT)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != false)
@@ -500,7 +500,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Check on bottom group's status */
     if (H5G__is_empty_test(gid2) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close bottom group */
     if (H5Gclose(gid2) < 0)
@@ -512,7 +512,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Check that the object header is still one chunk and the space has been allocated correctly */
     if (H5Oget_native_info(gid, &ninfo, H5O_NATIVE_INFO_HDR) < 0)
@@ -531,7 +531,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
 
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         u--;
     } /* end while */
@@ -542,34 +542,34 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Unlink one more object from the group, which should transform back to using links */
     snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     u--;
 
     /* Check on top group's status */
     if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
     if (H5G__has_links_test(gid, &nmsgs) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nmsgs != (LIFECYCLE_MIN_DENSE - 1))
         TEST_ERROR;
 
     /* Unlink last two objects from top group */
     snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     u--;
     snprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check on top group's status */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close top group */
     if (H5Gclose(gid) < 0)
@@ -577,7 +577,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Unlink top group */
     if (H5Ldelete(fid, LIFECYCLE_TOP_GROUP, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close GCPL */
     if (H5Pclose(gcpl) < 0)
@@ -664,7 +664,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Use internal testing routine to check that the group has no links or dense storage */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create first group with "long" name */
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -672,7 +672,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Check on bottom group's status */
     if (H5G__is_empty_test(gid2) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close bottom group */
     if (H5Gclose(gid2) < 0)
@@ -685,7 +685,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create second group with "long" name */
     objname[0] = 'b';
@@ -694,7 +694,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Check on bottom group's status */
     if (H5G__is_empty_test(gid2) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close bottom group */
     if (H5Gclose(gid2) < 0)
@@ -707,11 +707,11 @@ long_compact(hid_t fcpl, hid_t fapl2)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Unlink second object from top group */
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check on top group's status */
     /* (Should still be dense storage to hold links, since name is too long for object header message) */
@@ -720,17 +720,17 @@ long_compact(hid_t fcpl, hid_t fapl2)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Unlink first object from top group */
     objname[0] = 'a';
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check on top group's status */
     /* (Should have deleted the dense storage now) */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Free object name */
     free(objname);
@@ -742,7 +742,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
 
     /* Unlink top group */
     if (H5Ldelete(fid, "top", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
@@ -814,7 +814,7 @@ read_old(void)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__has_stab_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create a bunch of objects in the group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
@@ -824,7 +824,7 @@ read_old(void)
 
         /* Check on bottom group's status */
         if (H5G__is_empty_test(gid2) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Close bottom group */
         if (H5Gclose(gid2) < 0)
@@ -838,13 +838,13 @@ read_old(void)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__has_stab_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Delete new objects from old group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
         snprintf(objname, sizeof(objname), "Group %u", u);
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     } /* end for */
 
     /* Check on old group's status */
@@ -854,7 +854,7 @@ read_old(void)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__has_stab_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close old group */
     if (H5Gclose(gid) < 0)
@@ -948,7 +948,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
 
     /* Use internal testing routine to check that the group has no links or dense storage */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create first "bottom" group */
     snprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
@@ -957,7 +957,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
 
     /* Check on bottom group's status */
     if (H5G__is_empty_test(gid2) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close bottom group */
     if (H5Gclose(gid2) < 0)
@@ -969,16 +969,16 @@ no_compact(hid_t fcpl, hid_t fapl2)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Unlink object from top group */
     snprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check on top group's status */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close top group */
     if (H5Gclose(gid) < 0)
@@ -986,7 +986,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
 
     /* Unlink top group */
     if (H5Ldelete(fid, NO_COMPACT_TOP_GROUP, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
@@ -1194,19 +1194,19 @@ old_api(hid_t fapl)
 
     /* Create file */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a group, with the old API routine and a "small" heap */
     if ((gid = H5Gcreate1(fid, OLD_API_GROUP, (size_t)0)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file with a "small" heap for group */
     if ((small_file_size = h5_get_file_size(filename, fapl)) < 0)
@@ -1214,27 +1214,27 @@ old_api(hid_t fapl)
 
     /* Create file */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a group, with the old API routine and a "large" heap */
     if ((gid = H5Gcreate1(fid, OLD_API_GROUP, (size_t)10000)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open group */
     if ((gid = H5Gopen1(fid, OLD_API_GROUP)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file with a "large" heap for group */
     if ((large_file_size = h5_get_file_size(filename, fapl)) < 0)

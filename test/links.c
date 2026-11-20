@@ -638,13 +638,13 @@ cklinks(hid_t fapl, bool new_format)
     /* Open the file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Hard link */
     if (H5Oget_info_by_name3(file, "d1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file, "grp1/hard", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
@@ -654,7 +654,7 @@ cklinks(hid_t fapl, bool new_format)
     //! [H5Otoken_cmp_snip]
 
     if (H5Otoken_cmp(file, &oinfo1.token, &oinfo2.token, &token_cmp) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (token_cmp) {
         H5_FAILED();
         puts("    Hard link test failed. Link seems not to point to the ");
@@ -665,15 +665,15 @@ cklinks(hid_t fapl, bool new_format)
     //! [H5Otoken_cmp_snip]
 
     if (H5Lexists(file, "/", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "d1", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "grp1/hard", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "/grp1", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "/grp1/hard", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
@@ -697,14 +697,14 @@ cklinks(hid_t fapl, bool new_format)
 
     /* Symbolic link */
     if (H5Oget_info_by_name3(file, "grp1/soft", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Otoken_cmp(file, &oinfo1.token, &oinfo2.token, &token_cmp) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (token_cmp) {
         H5_FAILED();
         puts("    Soft link test failed. Link seems not to point to the ");
@@ -712,14 +712,14 @@ cklinks(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lget_val(file, "grp1/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(linkval, "/d1") != 0) {
         H5_FAILED();
         puts("    Soft link test failed. Wrong link value");
         TEST_ERROR;
     } /* end if */
     if (H5Lexists(file, "grp1/soft", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Dangling link */
     H5E_BEGIN_TRY
@@ -733,7 +733,7 @@ cklinks(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lget_info2(file, "grp1/dangle", &linfo, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
@@ -750,7 +750,7 @@ cklinks(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lexists(file, "grp1/dangle", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Recursive link */
     H5E_BEGIN_TRY
@@ -764,7 +764,7 @@ cklinks(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lget_info2(file, "grp1/recursive", &linfo, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
@@ -783,11 +783,11 @@ cklinks(hid_t fapl, bool new_format)
 
     /* Non-existent link */
     if (H5Lexists(file, "foobar", H5P_DEFAULT) == true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Cleanup */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -1069,7 +1069,7 @@ toomany(hid_t fapl, bool new_format)
 
     /* Open object through last hard link */
     if ((gid = H5Gopen2(fid, "hard21", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -1103,7 +1103,7 @@ toomany(hid_t fapl, bool new_format)
 
     /* Open object through lesser soft link */
     if ((gid = H5Gopen2(fid, "soft16", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -1437,7 +1437,7 @@ test_move(hid_t fapl, bool new_format)
 
     /* Open the group just moved to the new location. */
     if ((moved_grp = H5Gopen2(grp_2, "group_new_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
@@ -1459,7 +1459,7 @@ test_move(hid_t fapl, bool new_format)
 
     /* Open the group. */
     if ((moved_grp = H5Gopen2(grp_2, "group_newer_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
@@ -1469,7 +1469,7 @@ test_move(hid_t fapl, bool new_format)
 
     /* Open the group . */
     if ((moved_grp = H5Gopen2(grp_1, "group_newer_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
@@ -1480,7 +1480,7 @@ test_move(hid_t fapl, bool new_format)
 
     /* Open the group just moved to the new location. */
     if ((moved_grp = H5Gopen2(grp_2, "group_newest_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
@@ -1636,13 +1636,13 @@ test_copy(hid_t fapl, bool new_format)
 
     /* Open the group just moved to the new location. */
     if ((moved_grp = H5Gopen2(grp_2, "group_new_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
     /* Verify that the group is also in the original location */
     if ((moved_grp = H5Gopen2(grp_1, "group_copy", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
@@ -1652,12 +1652,12 @@ test_copy(hid_t fapl, bool new_format)
 
     /* Open the group. */
     if ((moved_grp = H5Gopen2(grp_2, "group_newer_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
     /* Verify that the group is also in the original location */
     if ((moved_grp = H5Gopen2(grp_2, "group_new_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
@@ -1667,12 +1667,12 @@ test_copy(hid_t fapl, bool new_format)
 
     /* Open the group . */
     if ((moved_grp = H5Gopen2(grp_1, "group_newer_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
     /* Verify that the group is still in the previous location */
     if ((moved_grp = H5Gopen2(grp_2, "group_new_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
@@ -1683,25 +1683,25 @@ test_copy(hid_t fapl, bool new_format)
 
     /* Open the group just moved to the new location. */
     if ((moved_grp = H5Gopen2(grp_2, "group_newest_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
     /* Verify that the group is still in all previous original locations */
     if ((moved_grp = H5Gopen2(grp_1, "group_newer_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
     if ((moved_grp = H5Gopen2(grp_2, "group_newer_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
     if ((moved_grp = H5Gopen2(grp_2, "group_new_name", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
     if ((moved_grp = H5Gopen2(grp_1, "group_copy", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(moved_grp) < 0)
         TEST_ERROR;
 
@@ -2012,42 +2012,42 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Create two groups in the file */
     if ((group1_id = H5Gcreate2(file_id, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((group2_id = H5Gcreate2(file_id, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((group3_id = H5Gcreate2(file_id, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5Gset and get comment */
 
     if (H5Gset_comment(file_id, "group1", "comment") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((len = H5Gget_comment(file_id, "group1", 0, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Returned length should be the same as strlen of the comment */
     if ((size_t)len != strlen("comment"))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get and verify the comment */
     if (H5Gget_comment(file_id, "group1", (size_t)len + 1, tmpstr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(tmpstr, "comment") != 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create links using H5Glink and H5Glink2 */
     if (H5Glink(file_id, H5G_LINK_HARD, "group2", "group1/link_to_group2") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Glink2(file_id, "group1", H5G_LINK_HARD, group2_id, "link_to_group1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Glink2(file_id, "link_to_group1", H5G_LINK_SOFT, H5G_SAME_LOC, "group2/soft_link_to_group1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Glink2(file_id, "dangle", H5G_LINK_SOFT, H5G_SAME_LOC, "group2/dangle_soft_link") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test getting the names for objects */
     if (H5Gget_objname_by_idx(group1_id, (hsize_t)0, tmpstr, sizeof(tmpstr)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(tmpstr, "link_to_group2") != 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
@@ -2063,7 +2063,7 @@ test_deprec(hid_t fapl, bool new_format)
     strcpy(non_null_buf, NON_NULL_BUF);
     buf_ptr = &non_null_buf[4];
     if ((name_len = H5Gget_objname_by_idx(group1_id, (hsize_t)0, buf_ptr, 0)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((size_t)name_len != strlen(tmpstr))
         TEST_ERROR;
     if ((strcmp(non_null_buf, NON_NULL_BUF) != 0))
@@ -2071,7 +2071,7 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test getting the type for objects */
     if ((obj_type = H5Gget_objtype_by_idx(group1_id, (hsize_t)0)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (obj_type != H5G_GROUP)
         TEST_ERROR;
     H5E_BEGIN_TRY
@@ -2084,19 +2084,19 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test getting the number of objects in a group */
     if (H5Gget_num_objs(file_id, &num_objs) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (num_objs != NUM_OBJS)
         TEST_ERROR;
     if (H5Gget_num_objs(group1_id, &num_objs) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (num_objs != 1)
         TEST_ERROR;
 
     /* Test that H5Glink created hard links properly */
     if (H5Gget_objinfo(file_id, "/group2", true, &sb_hard1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_objinfo(file_id, "/group1/link_to_group2", true, &sb_hard2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
@@ -2107,9 +2107,9 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test for the other hard link created */
     if (H5Gget_objinfo(file_id, "/group1", true, &sb_hard1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_objinfo(file_id, "/group2/link_to_group1", true, &sb_hard2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
@@ -2120,7 +2120,7 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test for using "." for the object name */
     if (H5Gget_objinfo(group1_id, ".", false, &sb_hard2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
@@ -2131,7 +2131,7 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test for using "." for the object name with a path */
     if (H5Gget_objinfo(file_id, "///.//./group1///././.", false, &sb_hard2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
@@ -2142,14 +2142,14 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test the soft link */
     if (H5Gget_objinfo(file_id, "/group2/soft_link_to_group1", false, &sb_soft1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (sb_soft1.type != H5G_LINK)
         TEST_ERROR;
     if (sb_soft1.linklen != strlen("link_to_group1") + 1)
         TEST_ERROR;
 
     if (H5Gget_linkval(group2_id, "soft_link_to_group1", sb_soft1.linklen, tmpstr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp("link_to_group1", tmpstr) != 0)
         TEST_ERROR;
 
@@ -2164,14 +2164,14 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Test the dangling soft link */
     if (H5Gget_objinfo(file_id, "/group2/dangle_soft_link", false, &sb_soft2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (sb_soft2.type != H5G_LINK)
         TEST_ERROR;
     if (sb_soft2.linklen != strlen("dangle") + 1)
         TEST_ERROR;
 
     if (H5Gget_linkval(group2_id, "dangle_soft_link", sb_soft2.linklen, tmpstr) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp("dangle", tmpstr) != 0)
         TEST_ERROR;
 
@@ -2217,26 +2217,26 @@ test_deprec(hid_t fapl, bool new_format)
 
     /* Ensure that both groups can be opened */
     if (H5Gclose(group2_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(group1_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((group1_id = H5Gopen2(file_id, "moved_group1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((group2_id = H5Gopen2(file_id, "moved_group1/moved_group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close open IDs */
     if (H5Gclose(group3_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(group2_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(group1_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5Gunlink */
     if (H5Gunlink(file_id, "moved_group1/moved_group2") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY
     {
@@ -2247,7 +2247,7 @@ test_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -2293,13 +2293,13 @@ cklinks_deprec(hid_t fapl, bool new_format)
     /* Open the file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Hard link */
     if (H5Oget_info_by_name2(file, "d1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name2(file, "grp1/hard", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
@@ -2312,15 +2312,15 @@ cklinks_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lexists(file, "/", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "d1", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "grp1/hard", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "/grp1", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lexists(file, "/grp1/hard", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         exists = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
@@ -2344,7 +2344,7 @@ cklinks_deprec(hid_t fapl, bool new_format)
 
     /* Symbolic link */
     if (H5Oget_info_by_name2(file, "grp1/soft", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
@@ -2357,14 +2357,14 @@ cklinks_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lget_val(file, "grp1/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(linkval, "/d1") != 0) {
         H5_FAILED();
         puts("    Soft link test failed. Wrong link value");
         TEST_ERROR;
     } /* end if */
     if (H5Lexists(file, "grp1/soft", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Dangling link */
     H5E_BEGIN_TRY
@@ -2378,7 +2378,7 @@ cklinks_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lget_info1(file, "grp1/dangle", &linfo, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
@@ -2395,7 +2395,7 @@ cklinks_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lexists(file, "grp1/dangle", H5P_DEFAULT) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Recursive link */
     H5E_BEGIN_TRY
@@ -2409,7 +2409,7 @@ cklinks_deprec(hid_t fapl, bool new_format)
         TEST_ERROR;
     } /* end if */
     if (H5Lget_info1(file, "grp1/recursive", &linfo, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
         printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
@@ -2428,11 +2428,11 @@ cklinks_deprec(hid_t fapl, bool new_format)
 
     /* Non-existent link */
     if (H5Lexists(file, "foobar", H5P_DEFAULT) == true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Cleanup */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -3004,7 +3004,7 @@ external_link_root_deprec(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -3047,9 +3047,9 @@ external_link_root_deprec(hid_t fapl, bool new_format)
 
     /* Open objects created through external link */
     if ((gid = H5Gopen2(fid, "new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gid2 = H5Gopen2(fid, "newer_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check names */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -3214,7 +3214,7 @@ external_link_query_deprec(hid_t fapl, bool new_format)
 
     /* Query information about object that external link points to */
     if (H5Oget_info_by_name2(fid, "src", &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5O_TYPE_GROUP != oi.type) {
         H5_FAILED();
         puts("    Unexpected object type - should have been a group");
@@ -3388,61 +3388,61 @@ external_link_closing_deprec(hid_t fapl, bool new_format)
 
     /* Open file 4 so we can do some fancy things */
     if ((fid4 = H5Fopen(filename4, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lmove(fid1, "elink/elink/elink/type1", fid4, "type1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lmove(fid4, "dataset1", fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file 4 again */
     if (H5Fclose(fid4) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test copy (as of this test, it uses the same code as move) */
     if (H5Lcopy(fid1, "elink/elink/elink", fid1, "elink/elink/elink_copied", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Also exercise H5L_SAME_LOC */
     if (H5Lcopy(H5L_SAME_LOC, "elink/elink/elink", fid1, "elink/elink/elink/elink_copied2", H5P_DEFAULT,
                 H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5Gset and get comment */
     if (H5Oset_comment_by_name(fid1, "elink/elink/elink/group1_moved", "comment", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_comment_by_name(fid1, "elink/elink/elink/group1_moved", buf, sizeof(buf), H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(buf, "comment") != 0)
         TEST_ERROR;
 
     /* Test H5*open */
     if ((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Close objects */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5*open2 */
     if ((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Close objects */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5Oopen */
     if ((did = H5Oopen(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0)
@@ -3831,7 +3831,7 @@ ud_hard_links_deprec(hid_t fapl)
 
     /* Open group through UD link */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -3851,7 +3851,7 @@ ud_hard_links_deprec(hid_t fapl)
 
     /* Re-open group without using ud link to check that it was created properly */
     if ((gid = H5Gopen2(fid, "group/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -3861,11 +3861,11 @@ ud_hard_links_deprec(hid_t fapl)
 
     /* Close opened object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that H5Lget_objinfo works on the hard link */
     if (H5Lget_info1(fid, "ud_link", &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* UD hard links have no query function, thus return a "link length" of 0 */
     if (li.u.val_size != 0)
         TEST_ERROR;
@@ -3878,33 +3878,33 @@ ud_hard_links_deprec(hid_t fapl)
     /* Unlink the group pointed to by the UD link.  It shouldn't be
      * deleted because of the UD link. */
     if (H5Ldelete(fid, "/group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Ensure we can open the group through the UD link */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink the group contained within it. */
     if (H5Ldelete(gid, "new_group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now delete the UD link.  This should cause the group to be
      * deleted, too. */
     if (H5Ldelete(fid, "ud_link", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The file should be empty again. */
     if (empty_size != h5_get_file_size(filename, fapl))
         TEST_ERROR;
 
     if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -4017,7 +4017,7 @@ ud_link_reregister_deprec(hid_t fapl)
      * It should be a different group
      * than the UD hard link pointed to */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -4037,7 +4037,7 @@ ud_link_reregister_deprec(hid_t fapl)
 
     /* Re-open group without using ud link to check that it was created properly */
     if ((gid = H5Gopen2(fid, "rereg_target/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -4047,51 +4047,51 @@ ud_link_reregister_deprec(hid_t fapl)
 
     /* Close opened object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink the group pointed to by the UD hard link.  It shouldn't be
      * deleted because the UD link incremented its reference count. */
     if (H5Ldelete(fid, "/group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* What a mess! Re-register user-defined links to clean up the
      * reference counts.  We shouldn't actually need to unregister the
      * other link type */
     if (H5Lregister(UD_hard_class_deprec) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Ensure we can open the group through the UD link (now that UD hard
      * links have been registered) */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Delete the UD hard link.  This should cause the group to be
      * deleted, too. */
     if (H5Ldelete(fid, "ud_link", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink the other two groups so that we can make sure the file is empty */
     if (H5Ldelete(fid, "/rereg_target/new_group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Ldelete(fid, REREG_TARGET_NAME, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The file should be empty again. */
     if (empty_size != h5_get_file_size(filename, fapl))
         TEST_ERROR;
 
     if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != false)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -4169,7 +4169,7 @@ ud_callbacks_deprec(hid_t fapl, bool new_format)
 
     /* Try opening group through UD link */
     if ((gid = H5Gopen2(fid, UD_CB_LINK_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
@@ -4186,47 +4186,47 @@ ud_callbacks_deprec(hid_t fapl, bool new_format)
 
     /* Fill the query buffer */
     if (H5Lget_val(fid, UD_CB_LINK_NAME, query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(query_buf, "query succeeded") != 0)
         TEST_ERROR;
 
     /* Move the link */
     if (H5Lmove(fid, UD_CB_LINK_NAME, H5L_SAME_LOC, NEW_UD_CB_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open group to ensure that move worked */
     if ((gid = H5Gopen2(fid, NEW_UD_CB_LINK_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Remove UD link */
     if (H5Ldelete(fid, NEW_UD_CB_LINK_NAME, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test that the callbacks don't work if the link class is not registered */
 
     /* Create a new link. Just for fun, give it a non-default character
      * encoding (to test that LAPLs work) */
     if ((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_char_encoding(lcpl, H5T_CSET_UTF8) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_ud(fid, UD_CB_LINK_NAME, (H5L_type_t)UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN,
                      lcpl, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(lcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check its character encoding */
     if (H5Lget_info1(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (li.cset != H5T_CSET_UTF8)
         TEST_ERROR;
 
     /* Unregister the link class so the library forgets what its callbacks do */
     if (H5Lunregister((H5L_type_t)UD_CB_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now test that each of the callbacks fails */
     H5E_BEGIN_TRY
@@ -4268,7 +4268,7 @@ ud_callbacks_deprec(hid_t fapl, bool new_format)
 
     /* The query callback should NOT fail, but should be unable to give a linklen */
     if (H5Lget_info1(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (li.u.val_size != 0)
         TEST_ERROR;
     if (li.type != UD_CB_TYPE)
@@ -4276,11 +4276,11 @@ ud_callbacks_deprec(hid_t fapl, bool new_format)
 
     /* Unregister the UD hard links */
     if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -4341,39 +4341,39 @@ lapl_nlinks_deprec(hid_t fapl, bool new_format)
 
     /* Create chain of soft links to existing object (limited) */
     if (H5Lcreate_soft("final", fid, "soft1", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft1", fid, "soft2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft2", fid, "soft3", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft3", fid, "soft4", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft4", fid, "soft5", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft5", fid, "soft6", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft6", fid, "soft7", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft7", fid, "soft8", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft8", fid, "soft9", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft9", fid, "soft10", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft10", fid, "soft11", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft11", fid, "soft12", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft12", fid, "soft13", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft13", fid, "soft14", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft14", fid, "soft15", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft15", fid, "soft16", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft16", fid, "soft17", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close objects */
     if (H5Gclose(gid) < 0)
@@ -4565,7 +4565,7 @@ lapl_nlinks_deprec(hid_t fapl, bool new_format)
      * of object.
      */
     if ((gid = H5Gopen2(fid, "soft17", gapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid = H5Topen2(fid, "soft17/datatype", tapl)) < 0)
         TEST_ERROR;
     if ((did = H5Dopen2(fid, "soft17/dataset", dapl)) < 0)
@@ -4656,9 +4656,9 @@ linkinfo_deprec(hid_t fapl, bool new_format)
     if (H5Tcommit2(fid, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("group", fid, "softlink", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
         TEST_ERROR;
@@ -4772,7 +4772,7 @@ corder_create_compact_deprec(hid_t fapl)
 
     /* Check on group's initial status */
     if (H5G__is_empty_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) == true)
@@ -4792,7 +4792,7 @@ corder_create_compact_deprec(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_links_test(group_id, &nlinks) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (nlinks != (u + 1))
             TEST_ERROR;
         if (H5G__has_stab_test(group_id) == true)
@@ -4819,11 +4819,11 @@ corder_create_compact_deprec(hid_t fapl)
 
     /* Open group created */
     if ((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify state of group */
     if (H5G__has_links_test(group_id, &nlinks) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nlinks != max_compact)
         TEST_ERROR;
     if (H5G__has_stab_test(group_id) == true)
@@ -4916,7 +4916,7 @@ corder_create_dense_deprec(hid_t fapl)
 
     /* Check on group's initial status */
     if (H5G__is_empty_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) == true)
@@ -4936,7 +4936,7 @@ corder_create_dense_deprec(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_links_test(group_id, &nlinks) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (nlinks != (u + 1))
             TEST_ERROR;
         if (H5G__has_stab_test(group_id) == true)
@@ -4958,11 +4958,11 @@ corder_create_dense_deprec(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve & verify # of records in the name & creation order indices */
     if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (name_count != corder_count)
         TEST_ERROR;
 
@@ -4984,7 +4984,7 @@ corder_create_dense_deprec(hid_t fapl)
 
     /* Open group created */
     if ((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify state of group */
     if (H5G__has_links_test(group_id, NULL) == true)
@@ -4992,7 +4992,7 @@ corder_create_dense_deprec(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Loop through links, checking their creation order values */
     /* (the name index is used, but the creation order value is in the same order) */
@@ -5361,7 +5361,7 @@ link_info_by_idx_deprec(hid_t fapl)
 
             /* Verify state of group */
             if (H5G__has_links_test(group_id, NULL) != true)
-                TEST_ERROR;
+                FAIL_STACK_ERROR;
 
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY
@@ -5416,7 +5416,7 @@ link_info_by_idx_deprec(hid_t fapl)
 
                 /* Verify state of group */
                 if (H5G__is_new_dense_test(group_id) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Verify link information for new link */
                 if (link_info_by_idx_check_deprec(group_id, objname, (hsize_t)u, hard_link, use_index) < 0)
@@ -5659,7 +5659,7 @@ link_info_by_idx_old_deprec(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Close the group */
         if (H5Gclose(group_id) < 0)
@@ -5821,7 +5821,7 @@ delete_by_idx_deprec(hid_t fapl)
 
                 /* Verify state of group (compact) */
                 if (H5G__has_links_test(group_id, NULL) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound deletion */
                 H5E_BEGIN_TRY
@@ -5890,7 +5890,7 @@ delete_by_idx_deprec(hid_t fapl)
                     /* Verify state of group (dense) */
                     if (u >= max_compact)
                         if (H5G__is_new_dense_test(group_id) != true)
-                            TEST_ERROR;
+                            FAIL_STACK_ERROR;
 
                     /* Verify link information for new link */
                     if (link_info_by_idx_check_deprec(group_id, objname, (hsize_t)u, true, use_index) < 0)
@@ -5977,7 +5977,7 @@ delete_by_idx_deprec(hid_t fapl)
                     /* Verify state of group (dense) */
                     if (u >= max_compact)
                         if (H5G__is_new_dense_test(group_id) != true)
-                            TEST_ERROR;
+                            FAIL_STACK_ERROR;
 
                     /* Verify link information for new link */
                     if (link_info_by_idx_check_deprec(group_id, objname, (hsize_t)u, true, use_index) < 0)
@@ -6234,7 +6234,7 @@ delete_by_idx_old_deprec(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Delete links in middle */
 
@@ -6333,7 +6333,7 @@ delete_by_idx_old_deprec(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Close the group */
         if (H5Gclose(group_id) < 0)
@@ -6773,7 +6773,7 @@ link_iterate_deprec(hid_t fapl)
 
                 /* Verify state of group (compact) */
                 if (H5G__has_links_test(group_id, NULL) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound iteration on compact group */
                 skip = (hsize_t)u;
@@ -6806,7 +6806,7 @@ link_iterate_deprec(hid_t fapl)
 
                 /* Verify state of group (dense) */
                 if (H5G__is_new_dense_test(group_id) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound iteration on dense group */
                 skip = (hsize_t)u;
@@ -7204,7 +7204,7 @@ link_iterate_old_deprec(hid_t fapl)
 
         /* Verify state of group (symbol table) */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Check for out of bound iteration on old-style group */
         skip = (hsize_t)u;
@@ -7373,7 +7373,7 @@ external_link_root(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7416,9 +7416,9 @@ external_link_root(hid_t fapl, bool new_format)
 
     /* Open objects created through external link */
     if ((gid = H5Gopen2(fid, "new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gid2 = H5Gopen2(fid, "newer_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check names */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7544,7 +7544,7 @@ external_link_path(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7574,7 +7574,7 @@ external_link_path(hid_t fapl, bool new_format)
 
     /* Open object created through external link */
     if ((gid = H5Gopen2(fid, "/A/B/C/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7716,7 +7716,7 @@ external_link_mult(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7746,7 +7746,7 @@ external_link_mult(hid_t fapl, bool new_format)
 
     /* Open object created through external link */
     if ((gid = H5Gopen2(fid, "/A/B/C/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7766,7 +7766,7 @@ external_link_mult(hid_t fapl, bool new_format)
     if ((fid = H5Fopen(filename4, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
     if ((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The intermediate files should not stay open. Replace one of them with a new file. */
     if ((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -7862,7 +7862,7 @@ external_link_self(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "A/B/C/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7884,7 +7884,7 @@ external_link_self(hid_t fapl, bool new_format)
 
     /* Check on object created */
     if ((gid = H5Gopen2(fid, "X/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -7941,7 +7941,7 @@ external_link_self(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "ext_link/B/C/Y/Z/end", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create object through external link */
     if ((gid2 = H5Gcreate2(gid, "newer_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -7957,10 +7957,10 @@ external_link_self(hid_t fapl, bool new_format)
 
     /* Open up file3 and make sure the object was created successfully */
     if ((fid = H5Fopen(filename3, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "end/newer_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Cleanup */
     if (H5Gclose(gid) < 0)
@@ -8064,7 +8064,7 @@ external_link_pingpong(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "link1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -8094,7 +8094,7 @@ external_link_pingpong(hid_t fapl, bool new_format)
 
     /* Open object created through external link */
     if ((gid = H5Gopen2(fid, "/final/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -8256,7 +8256,7 @@ external_link_toomany(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "link3", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -9946,47 +9946,47 @@ external_set_elink_acc_flags(const char *driver_name, hid_t fapl, bool new_forma
         /* Only supported under the latest file format */
         if (new_format) {
             if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Open a group through the external link using default gapl */
             if ((group = H5Gopen2(file1, "/ext_link/group", H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Verify that the correct parameters have been set on file2 */
             if ((file2 = H5Iget_file_id(group)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fget_intent(file2, &flags) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (flags != (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE))
                 TEST_ERROR;
 
             /* Close file2 and group */
             if (H5Gclose(group) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(file2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Set elink access flags on gapl to be H5F_ACC_RDWR (dropping SWMR_WRITE) */
             if (H5Pset_elink_acc_flags(gapl, H5F_ACC_RDWR) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Open a group through the external link using gapl */
             if ((group = H5Gopen2(file1, "/ext_link/group", gapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Verify that the correct parameters have been set on file2 */
             if ((file2 = H5Iget_file_id(group)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fget_intent(file2, &flags) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (flags != H5F_ACC_RDWR)
                 TEST_ERROR;
 
             /* Close file2 and group */
             if (H5Gclose(group) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(file2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Close file1 */
             if (H5Fclose(file1) < 0)
@@ -9995,47 +9995,47 @@ external_set_elink_acc_flags(const char *driver_name, hid_t fapl, bool new_forma
 
         /* Reopen file1, with read-only and SWMR-read access */
         if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Open a group through the external link using default gapl */
         if ((group = H5Gopen2(file1, "/ext_link/group", H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Verify that the correct parameters have been set on file2 */
         if ((file2 = H5Iget_file_id(group)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Fget_intent(file2, &flags) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (flags != (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ))
             TEST_ERROR;
 
         /* Close file2 and group */
         if (H5Gclose(group) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Fclose(file2) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set elink access flags on gapl to be H5F_ACC_RDWR (dropping SWMR_WRITE) */
         if (H5Pset_elink_acc_flags(gapl, H5F_ACC_RDONLY) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Open a group through the external link using gapl */
         if ((group = H5Gopen2(file1, "/ext_link/group", gapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Verify that the correct parameters have been set on file2 */
         if ((file2 = H5Iget_file_id(group)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Fget_intent(file2, &flags) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (flags != H5F_ACC_RDONLY)
             TEST_ERROR;
 
         /* Close file2 and group */
         if (H5Gclose(group) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Fclose(file2) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file1 */
         if (H5Fclose(file1) < 0)
@@ -11576,7 +11576,7 @@ external_link_query(hid_t fapl, bool new_format)
 
     /* Query information about object that external link points to */
     if (H5Oget_info_by_name3(fid, "src", &oi, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5O_TYPE_GROUP != oi.type) {
         H5_FAILED();
         puts("    Unexpected object type - should have been a group");
@@ -11687,31 +11687,31 @@ external_link_unlink_compact(hid_t fapl, bool new_format)
 
     /* Open first file */
     if ((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink external link */
     if (H5Ldelete(fid, "src", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close first file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open second file */
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group for external link */
     if ((gid = H5Gopen2(fid, "dst", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -11764,11 +11764,11 @@ external_link_unlink_dense(hid_t fapl, bool new_format)
 
     /* Open root group */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check on root group's status */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Query the group creation properties */
     if ((gcpl = H5Gget_create_plist(gid)) < 0)
@@ -11786,7 +11786,7 @@ external_link_unlink_dense(hid_t fapl, bool new_format)
     if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
     if (H5G__has_links_test(gid, &nmsgs) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nmsgs != 1)
         TEST_ERROR;
     if (H5G__has_stab_test(gid) == true)
@@ -11807,7 +11807,7 @@ external_link_unlink_dense(hid_t fapl, bool new_format)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close group creation property list */
     if (H5Pclose(gcpl) < 0)
@@ -11837,28 +11837,28 @@ external_link_unlink_dense(hid_t fapl, bool new_format)
 
     /* Open first file */
     if ((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open root group */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink external link */
     if (H5Ldelete(fid, "src", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Remove enough objects in the root group to change it into a "compact" group */
     for (u = 0; u < ((max_compact - min_dense) + 1); u++) {
         snprintf(objname, sizeof(objname), "filler %u", u);
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     } /* end for */
 
     /* Check on root group's status */
     if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
     if (H5G__has_links_test(gid, &nmsgs) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nmsgs != (min_dense - 1))
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) == true)
@@ -11868,27 +11868,27 @@ external_link_unlink_dense(hid_t fapl, bool new_format)
 
     /* Close root group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close first file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open second file */
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group for external link (should be unaffected) */
     if ((gid = H5Gopen2(fid, "dst", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -11959,170 +11959,170 @@ external_link_move(hid_t fapl, bool new_format)
     /* Move external link to different name within same group */
     /* Open first file */
     if ((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Move external link within same group */
     if (H5Lmove(fid, "src", H5L_SAME_LOC, "src2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "src2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/dst") != 0)
         TEST_ERROR;
 
     /* Create object in external file */
     if ((gid2 = H5Gcreate2(gid, "new_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group in external file */
     if (H5Gclose(gid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close external object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close first file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open second file */
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group created through external link */
     if ((gid = H5Gopen2(fid, "dst/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Move external link to different group */
 
     /* Open first file */
     if ((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create another group, to move the external link into */
     if ((gid = H5Gcreate2(fid, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Move external link to different group */
     if (H5Lmove(fid, "src2", gid, "src3", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close new group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "/group2/src3", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/dst") != 0)
         TEST_ERROR;
 
     /* Create object in external file */
     if ((gid2 = H5Gcreate2(gid, "new_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group in external file */
     if (H5Gclose(gid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close external object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close first file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open second file */
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group created through external link */
     if ((gid = H5Gopen2(fid, "dst/new_group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Move external link back to original group */
     /* Open first file */
     if ((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "/group2/src3", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/dst") != 0)
         TEST_ERROR;
 
     /* Move external link back to original location */
     if (H5Lmove(fid, "/group2/src3", H5L_SAME_LOC, "/src", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/dst") != 0)
         TEST_ERROR;
 
     /* Create object in external file */
     if ((gid2 = H5Gcreate2(gid, "new_group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group in external file */
     if (H5Gclose(gid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close external object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close first file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open second file */
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group created through external link */
     if ((gid = H5Gopen2(fid, "dst/new_group3", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -12176,11 +12176,11 @@ external_link_ride(hid_t fapl, bool new_format)
 
     /* Open root group */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check on root group's status */
     if (H5G__is_empty_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Query the group creation properties */
     if ((gcpl = H5Gget_create_plist(gid)) < 0)
@@ -12204,11 +12204,11 @@ external_link_ride(hid_t fapl, bool new_format)
         TEST_ERROR;
     if (new_format) {
         if (H5G__is_new_dense_test(gid) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     } /* end if */
     else {
         if (H5G__has_stab_test(gid) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     } /* end else */
 
     /* Create external link */
@@ -12222,7 +12222,7 @@ external_link_ride(hid_t fapl, bool new_format)
     if (H5G__has_links_test(gid, NULL) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(gid) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close group creation property list */
     if (H5Pclose(gcpl) < 0)
@@ -12258,7 +12258,7 @@ external_link_ride(hid_t fapl, bool new_format)
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "src", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -12280,20 +12280,20 @@ external_link_ride(hid_t fapl, bool new_format)
 
     /* Open root group */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Remove enough objects in the root group to change it into a "compact" group */
     for (u = 0; u < ((max_compact - min_dense) + 3); u++) {
         snprintf(objname, sizeof(objname), "filler %u", u);
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     } /* end for */
 
     /* Check on root group's status */
     if (H5G__is_empty_test(gid) == true)
         TEST_ERROR;
     if (H5G__has_links_test(gid, &nmsgs) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nmsgs != (min_dense - 1))
         TEST_ERROR;
     if (H5G__has_stab_test(gid) == true)
@@ -12303,11 +12303,11 @@ external_link_ride(hid_t fapl, bool new_format)
 
     /* Close root group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open object through external link */
     if ((gid = H5Gopen2(fid, "src", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -12317,43 +12317,43 @@ external_link_ride(hid_t fapl, bool new_format)
 
     /* Create object in external file */
     if ((gid2 = H5Gcreate2(gid, "new_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group in external file */
     if (H5Gclose(gid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close external object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close first file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open second file */
     if ((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group created through external link */
     if ((gid = H5Gopen2(fid, "dst/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group created through external link */
     if ((gid = H5Gopen2(fid, "dst/new_group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -12486,60 +12486,60 @@ external_link_closing(hid_t fapl, bool new_format)
 
     /* Open file 4 so we can do some fancy things */
     if ((fid4 = H5Fopen(filename4, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lmove(fid1, "elink/elink/elink/type1", fid4, "type1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lmove(fid4, "dataset1", fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file 4 again */
     if (H5Fclose(fid4) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test copy (as of this test, it uses the same code as move) */
     if (H5Lcopy(fid1, "elink/elink/elink", fid1, "elink/elink/elink_copied", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcopy(fid1, "elink/elink/elink", fid1, "elink/elink/elink/elink_copied2", H5P_DEFAULT,
                 H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5Gset and get comment */
     if (H5Oset_comment_by_name(fid1, "elink/elink/elink/group1_moved", "comment", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_comment_by_name(fid1, "elink/elink/elink/group1_moved", buf, sizeof(buf), H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(buf, "comment") != 0)
         TEST_ERROR;
 
     /* Test H5*open */
     if ((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Close objects */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5*open2 */
     if ((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Close objects */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test H5Oopen */
     if ((did = H5Oopen(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0)
@@ -12735,7 +12735,7 @@ external_link_endian(bool new_format)
 
     /* Open a group in the external file using that group ID */
     if ((gid2 = H5Gopen2(gid, "subgroup", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the IDs */
     if (H5Gclose(gid2) < 0)
@@ -12755,7 +12755,7 @@ external_link_endian(bool new_format)
 
     /* Open a group in the external file using that group ID */
     if ((gid2 = H5Gopen2(gid, "subgroup", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the IDs */
     if (H5Gclose(gid2) < 0)
@@ -12854,7 +12854,7 @@ external_link_strong(hid_t fapl, bool new_format)
     if ((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
     if ((gid2 = H5Gopen2(fid2, "/W/X/DLINK", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Iget_name(gid2, objname, (size_t)NAME_BUF_SIZE) < 0)
         TEST_ERROR;
     if (strcmp(objname, "/A/B/C") != 0)
@@ -13102,25 +13102,25 @@ external_symlink(const char *driver_name, hid_t fapl, bool new_format)
 
     /* Open group in file #2, through external link w/symlink */
     if ((group2 = H5Gopen2(file1, "extlink2-sym", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(group2) < 0)
         TEST_ERROR;
 
     /* Open group in file #3, through external link w/symlink to external link */
     if ((group3 = H5Gopen2(file1, "extlink2-sym/extlink3", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(group3) < 0)
         TEST_ERROR;
 
     /* Open group in file #4, through external link w/symlink to external link w/symlink */
     if ((group4 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(group4) < 0)
         TEST_ERROR;
 
     /* Open group in file #5, through external link w/symlink to external link w/symlink to external link */
     if ((group5 = H5Gopen2(file1, "extlink2-sym/extlink3/extlink4-sym/extlink5", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(group5) < 0)
         TEST_ERROR;
 
@@ -13949,74 +13949,74 @@ external_link_with_committed_datatype(hid_t fapl, bool new_format)
 
     /* Main file */
     if ((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create external link from main file to target file */
     if (H5Lcreate_external(filename2, "target_group", fid1, "link_to_2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create target file */
     if ((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Create group in target file */
     if ((gid2 = H5Gcreate2(fid2, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the group */
     if (H5Gclose(gid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Close the file */
     if (H5Fclose(fid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the group which is externally linked to target file */
     if ((gid1 = H5Gopen2(fid1, "link_to_2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a copy of integer datatype */
     if ((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Commit the datatype to the main file root group */
     if (H5Tcommit2(fid1, "myDatatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create dataspace */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Attach an attribute with the committed datatype to the group */
     if ((aid = H5Acreate2(gid1, "myAttribute", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write data to the attribute */
     if (H5Awrite(aid, tid, &wdata) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the attribute's datatype */
     if ((atid = H5Aget_type(aid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the datatype is not committed */
     if (H5Tcommitted(atid) == true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the attribute */
     if (H5Aclose(aid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a chunked dataset */
     if ((sid2 = H5Screate_simple(2, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (dcpl_g == H5P_DEFAULT)
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
     else
         dcpl = H5Pcopy(dcpl_g);
     if (0 > dcpl)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunks) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Initialize data buffers */
     for (i = 0; i < 60; i++) {
@@ -14026,125 +14026,125 @@ external_link_with_committed_datatype(hid_t fapl, bool new_format)
 
     /* Create a dataset with the committed datatype in the group */
     if ((did = H5Dcreate2(gid1, "myDataset", tid, sid2, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write to the dataset */
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the dataset's datatype */
     if ((dtid = H5Dget_type(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the datatype is not committed */
     if (H5Tcommitted(dtid) == true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset creation property list */
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataspaces */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the datatypes */
     if (H5Tclose(tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(atid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(dtid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the group */
     if (H5Gclose(gid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the mainfile */
     if ((fid1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the committed datatype in the mainfile */
     if ((tid = H5Topen2(fid1, "myDatatype", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the datatype is committed */
     if (H5Tcommitted(tid) == false)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the group which is externally linked to target file */
     if ((gid1 = H5Gopen2(fid1, "link_to_2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the attribute attached to the group */
     if ((aid = H5Aopen(gid1, "myAttribute", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the attribute's datatype */
     if ((atid = H5Aget_type(aid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the attribute's datatype is not committed */
     if (H5Tcommitted(atid) == true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the attribute */
     if (H5Aclose(aid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Delete the attribute */
     if (H5Adelete(gid1, "myAttribute") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataset in the group */
     if ((did = H5Dopen2(gid1, "myDataset", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the dataset's datatype */
     if ((dtid = H5Dget_type(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the dataset's datatype is not committed */
     if (H5Tcommitted(dtid) == true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Compare the data read should be the same as wbuf */
     if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the group */
     if (H5Gclose(gid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the datatypes */
     if (H5Tclose(tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(atid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(dtid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -14525,7 +14525,7 @@ ud_hard_links(hid_t fapl)
 
     /* Open group through UD link */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -14545,7 +14545,7 @@ ud_hard_links(hid_t fapl)
 
     /* Re-open group without using ud link to check that it was created properly */
     if ((gid = H5Gopen2(fid, "group/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -14555,11 +14555,11 @@ ud_hard_links(hid_t fapl)
 
     /* Close opened object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that H5Lget_objinfo works on the hard link */
     if (H5Lget_info2(fid, "ud_link", &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* UD hard links have no query function, thus return a "link length" of 0 */
     if (li.u.val_size != 0)
         TEST_ERROR;
@@ -14572,33 +14572,33 @@ ud_hard_links(hid_t fapl)
     /* Unlink the group pointed to by the UD link.  It shouldn't be
      * deleted because of the UD link. */
     if (H5Ldelete(fid, "/group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Ensure we can open the group through the UD link */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink the group contained within it. */
     if (H5Ldelete(gid, "new_group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now delete the UD link.  This should cause the group to be
      * deleted, too. */
     if (H5Ldelete(fid, "ud_link", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The file should be empty again. */
     if (empty_size != h5_get_file_size(filename, fapl))
         TEST_ERROR;
 
     if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -14739,7 +14739,7 @@ ud_link_reregister(hid_t fapl)
      * It should be a different group
      * than the UD hard link pointed to */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -14759,7 +14759,7 @@ ud_link_reregister(hid_t fapl)
 
     /* Re-open group without using ud link to check that it was created properly */
     if ((gid = H5Gopen2(fid, "rereg_target/new_group", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     if (H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE) < 0)
@@ -14769,51 +14769,51 @@ ud_link_reregister(hid_t fapl)
 
     /* Close opened object */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink the group pointed to by the UD hard link.  It shouldn't be
      * deleted because the UD link incremented its reference count. */
     if (H5Ldelete(fid, "/group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* What a mess! Re-register user-defined links to clean up the
      * reference counts.  We shouldn't actually need to unregister the
      * other link type */
     if (H5Lregister(UD_hard_class) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Ensure we can open the group through the UD link (now that UD hard
      * links have been registered) */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Delete the UD hard link.  This should cause the group to be
      * deleted, too. */
     if (H5Ldelete(fid, "ud_link", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink the other two groups so that we can make sure the file is empty */
     if (H5Ldelete(fid, "/rereg_target/new_group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Ldelete(fid, REREG_TARGET_NAME, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The file should be empty again. */
     if (empty_size != h5_get_file_size(filename, fapl))
         TEST_ERROR;
 
     if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lis_registered((H5L_type_t)UD_HARD_TYPE) != false)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -15035,7 +15035,7 @@ ud_callbacks(hid_t fapl, bool new_format)
 
     /* Try opening group through UD link */
     if ((gid = H5Gopen2(fid, UD_CB_LINK_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
@@ -15052,47 +15052,47 @@ ud_callbacks(hid_t fapl, bool new_format)
 
     /* Fill the query buffer */
     if (H5Lget_val(fid, UD_CB_LINK_NAME, query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(query_buf, "query succeeded") != 0)
         TEST_ERROR;
 
     /* Move the link */
     if (H5Lmove(fid, UD_CB_LINK_NAME, H5L_SAME_LOC, NEW_UD_CB_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open group to ensure that move worked */
     if ((gid = H5Gopen2(fid, NEW_UD_CB_LINK_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Remove UD link */
     if (H5Ldelete(fid, NEW_UD_CB_LINK_NAME, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test that the callbacks don't work if the link class is not registered */
 
     /* Create a new link. Just for fun, give it a non-default character
      * encoding (to test that LAPLs work) */
     if ((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_char_encoding(lcpl, H5T_CSET_UTF8) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_ud(fid, UD_CB_LINK_NAME, (H5L_type_t)UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN,
                      lcpl, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(lcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check its character encoding */
     if (H5Lget_info2(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (li.cset != H5T_CSET_UTF8)
         TEST_ERROR;
 
     /* Unregister the link class so the library forgets what its callbacks do */
     if (H5Lunregister((H5L_type_t)UD_CB_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now test that each of the callbacks fails */
     H5E_BEGIN_TRY
@@ -15134,7 +15134,7 @@ ud_callbacks(hid_t fapl, bool new_format)
 
     /* The query callback should NOT fail, but should be unable to give a linklen */
     if (H5Lget_info2(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (li.u.val_size != 0)
         TEST_ERROR;
     if (li.type != UD_CB_TYPE)
@@ -15142,11 +15142,11 @@ ud_callbacks(hid_t fapl, bool new_format)
 
     /* Unregister the UD hard links */
     if (H5Lunregister((H5L_type_t)UD_HARD_TYPE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -15269,7 +15269,7 @@ lapl_udata(hid_t fapl, bool new_format)
 
     /* Verify that we can open the new group without using the ud link */
     if ((gid2 = H5Gopen2(fid, "/group_a/subgroup_a", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid2) < 0)
         TEST_ERROR;
 
@@ -15290,7 +15290,7 @@ lapl_udata(hid_t fapl, bool new_format)
 
     /* Verify that we can open the new group without using the ud link */
     if ((gid2 = H5Gopen2(fid, "/group_b/subgroup_b", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid2) < 0)
         TEST_ERROR;
 
@@ -15577,13 +15577,13 @@ ud_link_errors(hid_t fapl, bool new_format)
     /* Now register the first class we'll be using.
      * It has the same ID as the plist class, and should replace it. */
     if (H5Lregister(UD_cbfail_class1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a group for the UD link to point to */
     if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Try to create internally defined links with H5Lcreate_ud */
     H5E_BEGIN_TRY
@@ -15615,13 +15615,13 @@ ud_link_errors(hid_t fapl, bool new_format)
     strcpy(group_name, "/group");
     if (H5Lcreate_ud(fid, "/ud_link", (H5L_type_t)UD_CBFAIL_TYPE, &group_name, strlen(group_name) + 1,
                      H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the group through the ud link */
     if ((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now test that each of the callbacks will cause a failure if it returns -1 */
     H5E_BEGIN_TRY
@@ -15652,7 +15652,7 @@ ud_link_errors(hid_t fapl, bool new_format)
 
     /* The traversal callback will fail (when opening the object) if we remove its target */
     if (H5Ldelete(fid, "group", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         gid = H5Gopen2(gid, "ud_link", H5P_DEFAULT);
@@ -15681,7 +15681,7 @@ ud_link_errors(hid_t fapl, bool new_format)
 
     /* Now use a class with different callback functions */
     if (H5Lregister(UD_cbfail_class2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Moving should still fail, but copying will succeed */
     H5E_BEGIN_TRY
@@ -15692,11 +15692,11 @@ ud_link_errors(hid_t fapl, bool new_format)
     if (status >= 0)
         TEST_ERROR;
     if (H5Lcopy(fid, "ud_link", fid, "copy_succ", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The query callback will succeed when we only want to get the size of the buffer... */
     if (H5Lget_info2(fid, "ud_link", &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (li.u.val_size != 0)
         TEST_ERROR;
     /* ...but fail when we try to write data to the buffer itself*/
@@ -15710,31 +15710,31 @@ ud_link_errors(hid_t fapl, bool new_format)
 
     /* Register a new class */
     if (H5Lregister(UD_cbfail_class3) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now querying should succeed */
     if (H5Lget_info2(fid, "ud_link", &li, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (li.u.val_size != 8)
         TEST_ERROR;
     if (H5Lget_val(fid, "ud_link", query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(query_buf, "succeed") != 0)
         TEST_ERROR;
 
     /* Moving and copying should both succeed */
     if (H5Lmove(fid, "copy_succ", H5L_SAME_LOC, "move_succ", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcopy(fid, "ud_link", fid, "copy_succ2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Delete link (this callback should work now) */
     if (H5Ldelete(fid, "ud_link", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -15794,39 +15794,39 @@ lapl_nlinks(hid_t fapl, bool new_format)
 
     /* Create chain of soft links to existing object (limited) */
     if (H5Lcreate_soft("final", fid, "soft1", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft1", fid, "soft2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft2", fid, "soft3", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft3", fid, "soft4", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft4", fid, "soft5", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft5", fid, "soft6", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft6", fid, "soft7", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft7", fid, "soft8", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft8", fid, "soft9", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft9", fid, "soft10", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft10", fid, "soft11", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft11", fid, "soft12", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft12", fid, "soft13", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft13", fid, "soft14", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft14", fid, "soft15", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft15", fid, "soft16", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("soft16", fid, "soft17", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close objects */
     if (H5Gclose(gid) < 0)
@@ -16017,7 +16017,7 @@ lapl_nlinks(hid_t fapl, bool new_format)
      * of object.
      */
     if ((gid = H5Gopen2(fid, "soft17", gapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid = H5Topen2(fid, "soft17/datatype", tapl)) < 0)
         TEST_ERROR;
     if ((did = H5Dopen2(fid, "soft17/dataset", dapl)) < 0)
@@ -16108,9 +16108,9 @@ linkinfo(hid_t fapl, bool new_format)
     if (H5Tcommit2(fid, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_soft("group", fid, "softlink", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
         TEST_ERROR;
@@ -16416,36 +16416,36 @@ link_visit(hid_t fapl, bool new_format)
     udata.idx  = 0;
     udata.info = lvisit0;
     if (H5Lvisit2(fid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Visit all the links reachable from the root group (with group ID) */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = lvisit0;
     if (H5Lvisit2(gid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Visit all the links reachable from each internal group */
     if ((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = lvisit1;
     if (H5Lvisit2(gid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = lvisit2;
     if (H5Lvisit2(gid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file created */
     if (H5Fclose(fid) < 0)
@@ -16493,47 +16493,47 @@ link_visit_by_name(hid_t fapl, bool new_format)
     udata.idx  = 0;
     udata.info = lvisit0;
     if (H5Lvisit_by_name2(fid, "/", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Visit all the links reachable from the root group (with group ID) */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = lvisit0;
     if (H5Lvisit_by_name2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Visit all the links reachable from each internal group */
     udata.idx  = 0;
     udata.info = lvisit1;
     if (H5Lvisit_by_name2(fid, "/Group1", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = lvisit1;
     if (H5Lvisit_by_name2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     udata.idx  = 0;
     udata.info = lvisit2;
     if (H5Lvisit_by_name2(fid, "/Group1/Group2", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata,
                           H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = lvisit2;
     if (H5Lvisit_by_name2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file created */
     if (H5Fclose(fid) < 0)
@@ -16609,38 +16609,38 @@ obj_visit(hid_t fapl, bool new_format)
     udata.idx  = 0;
     udata.info = new_format ? ovisit0_new : ovisit0_old;
     if (H5Ovisit3(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     //! [H5Ovisit3_snip]
 
     /* Visit all the objects reachable from the root group (with group ID) */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = new_format ? ovisit0_new : ovisit0_old;
     if (H5Ovisit3(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Visit all the objects reachable from each internal group */
     if ((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = new_format ? ovisit1_new : ovisit1_old;
     if (H5Ovisit3(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = new_format ? ovisit2_new : ovisit2_old;
     if (H5Ovisit3(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file created */
     if (H5Fclose(fid) < 0)
@@ -16691,53 +16691,53 @@ obj_visit_by_name(hid_t fapl, bool new_format)
     udata.info = new_format ? ovisit0_new : ovisit0_old;
     if (H5Ovisit_by_name3(fid, "/", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC,
                           H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     //! [H5Ovisit_by_name3_snip]
 
     /* Visit all the objects reachable from the root group (with group ID) */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = new_format ? ovisit0_new : ovisit0_old;
     if (H5Ovisit_by_name3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC,
                           H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Visit all the objects reachable from each internal group */
     udata.idx  = 0;
     udata.info = new_format ? ovisit1_new : ovisit1_old;
     if (H5Ovisit_by_name3(fid, "/Group1", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC,
                           H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = new_format ? ovisit1_new : ovisit1_old;
     if (H5Ovisit_by_name3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC,
                           H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     udata.idx  = 0;
     udata.info = new_format ? ovisit2_new : ovisit2_old;
     if (H5Ovisit_by_name3(fid, "/Group1/Group2", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata,
                           H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     udata.idx  = 0;
     udata.info = new_format ? ovisit2_new : ovisit2_old;
     if (H5Ovisit_by_name3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5O_INFO_BASIC,
                           H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file created */
     if (H5Fclose(fid) < 0)
@@ -16807,7 +16807,7 @@ obj_visit_stop(hid_t fapl, bool new_format)
      */
     nvisited = 0;
     if ((ret = H5Ovisit3(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_stop_cb, &nvisited, H5O_INFO_BASIC)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (ret != H5_ITER_STOP)
         TEST_ERROR;
     if (nvisited != 1)
@@ -16817,7 +16817,7 @@ obj_visit_stop(hid_t fapl, bool new_format)
     nvisited = 0;
     if ((ret = H5Ovisit_by_name3(fid, "/", H5_INDEX_NAME, H5_ITER_INC, visit_obj_stop_cb, &nvisited,
                                  H5O_INFO_BASIC, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (ret != H5_ITER_STOP)
         TEST_ERROR;
     if (nvisited != 1)
@@ -17343,20 +17343,20 @@ obj_exists(hid_t fapl, bool new_format)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Hard links */
     /* Verify that H5Oexists_by_name() returns false for non-existent link in root group */
     if ((status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (status != 0)
         TEST_ERROR;
 
     /* Create a group, as a destination for testing */
     if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() succeeds for hard linked object */
     if (true != H5Oexists_by_name(fid, "group", H5P_DEFAULT))
@@ -17364,14 +17364,14 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Verify that H5Oexists_by_name() returns false for non-existent object in non-root group */
     if ((status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (status != 0)
         TEST_ERROR;
 
     /* Soft links */
     /* Create dangling soft-link in root group */
     if (H5Lcreate_soft("dangle", fid, "soft1", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false for dangling soft-link in root group */
     if (false != H5Oexists_by_name(fid, "soft1", H5P_DEFAULT))
@@ -17379,7 +17379,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in root group that points to object */
     if (H5Lcreate_soft("/group", fid, "soft2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns true for soft-link in root group that points to object */
     if (true != H5Oexists_by_name(fid, "soft2", H5P_DEFAULT))
@@ -17387,7 +17387,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create dangling soft-link in non-root group */
     if (H5Lcreate_soft("dangle", fid, "group/soft1", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false for dangling soft-link in non-root group */
     if (false != H5Oexists_by_name(fid, "group/soft1", H5P_DEFAULT))
@@ -17395,7 +17395,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in non-root group that points to object */
     if (H5Lcreate_soft("/group", fid, "group/soft2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns true for soft-link in non-root group that points to object */
     if (true != H5Oexists_by_name(fid, "group/soft2", H5P_DEFAULT))
@@ -17458,7 +17458,7 @@ obj_exists(hid_t fapl, bool new_format)
     /* Soft->External links */
     /* Create soft-link in root group that points to dangling (file doesn't exist) external link */
     if (H5Lcreate_soft("external1", fid, "soft-elink1", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "soft-elink1", H5P_DEFAULT))
@@ -17466,7 +17466,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in root group that points to dangling (object doesn't exist) external link */
     if (H5Lcreate_soft("external2", fid, "soft-elink2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "soft-elink2", H5P_DEFAULT))
@@ -17474,7 +17474,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in root group that points to external link that points to object */
     if (H5Lcreate_soft("external3", fid, "soft-elink3", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns true */
     if (true != H5Oexists_by_name(fid, "soft-elink3", H5P_DEFAULT))
@@ -17483,7 +17483,7 @@ obj_exists(hid_t fapl, bool new_format)
     /* Create soft-link in root group that points to dangling (file doesn't exist) external link in non-root
      * group */
     if (H5Lcreate_soft("group/external1", fid, "soft-elink4", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "soft-elink4", H5P_DEFAULT))
@@ -17492,7 +17492,7 @@ obj_exists(hid_t fapl, bool new_format)
     /* Create soft-link in root group that points to dangling (object doesn't exist) external link in non-root
      * group */
     if (H5Lcreate_soft("group/external2", fid, "soft-elink5", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "soft-elink5", H5P_DEFAULT))
@@ -17500,7 +17500,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in root group that points to external link in non-root group that points to object */
     if (H5Lcreate_soft("group/external3", fid, "soft-elink6", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns true */
     if (true != H5Oexists_by_name(fid, "soft-elink6", H5P_DEFAULT))
@@ -17508,7 +17508,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in non-root group that points to dangling (file doesn't exist) external link */
     if (H5Lcreate_soft("/external1", fid, "group/soft-elink1", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "group/soft-elink1", H5P_DEFAULT))
@@ -17516,7 +17516,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in non-root group that points to dangling (object doesn't exist) external link */
     if (H5Lcreate_soft("/external2", fid, "group/soft-elink2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "group/soft-elink2", H5P_DEFAULT))
@@ -17524,7 +17524,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Create soft-link in non-root group that points to external link that points to object */
     if (H5Lcreate_soft("/external3", fid, "group/soft-elink3", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns true */
     if (true != H5Oexists_by_name(fid, "group/soft-elink3", H5P_DEFAULT))
@@ -17533,7 +17533,7 @@ obj_exists(hid_t fapl, bool new_format)
     /* Create soft-link in non-root group that points to dangling (file doesn't exist) external link in
      * non-root group */
     if (H5Lcreate_soft("/group/external1", fid, "group/soft-elink4", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "group/soft-elink4", H5P_DEFAULT))
@@ -17542,7 +17542,7 @@ obj_exists(hid_t fapl, bool new_format)
     /* Create soft-link in non-root group that points to dangling (object doesn't exist) external link in
      * non-root group */
     if (H5Lcreate_soft("/group/external2", fid, "group/soft-elink5", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false */
     if (false != H5Oexists_by_name(fid, "group/soft-elink5", H5P_DEFAULT))
@@ -17551,7 +17551,7 @@ obj_exists(hid_t fapl, bool new_format)
     /* Create soft-link in non-root group that points to external link in non-root group that points to object
      */
     if (H5Lcreate_soft("/group/external3", fid, "group/soft-elink6", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns true */
     if (true != H5Oexists_by_name(fid, "group/soft-elink6", H5P_DEFAULT))
@@ -17625,7 +17625,7 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Close file created */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -17667,11 +17667,11 @@ delete_self_referential_link(hid_t fapl, bool new_format)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a group, as a destination for testing */
     if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that H5Lexists() succeeds for hard linked object */
     if (true != H5Lexists(fid, "group", H5P_DEFAULT))
@@ -17737,7 +17737,7 @@ delete_self_referential_link(hid_t fapl, bool new_format)
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     gid = H5I_INVALID_HID;
 
     /*
@@ -17752,7 +17752,7 @@ delete_self_referential_link(hid_t fapl, bool new_format)
 
     /* Create a group, as a destination for testing */
     if ((gid = H5Gcreate2(fid, "group2", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close GCPL */
     if (H5Pclose(gcpl) < 0)
@@ -17823,12 +17823,12 @@ delete_self_referential_link(hid_t fapl, bool new_format)
 
     /* Close group */
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     gid = H5I_INVALID_HID;
 
     /* Close file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     fid = H5I_INVALID_HID;
 
     PASSED();
@@ -17912,7 +17912,7 @@ corder_create_empty(hid_t fapl)
 
     /* Check on group's status */
     if (H5G__is_empty_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close the group */
     if (H5Gclose(group_id) < 0)
@@ -17932,11 +17932,11 @@ corder_create_empty(hid_t fapl)
 
     /* Open group created */
     if ((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check on group's status */
     if (H5G__is_empty_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve group creation property list for group */
     if ((gcpl_id = H5Gget_create_plist(group_id)) < 0)
@@ -18018,7 +18018,7 @@ corder_create_compact(hid_t fapl)
 
     /* Check on group's initial status */
     if (H5G__is_empty_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) == true)
@@ -18038,7 +18038,7 @@ corder_create_compact(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_links_test(group_id, &nlinks) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (nlinks != (u + 1))
             TEST_ERROR;
         if (H5G__has_stab_test(group_id) == true)
@@ -18065,11 +18065,11 @@ corder_create_compact(hid_t fapl)
 
     /* Open group created */
     if ((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify state of group */
     if (H5G__has_links_test(group_id, &nlinks) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nlinks != max_compact)
         TEST_ERROR;
     if (H5G__has_stab_test(group_id) == true)
@@ -18162,7 +18162,7 @@ corder_create_dense(hid_t fapl)
 
     /* Check on group's initial status */
     if (H5G__is_empty_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) == true)
@@ -18182,7 +18182,7 @@ corder_create_dense(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_links_test(group_id, &nlinks) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (nlinks != (u + 1))
             TEST_ERROR;
         if (H5G__has_stab_test(group_id) == true)
@@ -18204,11 +18204,11 @@ corder_create_dense(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve & verify # of records in the name & creation order indices */
     if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (name_count != corder_count)
         TEST_ERROR;
 
@@ -18230,7 +18230,7 @@ corder_create_dense(hid_t fapl)
 
     /* Open group created */
     if ((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify state of group */
     if (H5G__has_links_test(group_id, NULL) == true)
@@ -18238,7 +18238,7 @@ corder_create_dense(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Loop through links, checking their creation order values */
     /* (the name index is used, but the creation order value is in the same order) */
@@ -18315,7 +18315,7 @@ corder_transition(hid_t fapl)
 
     /* Create group creation property list */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set creation order tracking & indexing on group */
     if (H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0)
@@ -18323,7 +18323,7 @@ corder_transition(hid_t fapl)
 
     /* Query the group creation properties */
     if (H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Increase estimated link info, so the group's object header is large
      *      enough to hold all the link messages in one chunk
@@ -18333,19 +18333,19 @@ corder_transition(hid_t fapl)
 
     /* Create group with creation order indexing & tracking on */
     if ((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the group creation property list */
     if (H5Pclose(gcpl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the group */
     if (H5Gclose(group_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the size of the file with an empty group */
     if ((empty_size = h5_get_file_size(filename, fapl)) < 0)
@@ -18353,11 +18353,11 @@ corder_transition(hid_t fapl)
 
     /* Re-open the file */
     if ((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group created */
     if ((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create several links, up to limit of compact form */
     for (u = 0; u < max_compact; u++) {
@@ -18381,11 +18381,11 @@ corder_transition(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve & verify # of records in the name & creation order indices */
     if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (name_count != corder_count)
         TEST_ERROR;
 
@@ -18401,11 +18401,11 @@ corder_transition(hid_t fapl)
         if (H5G__has_stab_test(group_id) == true)
             TEST_ERROR;
         if (H5G__is_new_dense_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Retrieve & verify # of records in the name & creation order indices */
         if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (name_count != corder_count)
             TEST_ERROR;
     } /* end for */
@@ -18417,7 +18417,7 @@ corder_transition(hid_t fapl)
 
     /* Verify state of group */
     if (H5G__has_links_test(group_id, &nlinks) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nlinks != (min_dense - 1))
         TEST_ERROR;
     if (H5G__has_stab_test(group_id) == true)
@@ -18440,11 +18440,11 @@ corder_transition(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve & verify # of records in the name & creation order indices */
     if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (name_count != corder_count)
         TEST_ERROR;
 
@@ -18462,7 +18462,7 @@ corder_transition(hid_t fapl)
 
     /* Open group created */
     if ((group_id = H5Gopen2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify state of group */
     if (H5G__has_links_test(group_id, NULL) == true)
@@ -18470,11 +18470,11 @@ corder_transition(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve & verify # of records in the name & creation order indices */
     if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (name_count != corder_count)
         TEST_ERROR;
 
@@ -18490,11 +18490,11 @@ corder_transition(hid_t fapl)
         if (H5G__has_stab_test(group_id) == true)
             TEST_ERROR;
         if (H5G__is_new_dense_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Retrieve & verify # of records in the name & creation order indices */
         if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (name_count != corder_count)
             TEST_ERROR;
     } /* end for */
@@ -18506,7 +18506,7 @@ corder_transition(hid_t fapl)
 
     /* Verify state of group */
     if (H5G__has_links_test(group_id, &nlinks) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (nlinks != (min_dense - 1))
         TEST_ERROR;
     if (H5G__has_stab_test(group_id) == true)
@@ -18529,11 +18529,11 @@ corder_transition(hid_t fapl)
     if (H5G__has_stab_test(group_id) == true)
         TEST_ERROR;
     if (H5G__is_new_dense_test(group_id) != true)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve & verify # of records in the name & creation order indices */
     if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (name_count != corder_count)
         TEST_ERROR;
 
@@ -18613,11 +18613,11 @@ corder_delete(hid_t fapl)
 
         /* Creating file with latest format will enable paged aggregation with persistent fs */
         if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close file */
         if (H5Fclose(file_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the size of an empty file */
         if ((empty_size = h5_get_file_size(filename, fapl)) < 0)
@@ -18625,11 +18625,11 @@ corder_delete(hid_t fapl)
 
         /* Re-open the file */
         if ((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create group creation property list */
         if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set creation order tracking & indexing on group */
         if (H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0)
@@ -18637,7 +18637,7 @@ corder_delete(hid_t fapl)
 
         /* Query the group creation properties */
         if (H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Increase estimated link info, so the group's object header is large
          *      enough to hold all the link messages in one chunk
@@ -18647,19 +18647,19 @@ corder_delete(hid_t fapl)
 
         /* Create group with creation order indexing & tracking on */
         if ((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Close the group creation property list */
         if (H5Pclose(gcpl_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create links until the group is in dense form */
         for (u = 0; u < max_compact * 2; u++) {
             snprintf(objname, sizeof(objname), "filler %u", u);
             if ((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Gclose(group_id2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
         } /* end for */
 
         /* Verify state of group */
@@ -18668,41 +18668,41 @@ corder_delete(hid_t fapl)
         if (H5G__has_stab_test(group_id) == true)
             TEST_ERROR;
         if (H5G__is_new_dense_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Retrieve & verify # of records in the name & creation order indices */
         if (H5G__new_dense_info_test(group_id, &name_count, &corder_count) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (name_count != corder_count)
             TEST_ERROR;
 
         /* Close the group */
         if (H5Gclose(group_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Check for deleting group without re-opening file */
         if (!reopen_file)
             /* Delete the group with the creation order index */
             if (H5Ldelete(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
         /* Close the file */
         if (H5Fclose(file_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Check for deleting group after re-opening file */
         if (reopen_file) {
             /* Re-open the file */
             if ((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Delete the group with the creation order index */
             if (H5Ldelete(file_id, CORDER_GROUP_NAME, H5P_DEFAULT) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Close the file */
             if (H5Fclose(file_id) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
         } /* end if */
 
         /* Get the size of the file now */
@@ -19050,7 +19050,7 @@ link_info_by_idx(hid_t fapl)
 
             /* Verify state of group */
             if (H5G__has_links_test(group_id, NULL) != true)
-                TEST_ERROR;
+                FAIL_STACK_ERROR;
 
             /* Check for out of bound offset queries */
             H5E_BEGIN_TRY
@@ -19105,7 +19105,7 @@ link_info_by_idx(hid_t fapl)
 
                 /* Verify state of group */
                 if (H5G__is_new_dense_test(group_id) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Verify link information for new link */
                 if (link_info_by_idx_check(group_id, objname, (hsize_t)u, hard_link, use_index) < 0)
@@ -19356,7 +19356,7 @@ link_info_by_idx_old(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Close the group */
         if (H5Gclose(group_id) < 0)
@@ -19518,7 +19518,7 @@ delete_by_idx(hid_t fapl)
 
                 /* Verify state of group (compact) */
                 if (H5G__has_links_test(group_id, NULL) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound deletion */
                 H5E_BEGIN_TRY
@@ -19587,7 +19587,7 @@ delete_by_idx(hid_t fapl)
                     /* Verify state of group (dense) */
                     if (u >= max_compact)
                         if (H5G__is_new_dense_test(group_id) != true)
-                            TEST_ERROR;
+                            FAIL_STACK_ERROR;
 
                     /* Verify link information for new link */
                     if (link_info_by_idx_check(group_id, objname, (hsize_t)u, true, use_index) < 0)
@@ -19674,7 +19674,7 @@ delete_by_idx(hid_t fapl)
                     /* Verify state of group (dense) */
                     if (u >= max_compact)
                         if (H5G__is_new_dense_test(group_id) != true)
-                            TEST_ERROR;
+                            FAIL_STACK_ERROR;
 
                     /* Verify link information for new link */
                     if (link_info_by_idx_check(group_id, objname, (hsize_t)u, true, use_index) < 0)
@@ -19935,7 +19935,7 @@ delete_by_idx_old(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Delete links in middle */
 
@@ -20043,7 +20043,7 @@ delete_by_idx_old(hid_t fapl)
 
         /* Verify state of group */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Close the group */
         if (H5Gclose(group_id) < 0)
@@ -20498,7 +20498,7 @@ link_iterate(hid_t fapl)
 
                 /* Verify state of group (compact) */
                 if (H5G__has_links_test(group_id, NULL) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound iteration on compact group */
                 skip = (hsize_t)u;
@@ -20531,7 +20531,7 @@ link_iterate(hid_t fapl)
 
                 /* Verify state of group (dense) */
                 if (H5G__is_new_dense_test(group_id) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound iteration on dense group */
                 skip = (hsize_t)u;
@@ -20941,7 +20941,7 @@ link_iterate_old(hid_t fapl)
 
         /* Verify state of group (symbol table) */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Check for out of bound iteration on old-style group */
         skip = (hsize_t)u;
@@ -21275,7 +21275,7 @@ open_by_idx(hid_t fapl)
 
                 /* Verify state of group (compact) */
                 if (H5G__has_links_test(group_id, NULL) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound open by index on compact group */
                 H5E_BEGIN_TRY
@@ -21319,7 +21319,7 @@ open_by_idx(hid_t fapl)
 
                 /* Verify state of group (dense) */
                 if (H5G__is_new_dense_test(group_id) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound open by index on compact group */
                 H5E_BEGIN_TRY
@@ -21589,7 +21589,7 @@ open_by_idx_old(hid_t fapl)
 
         /* Verify state of group (symbol table) */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Check for out of bound open by index */
         H5E_BEGIN_TRY
@@ -21914,7 +21914,7 @@ object_info(hid_t fapl)
 
                 /* Verify state of group (compact) */
                 if (H5G__has_links_test(group_id, NULL) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
@@ -21975,7 +21975,7 @@ object_info(hid_t fapl)
 
                 /* Verify state of group (dense) */
                 if (H5G__is_new_dense_test(group_id) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
@@ -22231,7 +22231,7 @@ object_info_old(hid_t fapl)
 
         /* Verify state of group (symbol table) */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Check for out of bound query by index */
         H5E_BEGIN_TRY
@@ -22600,7 +22600,7 @@ group_info(hid_t fapl)
 
                 /* Verify state of group (compact) */
                 if (H5G__has_links_test(group_id, NULL) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
@@ -22792,7 +22792,7 @@ group_info(hid_t fapl)
 
                 /* Verify state of group (dense) */
                 if (H5G__is_new_dense_test(group_id) != true)
-                    TEST_ERROR;
+                    FAIL_STACK_ERROR;
 
                 /* Check for out of bound query by index */
                 H5E_BEGIN_TRY
@@ -23079,7 +23079,7 @@ group_info_old(hid_t fapl)
 
         /* Verify state of group (old-style) */
         if (H5G__has_stab_test(group_id) != true)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Check for out of bound query by index */
         H5E_BEGIN_TRY
@@ -23273,9 +23273,9 @@ timestamps(hid_t fapl)
 
     /* Open groups */
     if ((group_id = H5Gopen2(file_id, TIMESTAMP_GROUP_1, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((group_id2 = H5Gopen2(file_id, TIMESTAMP_GROUP_2, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Retrieve the groups' creation properties */
     if ((gcpl_id = H5Gget_create_plist(group_id)) < 0)

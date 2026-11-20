@@ -539,7 +539,7 @@ reader(char *filename, hid_t fapl)
         fflush(stdout);
 
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Dread(d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
             TEST_ERROR;
 

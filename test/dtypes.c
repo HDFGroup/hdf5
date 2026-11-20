@@ -1923,7 +1923,7 @@ test_compound_9(void)
     } /* end if */
 
     if ((cmpd_tid = H5Topen2(file, "compound", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dup_tid = H5Tcopy(cmpd_tid)) < 0) {
         H5_FAILED();
@@ -2655,72 +2655,72 @@ test_compound_13(void)
      * compound datatype format.
      */
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open file and get root group. */
     h5_fixname(FILENAME[4], H5P_DEFAULT, filename, sizeof filename);
     if ((fileid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a compound type. */
     if ((dtypeid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((array1_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, 1, dims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(dtypeid, "x", HOFFSET(struct s1, x), array1_tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(dtypeid, "y", HOFFSET(struct s1, y), H5T_NATIVE_FLOAT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a space. */
     if ((spaceid = H5Screate(H5S_SCALAR)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create an attribute of this compound type. */
     if ((attid = H5Acreate2(grpid, COMPOUND13_ATTR_NAME, dtypeid, spaceid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write some data. */
     if (H5Awrite(attid, dtypeid, &data_out) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Release all resources. */
     if (H5Aclose(attid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(array1_tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(dtypeid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(spaceid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(grpid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fileid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(fapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now open the file and read it. */
     if ((fileid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((attid = H5Aopen(grpid, COMPOUND13_ATTR_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dtypeid = H5Aget_type(attid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tget_class(dtypeid) != H5T_COMPOUND)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (HOFFSET(struct s1, x) != H5Tget_member_offset(dtypeid, 0))
         TEST_ERROR;
     if (HOFFSET(struct s1, y) != H5Tget_member_offset(dtypeid, 1))
         TEST_ERROR;
     if (H5Aread(attid, dtypeid, &data_in) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check the data. */
     for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
@@ -2731,13 +2731,13 @@ test_compound_13(void)
 
     /* Release all resources. */
     if (H5Aclose(attid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(dtypeid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(grpid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fileid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -3788,7 +3788,7 @@ test_compound_18(void)
     /* Create File */
     h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a dataspace to use */
     sid = H5Screate_simple(1, &dim, NULL);
@@ -3832,13 +3832,13 @@ test_compound_18(void)
 
     /* Close IDs */
     if (H5Tclose(tid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
         FAIL_PUTS_ERROR("can't check if VFD is default VFD compatible");
@@ -3847,7 +3847,7 @@ test_compound_18(void)
         /* Open Generated File */
         /* (generated with gen_bad_compound.c) */
         if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Try to open the datatype */
         H5E_BEGIN_TRY
@@ -3888,9 +3888,9 @@ test_compound_18(void)
 
         /* Close IDs */
         if (H5Gclose(gid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
 
     PASSED();
@@ -4116,7 +4116,7 @@ test_compound_member_convert_id_leak(void)
 
     /* Store the current number of datatype IDs registered */
     if ((num_dtype_ids = H5I_nmembers(H5I_DATATYPE)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Convert a value from float to double */
     val1 = 3.0f;
@@ -4348,9 +4348,9 @@ test_query(void)
 
     /* Open the dataytpe for query */
     if ((tid1 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid2 = H5Topen2(file, enum_type, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Query member number and member index by name, for compound type */
     if (H5Tget_nmembers(tid1) != 4) {
@@ -4798,7 +4798,7 @@ test_named(hid_t fapl)
     if (H5Tclose(type) < 0)
         goto error;
     if ((type = H5Topen2(file, "native-int", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((status = H5Tcommitted(type)) < 0)
         goto error;
     if (!status) {
@@ -5524,19 +5524,19 @@ test_conv_str_3(void)
     } /* end for */
 
     if (H5Tget_precision(type) == 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tget_size(type) == 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tget_cset(type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tget_strpad(type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tset_offset(type, (size_t)0) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tget_order(type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY
     {
@@ -10787,11 +10787,11 @@ test_encode(bool H5_ATTR_DEPRECATED_USED use_old_decode_api)
 
     /* Open the dataytpe for query */
     if ((tid1 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid2 = H5Topen2(file, enum_type, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((tid3 = H5Topen2(file, vlstr_type, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*-----------------------------------------------------------------------
      * Test encoding and decoding compound, enumerate, and vl string datatypes
@@ -11101,63 +11101,63 @@ test_latest(void)
 
     /* Create a compound datatype */
     if ((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the 'use the earliest format' bounds in the FAPL */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create file using earliest version of the file format */
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make a copy of the datatype, to commit */
     if ((tid2 = H5Tcopy(tid1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Commit compound datatype */
     if (H5Tcommit2(file, compnd_type, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get information about datatype on disk */
     if (H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     old_dtype_oh_size = oi.hdr.space.total;
 
     /* Close datatype */
     if (H5Tclose(tid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that datatype has been encoded/decoded correctly */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataytpe for query */
     if ((tid2 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that the datatype was encoded/decoded correctly */
     if (H5Tequal(tid1, tid2) <= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get information about datatype on disk */
     if (H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the object header info is still the same */
     if (old_dtype_oh_size != oi.hdr.space.total)
@@ -11165,32 +11165,32 @@ test_latest(void)
 
     /* Close datatype */
     if (H5Tclose(tid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the 'use the latest format' bounds in the FAPL */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create file using default FAPL */
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make a copy of the datatype, to commit */
     if ((tid2 = H5Tcopy(tid1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Commit compound datatype */
     if (H5Tcommit2(file, compnd_type, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get information about datatype on disk */
     if (H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     new_dtype_oh_size = oi.hdr.space.total;
 
     /* Check that the new format is smaller than the old format */
@@ -11199,27 +11199,27 @@ test_latest(void)
 
     /* Close datatype */
     if (H5Tclose(tid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that datatype has been encoded/decoded correctly */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the dataytpe for query */
     if ((tid2 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that the datatype was encoded/decoded correctly */
     if (H5Tequal(tid1, tid2) <= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get information about datatype on disk */
     if (H5Oget_native_info_by_name(file, compnd_type, &oi, H5O_NATIVE_INFO_HDR, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the object header info is still the same */
     if (new_dtype_oh_size != oi.hdr.space.total)
@@ -11227,19 +11227,19 @@ test_latest(void)
 
     /* Close datatype */
     if (H5Tclose(tid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close file */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close FAPL */
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close datatype */
     if (H5Tclose(tid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -12034,19 +12034,19 @@ test_set_order_compound(hid_t fapl)
     TESTING("H5Tset/get_order for compound type");
 
     if ((memb_cmpd = H5Tcreate(H5T_COMPOUND, sizeof(atomic_cmpd))) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(memb_cmpd, "i", HOFFSET(atomic_cmpd, i), H5T_NATIVE_INT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(memb_cmpd, "c", HOFFSET(atomic_cmpd, c), H5T_NATIVE_CHAR) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(memb_cmpd, "s", HOFFSET(atomic_cmpd, s), H5T_NATIVE_SHORT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(memb_cmpd, "f", HOFFSET(atomic_cmpd, f), H5T_NATIVE_FLOAT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the order to little-endian. */
     if (H5Tset_order(memb_cmpd, H5T_ORDER_BE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the array datatypes */
     memb_array1 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 2, dims);
@@ -12054,34 +12054,34 @@ test_set_order_compound(hid_t fapl)
 
     /* Set the order to big-endian. */
     if (H5Tset_order(memb_array1, H5T_ORDER_LE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a variable-length datatype */
     if ((vl_id = H5Tvlen_create(H5T_NATIVE_UINT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a compound type using the types above. */
     if ((cmpd = H5Tcreate(H5T_COMPOUND, sizeof(complex_cmpd))) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(cmpd, "a", HOFFSET(complex_cmpd, a), memb_cmpd) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(cmpd, "vl_type", HOFFSET(complex_cmpd, vl), vl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(cmpd, "b", HOFFSET(complex_cmpd, b), memb_array1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tinsert(cmpd, "d", HOFFSET(complex_cmpd, d), memb_array2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The order should be mixed now. */
     if (H5Tget_order(cmpd) != H5T_ORDER_MIXED)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create an array of the compound type above */
     cmpd_array = H5Tarray_create2(cmpd, 2, dims);
 
     /* The order of the array type should be the same as the compound type */
     if (H5Tget_order(cmpd_array) != H5T_ORDER_MIXED)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that the order can't be 'none'. */
     H5E_BEGIN_TRY
@@ -12099,29 +12099,29 @@ test_set_order_compound(hid_t fapl)
 
     /* Change the order of the compound type to big-endian*/
     if (H5Tset_order(cmpd, H5T_ORDER_BE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that the order of the compound type is big-endian */
     if (H5Tget_order(cmpd) != H5T_ORDER_BE)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Change the order of the array type to little-endian*/
     if (H5Tset_order(cmpd_array, H5T_ORDER_LE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that the order of the array type is little-endian */
     if (H5Tget_order(cmpd_array) != H5T_ORDER_LE)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Commit the data type */
     if (H5Tcommit2(file, "compound", cmpd, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify that committed type can't change order */
     H5E_BEGIN_TRY
@@ -12131,19 +12131,19 @@ test_set_order_compound(hid_t fapl)
         TEST_ERROR;
 
     if (H5Tclose(memb_cmpd) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(memb_array1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(memb_array2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(vl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(cmpd) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(cmpd_array) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -12824,7 +12824,7 @@ test_delete_obj_named(hid_t fapl)
 
     /* Set up filenames & FAPLs */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
@@ -12842,62 +12842,62 @@ test_delete_obj_named(hid_t fapl)
 
             /* Test deleting dataset opened through different file ID */
             if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Dclose(dset) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea1) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Ldelete(filea2, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(fileb) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create test file, with attribute that uses committed datatype */
             create_del_obj_named_test_file(filename, fapl, low, high);
 
             /* Test deleting attribute opened through different file ID */
             if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT,
                                         H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Aclose(attr) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea1) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Adelete_by_name(filea2, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(fileb) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
         } /* end high */
     }     /* end low */
 
     if (H5Pclose(fapl2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -12945,7 +12945,7 @@ test_delete_obj_named_fileid(hid_t fapl)
 
     /* Set up filenames & FAPLs */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
     h5_fixname(FILENAME[9], fapl2, filename2, sizeof filename2);
 
@@ -12962,13 +12962,13 @@ test_delete_obj_named_fileid(hid_t fapl)
 
             /* Test getting file ID for dataset opened through different file ID */
             if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Verify file ID from dataset matches correct file */
             dset_fid = H5Iget_file_id(dset);
@@ -12985,19 +12985,19 @@ test_delete_obj_named_fileid(hid_t fapl)
             H5Tclose(type);
 
             if (H5Dclose(dset) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea1) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((dset = H5Dopen2(filea1, DEL_OBJ_NAMED_DATASET, H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Verify file ID from dataset matches correct file */
             dset_fid = H5Iget_file_id(dset);
@@ -13014,27 +13014,27 @@ test_delete_obj_named_fileid(hid_t fapl)
             H5Tclose(type);
 
             if (H5Dclose(dset) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea1) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(filea2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(fileb) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create test file, with attribute that uses committed datatype */
             create_del_obj_named_test_file(filename, fapl, low, high);
 
             /* Test getting file ID for attribute opened through different file ID */
             if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((filea2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT,
                                         H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Verify file ID from dataset matches correct file */
             attr_fid = H5Iget_file_id(attr);
@@ -13051,20 +13051,20 @@ test_delete_obj_named_fileid(hid_t fapl)
             H5Tclose(type);
 
             if (H5Aclose(attr) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea1) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((fileb = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((filea1 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((attr = H5Aopen_by_name(filea1, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, H5P_DEFAULT,
                                         H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Verify file ID from dataset matches correct file */
             attr_fid = H5Iget_file_id(attr);
@@ -13081,19 +13081,19 @@ test_delete_obj_named_fileid(hid_t fapl)
             H5Tclose(type);
 
             if (H5Aclose(attr) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Fclose(filea1) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(filea2) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (H5Fclose(fileb) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
         } /* end high */
     }     /* end low */
 
     if (H5Pclose(fapl2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -13146,18 +13146,18 @@ test_deprec(hid_t fapl)
     /* Create an array datatype with an atomic base type */
     /* (dimension permutations allowed, but not stored) */
     if ((type = H5Tarray_create1(H5T_NATIVE_INT, (int)rank, dims, perm)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
     if (H5Tdetect_class(type, H5T_ARRAY) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tdetect_class(type, H5T_INTEGER) != true)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the array dimensions */
     /* (Query the dimension permutations, which is allowed, but ignored) */
     if (H5Tget_array_dims1(type, rdims, rperm) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check the array dimensions */
     dim_mismatch = false;
@@ -13184,11 +13184,11 @@ test_deprec(hid_t fapl)
 
     /* Close the datatype */
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Predefined types cannot be committed */
     H5E_BEGIN_TRY
@@ -13201,11 +13201,11 @@ test_deprec(hid_t fapl)
 
     /* Copy a predefined datatype and commit the copy */
     if ((type = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tcommit1(file, "native-int", type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((status = H5Tcommitted(type)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (0 == status)
         FAIL_PUTS_ERROR("    H5Tcommitted() returned false!");
 
@@ -13231,19 +13231,19 @@ test_deprec(hid_t fapl)
      * Close the committed type and reopen it.  It should return a named type.
      */
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((type = H5Topen1(file, "native-int")) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((status = H5Tcommitted(type)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (!status)
         FAIL_PUTS_ERROR("    Opened named types should be named types!");
 
     /* Close */
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Reopen file with read only access */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
@@ -13319,25 +13319,25 @@ test_utf_ascii_conv(void)
      ************************************************/
     /* Create a variable-length string */
     if ((utf8_vtid = H5Tcopy(H5T_C_S1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((status = H5Tset_size(utf8_vtid, H5T_VARIABLE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the character set for the string to UTF-8 */
     if ((status = H5Tset_cset(utf8_vtid, H5T_CSET_UTF8)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a variable-length string */
     if ((ascii_vtid = H5Tcopy(H5T_C_S1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((status = H5Tset_size(ascii_vtid, H5T_VARIABLE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the character set for the string to ASCII (should already be so) */
     if ((status = H5Tset_cset(ascii_vtid, H5T_CSET_ASCII) < 0))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test conversion in memory */
     H5E_BEGIN_TRY
@@ -13346,24 +13346,24 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a file */
     h5_fixname(FILENAME[10], H5P_DEFAULT, filename, sizeof filename);
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a scalar dataspace for the dataset */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a dataset of UTF8 string type */
     if ((did = H5Dcreate2(fid, UTF8_DATASET, utf8_vtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the UTF8 string, as UTF8 */
     if ((status = H5Dwrite(did, utf8_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_w)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the UTF8 string, as ASCII, supposed to fail */
     H5E_BEGIN_TRY
@@ -13372,11 +13372,11 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if ((status = H5Dclose(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /************************************************
      * Test VL string conversion from ASCII to UTF8
@@ -13388,15 +13388,15 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a dataset of ASCII string type */
     if ((did = H5Dcreate2(fid, ASCII_DATASET, ascii_vtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the ASCII string, as ASCII */
     if ((status = H5Dwrite(did, ascii_vtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_w)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the ASCII string, as UTF8, supposed to fail */
     H5E_BEGIN_TRY
@@ -13405,44 +13405,44 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if ((status = H5Dclose(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the UTF8 VL-string datatype */
     if ((status = H5Tclose(utf8_vtid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the ASCII VL-string datatype */
     if ((status = H5Tclose(ascii_vtid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /**********************************************************
      * Test fixed-length string conversion from UTF8 to ASCII
      **********************************************************/
     /* Create a fixed-length UTF8 string */
     if ((utf8_tid = H5Tcopy(H5T_C_S1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((status = H5Tset_size(utf8_tid, 4)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the character set for the string to UTF-8 */
     if ((status = H5Tset_cset(utf8_tid, H5T_CSET_UTF8)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a fixed-length ASCII string */
     if ((ascii_tid = H5Tcopy(H5T_C_S1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((status = H5Tset_size(ascii_tid, 4)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the character set for the string to ASCII (should already be so) */
     if ((status = H5Tset_cset(ascii_tid, H5T_CSET_ASCII) < 0))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test conversion in memory */
     H5E_BEGIN_TRY
@@ -13451,15 +13451,15 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a dataset */
     if ((did = H5Dcreate2(fid, UTF8_DATASET2, utf8_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the UTF8 string, as UTF8 */
     if ((status = H5Dwrite(did, utf8_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &utf8_w)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the UTF8 string as ASCII, supposed to fail */
     H5E_BEGIN_TRY
@@ -13468,11 +13468,11 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if ((status = H5Dclose(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /**********************************************************
      * Test fixed-length string conversion from ASCII to UTF8
@@ -13484,15 +13484,15 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a dataset */
     if ((did = H5Dcreate2(fid, ASCII_DATASET2, ascii_tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the ASCII string, as ASCII */
     if ((status = H5Dwrite(did, ascii_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ascii_w)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the UTF8 string as ASCII, supposed to fail */
     H5E_BEGIN_TRY
@@ -13501,27 +13501,27 @@ test_utf_ascii_conv(void)
     }
     H5E_END_TRY
     if (status >= 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if ((status = H5Dclose(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the UTF8 string datatype */
     if ((status = H5Tclose(utf8_tid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the ASCII string datatype */
     if ((status = H5Tclose(ascii_tid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataspace */
     if ((status = H5Sclose(sid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the file */
     if ((status = H5Fclose(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -14073,7 +14073,7 @@ test_versionbounds(void)
             /* Get the version of this datatype */
             dtypep = (H5T_t *)H5I_object(dset_dtype);
             if (dtypep == NULL)
-                TEST_ERROR;
+                FAIL_STACK_ERROR;
             highest_version = dtypep->shared->version;
 
             /* Verify version of the datatype recursively */

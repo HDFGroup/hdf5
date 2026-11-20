@@ -223,7 +223,7 @@ generate_eoc_test_file(hid_t fapl_id)
 
     /* Ensure we're using the correct chunk indexing scheme */
     if (H5D__layout_idx_type_test(did, &idx_type) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (idx_type != H5D_CHUNK_IDX_BTREE)
         FAIL_PUTS_ERROR("should be using version 1 B-tree as the chunk index");
 
@@ -314,7 +314,7 @@ generate_eoc_test_file(hid_t fapl_id)
 
     /* Ensure we're using the correct chunk indexing scheme */
     if (H5D__layout_idx_type_test(did, &idx_type) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (idx_type != H5D_CHUNK_IDX_EARRAY)
         FAIL_PUTS_ERROR("should be using extensible array as the chunk index");
 
@@ -358,7 +358,7 @@ generate_eoc_test_file(hid_t fapl_id)
 
     /* Ensure we're using the correct chunk indexing scheme */
     if (H5D__layout_idx_type_test(did, &idx_type) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (idx_type != H5D_CHUNK_IDX_BT2)
         FAIL_PUTS_ERROR("should be using version 2 B-tree as the chunk index");
 
@@ -400,7 +400,7 @@ generate_eoc_test_file(hid_t fapl_id)
 
     /* Ensure we're using the correct chunk indexing scheme */
     if (H5D__layout_idx_type_test(did, &idx_type) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (idx_type != H5D_CHUNK_IDX_FARRAY)
         FAIL_PUTS_ERROR("should be using fixed array as the chunk index");
 
@@ -442,7 +442,7 @@ generate_eoc_test_file(hid_t fapl_id)
 
     /* Ensure we're using the correct chunk indexing scheme */
     if (H5D__layout_idx_type_test(did, &idx_type) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (idx_type != H5D_CHUNK_IDX_SINGLE)
         FAIL_PUTS_ERROR("should be using single chunk as the chunk index");
 
@@ -477,7 +477,7 @@ generate_eoc_test_file(hid_t fapl_id)
 
     /* Ensure we're using the correct layout scheme */
     if (H5D__layout_type_test(did, &layout_type) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (layout_type != H5D_CONTIGUOUS)
         FAIL_PUTS_ERROR("should be using contiguous layout");
 
@@ -516,7 +516,7 @@ generate_eoc_test_file(hid_t fapl_id)
 
     /* Ensure we're using the correct layout scheme */
     if (H5D__layout_type_test(did, &layout_type) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (layout_type != H5D_COMPACT)
         FAIL_PUTS_ERROR("should be using compact layout");
 
@@ -589,7 +589,7 @@ check_group_layout(hid_t fid, const char *group_name)
 
     /* Get a pointer to the file struct */
     if (NULL == (file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Record the number of cache entries */
     before = file_ptr->shared->cache->index_len;
@@ -597,7 +597,7 @@ check_group_layout(hid_t fid, const char *group_name)
 #ifdef EOC_MANUAL_INSPECTION
     printf("\nCACHE BEFORE GROUP OPEN:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     printf("NUMBER OF CACHE ENTRIES: %u\n", before);
 #endif
 
@@ -605,7 +605,7 @@ check_group_layout(hid_t fid, const char *group_name)
     if ((gid1 = H5Gopen2(fid, group_name, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (NULL == (grp_ptr = (H5G_t *)H5VL_object_verify(gid1, H5I_GROUP)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     tag1 = grp_ptr->oloc.addr;
 
     /* Open and close all sub-groups */
@@ -621,7 +621,7 @@ check_group_layout(hid_t fid, const char *group_name)
             TEST_ERROR;
 
         if (NULL == (grp_ptr = (H5G_t *)H5VL_object_verify(gid2, H5I_GROUP)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         tag2 = grp_ptr->oloc.addr;
 
         if (H5Gclose(gid2) < 0)
@@ -637,7 +637,7 @@ check_group_layout(hid_t fid, const char *group_name)
 #ifdef EOC_MANUAL_INSPECTION
     printf("\nCACHE AFTER OPENING GROUPS (WHILE OPEN):\n");
     if (H5AC_dump_cache(file_ptr) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     printf("MAIN GROUP TAG: %#X\n", tag1);
     printf("NUMBER OF CACHE ENTRIES: %u\n", during);
 #endif
@@ -652,7 +652,7 @@ check_group_layout(hid_t fid, const char *group_name)
 #ifdef EOC_MANUAL_INSPECTION
     printf("\nCACHE AFTER CLOSING GROUPS:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     printf("NUMBER OF CACHE ENTRIES: %u\n", after);
 #endif
 
@@ -703,7 +703,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
 
     /* Get a pointer to the file struct */
     if (NULL == (file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create the data buffer */
     if (NULL == (data = (int *)calloc(NELEMENTS, sizeof(int))))
@@ -715,7 +715,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
 #ifdef EOC_MANUAL_INSPECTION
     printf("\nCACHE BEFORE DATASET OPEN:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     printf("NUMBER OF CACHE ENTRIES: %u\n", before);
 #endif
 
@@ -723,7 +723,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     if ((did = H5Dopen2(fid, dset_name, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (NULL == (dset_ptr = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     tag = dset_ptr->oloc.addr;
 
     /* Read data from the dataset so the cache gets populated with chunk entries
@@ -738,7 +738,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
 #ifdef EOC_MANUAL_INSPECTION
     printf("\nCACHE AFTER DATA READ (WHILE OPEN):\n");
     if (H5AC_dump_cache(file_ptr) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     printf("TAG: %#X\n", tag);
     printf("NUMBER OF CACHE ENTRIES: %u\n", during);
 #endif
@@ -753,7 +753,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
 #ifdef EOC_MANUAL_INSPECTION
     printf("\nCACHE AFTER DATASET CLOSE:\n");
     if (H5AC_dump_cache(file_ptr) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     printf("NUMBER OF CACHE ENTRIES: %u\n", after);
 #endif
 

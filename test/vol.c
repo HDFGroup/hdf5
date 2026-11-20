@@ -1729,7 +1729,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Create fake object on fake VOL connector */
     if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, fake_vol_id)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Pop the API context off the stack */
     if (H5VL_SUBCLS_DATATYPE == subcls)
@@ -1763,19 +1763,19 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
         /* Destroy fake datatype object */
         if (NULL == (dt = H5I_remove(obj_id)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (H5VL_free_object(dt->vol_obj) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         dt->vol_obj = NULL;
         if (H5T_close(dt) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     } /* end if */
     else {
         /* Destroy fake object */
         if (NULL == (vol_obj = H5I_remove(obj_id)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (H5VL_free_object(vol_obj) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     } /* end else */
 
     /* Push a new API context on the stack */
@@ -1786,7 +1786,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Create fake object on reg_opt VOL connector */
     if (H5I_INVALID_HID == (obj_id = H5VL__register_using_vol_id_test(id_type, &fake_obj, reg_opt_vol_id)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Pop the API context off the stack */
     if (H5VL_SUBCLS_DATATYPE == subcls)
@@ -1840,19 +1840,19 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
         /* Destroy fake datatype object */
         if (NULL == (dt = H5I_remove(obj_id)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (H5VL_free_object(dt->vol_obj) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         dt->vol_obj = NULL;
         if (H5T_close(dt) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     } /* end if */
     else {
         /* Destroy fake object */
         if (NULL == (vol_obj = H5I_remove(obj_id)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         if (H5VL_free_object(vol_obj) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     } /* end else */
 
     /* Unregister 2nd registered optional operation */
@@ -2043,7 +2043,7 @@ test_async_vol_props(void)
 
     /* Test query w/NULL for cap_flags parameter */
     if (H5Pget_vol_cap_flags(fapl_id, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Override possible environment variable & re-initialize default VOL connector */
     conn_env_str = getenv(HDF5_VOL_CONNECTOR);
@@ -2053,14 +2053,14 @@ test_async_vol_props(void)
         if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
             TEST_ERROR;
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
 
     /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
      */
     if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) > 0)
         TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
@@ -2068,17 +2068,17 @@ test_async_vol_props(void)
 
     /* Close FAPL */
     if (H5Pclose(fapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Register a fake VOL connector that sets the async capability flag */
     if ((vol_id = H5VLregister_connector(&fake_async_vol_g, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set environment variable to use 'fake async' connector & re-init default connector */
     if (HDsetenv(HDF5_VOL_CONNECTOR, "fake_async", true) < 0)
         TEST_ERROR;
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Retrieve the file access property again */
     fapl_id = h5_fileaccess();
@@ -2086,7 +2086,7 @@ test_async_vol_props(void)
     /* Test query w/fake async VOL, which should succeed */
     vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
@@ -2096,23 +2096,23 @@ test_async_vol_props(void)
     if (HDunsetenv(HDF5_VOL_CONNECTOR) < 0)
         TEST_ERROR;
     if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close FAPL */
     if (H5Pclose(fapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Retrieve the file access property again */
     fapl_id = h5_fileaccess();
 
     /* Set the VOL connector for the FAPL to the fake async connector */
     if (H5Pset_vol(fapl_id, vol_id, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
     vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
@@ -2122,12 +2122,12 @@ test_async_vol_props(void)
     passthru_info.under_vol_id   = vol_id;
     passthru_info.under_vol_info = NULL;
     if (H5Pset_vol(fapl_id, H5VL_PASSTHRU, &passthru_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
     vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
@@ -2139,7 +2139,7 @@ test_async_vol_props(void)
 
     /* Close FAPL */
     if (H5Pclose(fapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Restore environment variable, if there was one */
     if (conn_env_str) {
@@ -2148,7 +2148,7 @@ test_async_vol_props(void)
         free(conn_env_str);
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
     }
 
     PASSED();
@@ -2217,7 +2217,7 @@ test_vol_cap_flags(void)
         if (H5Pget_vol_id(H5P_DEFAULT, &connector_id) < 0)
             TEST_ERROR;
         if (NULL == (connector = H5I_object(connector_id)))
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
@@ -2236,7 +2236,7 @@ test_vol_cap_flags(void)
     passthru_info.under_vol_info = NULL;
 
     if (H5Pset_vol(fapl_id, H5VL_PASSTHRU, &passthru_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify the correctness of the VOL capacity flags */
     vol_cap_flags_g = H5VL_CAP_FLAG_NONE;

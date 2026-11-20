@@ -2272,7 +2272,7 @@ test_refer_dtype(hid_t file)
 
     /* Create a group */
     if ((group = H5Gcreate2(file, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a datatype to refer to */
     if ((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0)
@@ -2892,33 +2892,33 @@ test_ninteger(void)
      */
     /* create a file using default properties */
     if ((fid1 = H5Fcreate("tstint1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* create a data space */
     if ((sid1 = H5Screate_simple(rank, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* create dcpl  */
     if ((dcpl1 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* create a dataset */
     if ((did1 = H5Dcreate2(fid1, "dset", H5T_NATIVE_INT, sid1, H5P_DEFAULT, dcpl1, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* write */
     if (H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* close  */
     if (H5Sclose(sid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*-------------------------------------------------------------------------
      * step 2: open and create another file copying the data from file1
@@ -2927,67 +2927,67 @@ test_ninteger(void)
 
     /* open */
     if ((fid1 = H5Fopen("tstint1.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* open dataset */
     if ((did1 = H5Dopen2(fid1, "dset", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((sid1 = H5Dget_space(did1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get dcpl */
     if ((dcpl1 = H5Dget_create_plist(did1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get file datatype */
     if ((tid1 = H5Dget_type(did1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get native datatype */
     if ((nid1 = H5Tget_native_type(tid1, H5T_DIR_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get size */
     if (H5Tget_size(nid1) == 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get rank */
     if ((rank = H5Sget_simple_extent_ndims(sid1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     memset(dims, 0, sizeof dims);
 
     /* get dimension */
     if (H5Sget_simple_extent_dims(sid1, dims, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* read */
     if (H5Dread(did1, nid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, chk) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* create a file using default properties */
     if ((fid2 = H5Fcreate("tstint2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* create a dataset using the native type */
     if ((did2 = H5Dcreate2(fid2, "dset", nid1, sid1, H5P_DEFAULT, dcpl1, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* write */
     if (H5Dwrite(did2, nid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, chk) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get dcpl */
     if ((dcpl2 = H5Dget_create_plist(did2)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get file datatype */
     if ((tid2 = H5Dget_type(did2)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* get native datatype */
     if ((nid2 = H5Tget_native_type(tid2, H5T_DIR_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* check */
     if (H5Tget_precision(nid1) != H5Tget_precision(nid2)) {
@@ -3012,27 +3012,27 @@ test_ninteger(void)
 
     /* close  */
     if (H5Sclose(sid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(tid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(tid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(nid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(nid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;

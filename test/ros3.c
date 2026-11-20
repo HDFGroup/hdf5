@@ -713,7 +713,7 @@ test_vfl_read(void)
         if (S3_TEST_MAX_URL_SIZE < tests[i].len)
             FAIL_PUTS_ERROR("buffer too small!");
         if (H5FD_set_eoa(fd, H5FD_MEM_DEFAULT, tests[i].eoa_set) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
         memset(buffer, 0, S3_TEST_MAX_URL_SIZE);
 
         /* Check test config */
