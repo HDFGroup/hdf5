@@ -1,0 +1,6 @@
+dataset: </u32_zero> and </u32_one>
+size:           [1]           [1]
+position        u32_zero        u32_one         difference      relative       
+------------------------------------------------------------------------
+[ 0 ]          0               1               1               not comparable
+1 differences found

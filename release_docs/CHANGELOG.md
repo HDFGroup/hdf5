@@ -501,6 +501,16 @@ Fixes #5723.
 
 ## Tools
 
+### Fixed unsigned integer comparisons in h5diff
+
+   Large unsigned 32-bit values could be printed as negative numbers and cause
+   `h5diff -d` to miss differences above the requested threshold. Relative
+   differences reported with `-p` could also be incorrect when unsigned values
+   were converted through a signed type. These comparisons now use unsigned
+   magnitudes while preserving the existing threshold and zero-value behavior.
+
+   Fixes GitHub issue #6756.
+
 ### Fixed a double free in h5repack
 
    The tool h5repack produced a double free crash on a malicious HDF5 file in copy_refs_attr()
