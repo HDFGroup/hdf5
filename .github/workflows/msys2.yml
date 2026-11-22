@@ -40,6 +40,8 @@ jobs:
         with:
           msystem: ${{matrix.sys}}
           update: true
+          if [[ "${{ matrix.sys }}" == "clangarm64" ]]; then
+            cache: false
           install: >-
            base-devel
            git
