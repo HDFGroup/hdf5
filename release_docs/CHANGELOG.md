@@ -455,9 +455,9 @@ Fixes GitHub issue #6679.
    Autotools wrappers did, to run a different compiler. For example, `HDF5_CC=clang h5cc foo.c`.
    `h5pcc` reads `HDF5_CC` and `h5pfc` reads `HDF5_FC`.
 
-   The release CI now compiles and runs a C, C++ and Fortran program with the glibc 2.28 and Intel
-   Linux binaries, outside the build environment and with the recorded compiler path removed, and
-   checks `pkg-config --define-prefix` on them.
+   The release CI now compiles and runs a C, C++ and Fortran program with the glibc 2.28 binary
+   (outside its build container) and the Intel Linux binary, each also with the recorded compiler
+   path made nonexistent, and checks `pkg-config --define-prefix` on them.
 
 ### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
 
