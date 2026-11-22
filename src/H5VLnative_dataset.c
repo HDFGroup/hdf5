@@ -718,6 +718,30 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         case H5VL_NATIVE_DATASET_CHUNK_READ: {
             H5VL_native_dataset_chunk_read_t *chunk_read_args = &opt_args->chunk_read;
             hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
+            size_t  sub_chunk_byte_offset = 0;     /* Raw chunk byte offset from the DXPL */
+            size_t  sub_chunk_byte_size   = 0;     /* Raw chunk byte size from the DXPL */
+
+            /* H5Dread_chunk2 passes buf_size and honors a sub-chunk byte range set on
+             * the DXPL; H5Dread_chunk1 passes no buf_size and always reads the whole
+             * chunk. The range is read from the DXPL here, rather than carried in
+             * H5VL_native_dataset_chunk_read_t, so that struct keeps its layout for
+             * callers built against earlier headers.
+             */
+            if (chunk_read_args->buf_size) {
+                H5P_genplist_t *dxpl_plist; /* DXPL for this operation */
+
+                if (NULL == (dxpl_plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, true)))
+                    HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for DXPL ID");
+                if (H5P_get(dxpl_plist, H5D_XFER_SUB_CHUNK_BYTE_OFFSET_NAME, &sub_chunk_byte_offset) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sub-chunk byte offset");
+                if (H5P_get(dxpl_plist, H5D_XFER_SUB_CHUNK_BYTE_SIZE_NAME, &sub_chunk_byte_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sub-chunk byte size");
+                if (sub_chunk_byte_offset > 0 && 0 == sub_chunk_byte_size)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "sub-chunk byte size must be greater than zero when byte offset is non-zero");
+                if (sub_chunk_byte_size > 0 && sub_chunk_byte_offset > (SIZE_MAX - sub_chunk_byte_size))
+                    HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "sub-chunk byte range overflows size_t");
+            }
 
             /* Check arguments */
             if (NULL == dset->oloc.file)
@@ -733,8 +757,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
 
             /* Read the raw chunk */
             if (H5D__chunk_direct_read(dset, offset_copy, &chunk_read_args->filters, chunk_read_args->buf,
-                                       chunk_read_args->buf_size, chunk_read_args->use_sub_chunk,
-                                       chunk_read_args->byte_offset, chunk_read_args->byte_size) < 0)
+                                       chunk_read_args->buf_size, sub_chunk_byte_size > 0,
+                                       sub_chunk_byte_offset, sub_chunk_byte_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
 
             break;
