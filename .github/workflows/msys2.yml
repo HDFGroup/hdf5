@@ -40,8 +40,8 @@ jobs:
         with:
           msystem: ${{matrix.sys}}
           update: true
-          if [[ "${{ matrix.sys }}" == "clangarm64" ]]; then
-            cache: false
+          # Package cache save step crashes on the windows-11-arm runner
+          cache: ${{ matrix.sys != 'clangarm64' }}
           install: >-
            base-devel
            git
