@@ -678,7 +678,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
 
     /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large enough
      * (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must support it
-     * here for the deprecated H5Dreach_chunk1()). */
+     * here for the deprecated H5Dread_chunk1()). */
     if (read_size > 0 && buf && (!nalloc || *nalloc >= read_size))
         /* Read the chunk data into the supplied buffer */
         if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, read_offset, read_size, buf) <
