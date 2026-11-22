@@ -385,7 +385,7 @@ These are options that control how the HDF5 compiler wrapper scripts are built.
 | `HDF5_H5CC_Fortran_COMPILER` | `STRING` | Fortran compiler set at configure time for serial HDF5. <br /> MPI Fortran compiler set at configure time for parallel HDF5 (usually `mpif90` or similar). | The program to use for compiling programs with `h5fc` / `h5pfc`. |
 | `HDF5_H5CC_CXX_COMPILER` | `STRING` | C++ compiler set at configure time. | The program to use for compiling programs with `h5c++`. |
 
-CMake records the compiler as an absolute path. For a package that will be used on other systems, set these options to a bare name such as `gcc`, which the wrappers find on `PATH`.
+CMake records the compiler as an absolute path. If that path does not exist when a wrapper runs, for example because the installation was built on another system, the wrapper runs the compiler of the same name found on `PATH`.
 
 When running the installed wrappers, the `HDF5_CC` (`h5cc` and `h5pcc`), `HDF5_CXX` (`h5c++`) and `HDF5_FC` (`h5fc` and `h5pfc`) environment variables override the compiler recorded in the wrapper.
 

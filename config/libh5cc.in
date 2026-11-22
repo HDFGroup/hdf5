@@ -64,6 +64,20 @@ libdir=@H5_WRAPPER_LIB_DIR@
 # the one recorded at configure time
 compiler=${@_PKG_CONFIG_COMPILER_ENV@:-"@_PKG_CONFIG_COMPILER@"}
 
+# The recorded compiler is usually an absolute path, which may not exist when
+# this installation was built elsewhere, as with a binary package. Then run
+# the compiler of the same name found on PATH.
+if test -z "${@_PKG_CONFIG_COMPILER_ENV@}"; then
+  case $compiler in
+    (*" "*) ;;
+    (/*)
+      if test ! -x "$compiler"; then
+        compiler=$(basename -- "$compiler")
+      fi
+      ;;
+  esac
+fi
+
 export PKG_CONFIG_PATH=$libdir/pkgconfig
 
 # Show the configuration summary of the library recorded in the
@@ -124,7 +138,8 @@ usage() {
   echo " You can override the compiler $prog_name runs by setting the following"
   echo " environment variable:"
   echo " "
-  echo "   @_PKG_CONFIG_COMPILER_ENV@  -  compiler command [default: @_PKG_CONFIG_COMPILER@]"
+  echo "   @_PKG_CONFIG_COMPILER_ENV@  -  compiler command [default: @_PKG_CONFIG_COMPILER@, or the"
+  echo "                 compiler of that name on PATH if that path does not exist]"
   echo " "
   echo " $prog_name uses pkg-config to determine additional flags to pass to the"
   echo " compiler. You can specify any options to pass to pkg-config by setting the"
@@ -290,6 +305,9 @@ status=$?
 
 if test $status -ne 0; then
   echo "compile failed with command: $compiler $compile_args $@ $pc_flags" >&2
+  if test $status -eq 127; then
+    echo "set @_PKG_CONFIG_COMPILER_ENV@ to the compiler $prog_name should run" >&2
+  fi
 fi
 
 exit $status

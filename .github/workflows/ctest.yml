@@ -1417,10 +1417,16 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [check-secret]
     steps:
+      - name: Get Actions
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
       - name: Install Dependencies (Linux_intel)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build graphviz
+          sudo apt-get install ninja-build graphviz pkg-config
 
       - name: add oneAPI to env
         uses: fortran-lang/setup-fortran@be037f0a45b1160f139d4ccd0b96f9e9bfd6a682 # v1
@@ -1470,6 +1476,16 @@ jobs:
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-Intel --fresh
+        shell: bash
+
+      # Use the binary the way a user would. The oneAPI compilers are on PATH
+      # from setup-fortran, as they are for a user who sources setvars.sh.
+      - name: Test binary (Linux_intel)
+        run: |
+          mkdir "${RUNNER_TEMP}/binary"
+          tar -xzf ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-Intel/HDF5-*-Linux.tar.gz -C "${RUNNER_TEMP}/binary"
+          root=$(dirname "$(dirname "$(find "${RUNNER_TEMP}/binary" -path '*/bin/h5cc' | head -1)")")
+          ${{ github.workspace }}/.github/scripts/test-linux-binary.sh "${root}" "${RUNNER_TEMP}/binary-test"
         shell: bash
 
       - name: Publish binary (Linux_intel)

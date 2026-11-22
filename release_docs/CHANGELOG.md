@@ -442,18 +442,22 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
-### Fixed h5cc, h5c++ and h5fc in the glibc 2.28 Linux binary
+### Fixed h5cc, h5c++ and h5fc when the compiler is not where it was at build time
 
-   The wrappers in the Linux binary built against glibc 2.28 called the compiler by its path in the
-   build container, `/opt/rh/gcc-toolset-14/root/usr/bin/cc` (and `c++`, `gfortran`), so they failed
-   on any other system. The binary now records `gcc`, `g++` and `gfortran`, which are found on `PATH`.
+   The wrappers run the compiler by the absolute path CMake recorded at configure time. In a
+   binary package that path only exists on systems with the same toolchain in the same place,
+   so the wrappers in the glibc 2.28 Linux binary failed looking for
+   `/opt/rh/gcc-toolset-14/root/usr/bin/cc`, and those in the Intel Linux binary needed exactly
+   `/opt/intel/oneapi/compiler/2025.0/bin/icx`. When the recorded path does not exist, the
+   wrappers now run the compiler of the same name found on `PATH`, for any compiler.
 
-   The wrappers now also honor the `HDF5_CC`, `HDF5_CXX` and `HDF5_FC` environment variables, as the
-   Autotools wrappers did, to run a different compiler than the one recorded at configure time. For
-   example, `HDF5_CC=clang h5cc foo.c`. `h5pcc` reads `HDF5_CC` and `h5pfc` reads `HDF5_FC`.
+   The wrappers also honor the `HDF5_CC`, `HDF5_CXX` and `HDF5_FC` environment variables, as the
+   Autotools wrappers did, to run a different compiler. For example, `HDF5_CC=clang h5cc foo.c`.
+   `h5pcc` reads `HDF5_CC` and `h5pfc` reads `HDF5_FC`.
 
-   The release CI now compiles and runs a C, C++ and Fortran program, and calls `pkg-config`, against
-   the unpacked glibc 2.28 binary outside its build container.
+   The release CI now compiles and runs a C, C++ and Fortran program with the glibc 2.28 and Intel
+   Linux binaries, outside the build environment and with the recorded compiler path removed, and
+   checks `pkg-config --define-prefix` on them.
 
 ### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
 

@@ -79,8 +79,9 @@ Compiling with the wrappers and pkg-config
 The compiler wrappers in the bin folder (h5cc, and h5c++ and h5fc when
 built) find the installation from their own location, so they work
 wherever the package is extracted. They run the compiler that
-"h5cc -show" prints, unless the HDF5_CC, HDF5_CXX or HDF5_FC environment
-variable names another one, for example:
+"h5cc -show" prints: the one HDF5 was built with if it exists at the same
+path, otherwise the compiler of the same name on PATH. The HDF5_CC,
+HDF5_CXX or HDF5_FC environment variable selects another one, for example:
     HDF5_CC=clang h5cc myprog.c -o myprog
 
 The pkg-config files in the lib/pkgconfig (or lib64/pkgconfig) folder record the install

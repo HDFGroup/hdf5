@@ -2,9 +2,14 @@
 
 # Check that an extracted HDF5 Linux binary works away from the machine it was
 # built on: compile and run a program with each compiler wrapper, and with
-# plain pkg-config. Run by the "AlmaLinux 8 gcc (glibc 2.28)" job in
-# .github/workflows/ctest.yml on the runner, outside the build container, so
-# a path that only exists in the container makes it fail.
+# plain pkg-config. Run by the "AlmaLinux 8 gcc (glibc 2.28)" and "Ubuntu
+# Intel" jobs in .github/workflows/ctest.yml.
+#
+# The wrappers record the compiler's absolute path, which only exists on
+# systems with the same toolchain in the same place. When it is missing they
+# fall back to the compiler of the same name on PATH. Each wrapper is also
+# run with its recorded path made nonexistent, so the fallback is tested even
+# on a runner that has the compiler at the recorded path.
 #
 # Usage: test-linux-binary.sh <install-root> <work-dir>
 #   <install-root>  directory holding bin/, include/ and lib*/ of the binary
@@ -76,6 +81,7 @@ EOF
 
 nerrors=0
 
+
 # Build with "$@" and then run the result, reporting the outcome
 check() {
   local name=$1 exe=$2
@@ -89,9 +95,31 @@ check() {
   fi
 }
 
+unset HDF5_CC HDF5_CXX HDF5_FC
+
 check "h5cc"  c_test   "${ROOT}/bin/h5cc"  c_test.c -o c_test
 check "h5c++" cpp_test "${ROOT}/bin/h5c++" cpp_test.cpp -o cpp_test
 check "h5fc"  f_test   "${ROOT}/bin/h5fc"  f_test.f90 -o f_test
+
+# Copy each wrapper next to the original, so it still finds the installation,
+# with the recorded compiler moved to a path that does not exist
+for w in h5cc h5c++ h5fc; do
+  # shellcheck disable=SC2016 # the $ is literal
+  recorded=$(sed -n 's/^compiler=\${HDF5_[A-Z]*:-"\(.*\)"}$/\1/p' "${ROOT}/bin/${w}")
+  case ${recorded} in
+    (/*) ;;
+    (*) echo "::error::cannot find the absolute compiler path recorded in ${w}"
+        nerrors=$((nerrors + 1))
+        continue;;
+  esac
+  sed "s|\"${recorded}\"|\"/nonexistent${recorded}\"|" "${ROOT}/bin/${w}" > "${ROOT}/bin/${w}-moved"
+  chmod +x "${ROOT}/bin/${w}-moved"
+done
+
+check "h5cc, compiler moved"  c_test   "${ROOT}/bin/h5cc-moved"  c_test.c -o c_test
+check "h5c++, compiler moved" cpp_test "${ROOT}/bin/h5c++-moved" cpp_test.cpp -o cpp_test
+check "h5fc, compiler moved"  f_test   "${ROOT}/bin/h5fc-moved"  f_test.f90 -o f_test
+rm -f "${ROOT}/bin/"h5*-moved
 
 # The .pc files record the build-time prefix; --define-prefix relocates them
 # to where they were extracted, as the binary's README documents
