@@ -1126,6 +1126,24 @@ jobs:
           echo "Linux x86_64 binary requires ${needs} or newer" >> "${GITHUB_STEP_SUMMARY}"
         shell: bash
 
+      # Use the binary the way a user would, on the runner rather than in the
+      # build container, so a path that only exists in the container (such as
+      # gcc-toolset's compilers or the install prefix) fails the job.
+      # gfortran-14 matches the toolset's gfortran, so the .mod files load.
+      - name: Test binary outside the build container (Linux glibc 2.28)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ gfortran-14 pkg-config
+          mkdir -p "${RUNNER_TEMP}/compilers"
+          ln -sf "$(command -v gfortran-14)" "${RUNNER_TEMP}/compilers/gfortran"
+          export PATH="${RUNNER_TEMP}/compilers:${PATH}"
+
+          mkdir "${RUNNER_TEMP}/binary"
+          tar -xzf ${{ github.workspace }}/build/${GLIBC228_PRESET}/HDF5-*-Linux.tar.gz -C "${RUNNER_TEMP}/binary"
+          root=$(dirname "$(dirname "$(find "${RUNNER_TEMP}/binary" -path '*/bin/h5cc' | head -1)")")
+          ${{ github.workspace }}/.github/scripts/test-linux-binary.sh "${root}" "${RUNNER_TEMP}/binary-test"
+        shell: bash
+
       - name: Publish binary (Linux glibc 2.28)
         id: publish-ctest-binary
         run: |

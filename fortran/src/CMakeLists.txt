@@ -617,6 +617,7 @@ install (
 
 if (H5_HAVE_PKGCONFIG)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
+  set (_PKG_CONFIG_COMPILER_ENV HDF5_FC)
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5fc

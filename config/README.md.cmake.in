@@ -74,6 +74,22 @@ add "-VV" to the ctest command. The output should show;
 For more information see USING_CMake_Examples.txt in the install folder.
 ===========================================================================
 
+Compiling with the wrappers and pkg-config
+===========================================================================
+The compiler wrappers in the bin folder (h5cc, and h5c++ and h5fc when
+built) find the installation from their own location, so they work
+wherever the package is extracted. They run the compiler that
+"h5cc -show" prints, unless the HDF5_CC, HDF5_CXX or HDF5_FC environment
+variable names another one, for example:
+    HDF5_CC=clang h5cc myprog.c -o myprog
+
+The pkg-config files in the lib/pkgconfig (or lib64/pkgconfig) folder record the install
+prefix used when the package was built. When using pkg-config directly
+on an extracted package, pass --define-prefix so the prefix is taken from
+the location of the .pc file:
+    PKG_CONFIG_PATH=<install>/<lib or lib64>/pkgconfig pkg-config --define-prefix --cflags --libs hdf5
+===========================================================================
+
 Documentation to download for this release can be found as hdf5-\<version\>.doxygen.zip in https://github.com/HDFGroup/hdf5/releases.  Documentation for the latest development version can be seen at https://support.hdfgroup.org/documentation/hdf5/latest/
 
 Bugs should be reported to help@hdfgroup.org.

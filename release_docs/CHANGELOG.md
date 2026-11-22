@@ -442,6 +442,19 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
+### Fixed h5cc, h5c++ and h5fc in the glibc 2.28 Linux binary
+
+   The wrappers in the Linux binary built against glibc 2.28 called the compiler by its path in the
+   build container, `/opt/rh/gcc-toolset-14/root/usr/bin/cc` (and `c++`, `gfortran`), so they failed
+   on any other system. The binary now records `gcc`, `g++` and `gfortran`, which are found on `PATH`.
+
+   The wrappers now also honor the `HDF5_CC`, `HDF5_CXX` and `HDF5_FC` environment variables, as the
+   Autotools wrappers did, to run a different compiler than the one recorded at configure time. For
+   example, `HDF5_CC=clang h5cc foo.c`. `h5pcc` reads `HDF5_CC` and `h5pfc` reads `HDF5_FC`.
+
+   The release CI now compiles and runs a C, C++ and Fortran program, and calls `pkg-config`, against
+   the unpacked glibc 2.28 binary outside its build container.
+
 ### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
 
    With `HDF5_LIB_INFIX` set, for example to `_openmpi`, the pkg-config files were still installed as `hdf5.pc`, `hdf5_hl.pc` and so on, while their `Name` and `Requires` fields, and the compiler wrappers, used the name with the infix (`hdf5_openmpi`). `h5cc` and the other wrappers failed with "Package hdf5_openmpi was not found", and `pkg-config hdf5_hl` could not resolve its requirement. The pkg-config files are now named after the library (`hdf5_openmpi.pc`, `hdf5_openmpi_hl.pc`, ...), and `libhdf5.settings` is installed as `libhdf5_openmpi.settings`, which `h5cc -showconfig` reads.
