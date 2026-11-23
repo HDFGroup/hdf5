@@ -459,7 +459,7 @@ Fixes GitHub issue #6679.
    Unlike the Autotools wrappers, the parallel wrappers do not read `HDF5_CC` or `HDF5_FC`, so
    setting one for a serial installation does not change a parallel one.
 
-   The release CI now compiles and runs a C, C++ and Fortran program with the glibc 2.28 binary
+   The release CI now compiles and runs C, C++ and Fortran programs with the glibc 2.28 binary
    (outside its build container) and the Intel Linux binary, checks that their wrappers record
    no absolute compiler path, and checks `pkg-config --define-prefix` on them.
 
