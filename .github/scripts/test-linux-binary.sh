@@ -5,11 +5,11 @@
 # plain pkg-config. Run by the "AlmaLinux 8 gcc (glibc 2.28)" and "Ubuntu
 # Intel" jobs in .github/workflows/ctest.yml.
 #
-# The wrappers record the compiler's absolute path, which only exists on
-# systems with the same toolchain in the same place. When it is missing they
-# fall back to the compiler of the same name on PATH. Each wrapper is also
-# run with its recorded path made nonexistent, so the fallback is tested even
-# on a runner that has the compiler at the recorded path.
+# The binary is configured to record each wrapper's compiler by name (for
+# example gcc or icx) rather than by the absolute path CMake finds, so the
+# wrappers run the compiler on PATH. Check that no absolute path is
+# recorded, that the HDF5_CC-style overrides work, and that a missing
+# compiler is reported.
 #
 # Usage: test-linux-binary.sh <install-root> <work-dir>
 #   <install-root>  directory holding bin/, include/ and lib*/ of the binary
@@ -101,40 +101,48 @@ check "h5cc"  c_test   "${ROOT}/bin/h5cc"  c_test.c -o c_test
 check "h5c++" cpp_test "${ROOT}/bin/h5c++" cpp_test.cpp -o cpp_test
 check "h5fc"  f_test   "${ROOT}/bin/h5fc"  f_test.f90 -o f_test
 
-# Copy each wrapper next to the original, so it still finds the installation,
-# with the recorded compiler moved to a path that does not exist
+# A recorded absolute path would only exist on the build machine
 for w in h5cc h5c++ h5fc; do
   # shellcheck disable=SC2016 # the $ is literal
   recorded=$(sed -n 's/^compiler=\${HDF5_[A-Z]*:-"\(.*\)"}$/\1/p' "${ROOT}/bin/${w}")
+  echo "=== ${w} records the compiler by name ==="
   case ${recorded} in
-    (/*) ;;
-    (*) echo "::error::cannot find the absolute compiler path recorded in ${w}"
-        nerrors=$((nerrors + 1))
-        continue;;
+    ("") echo "::error::FAILED: cannot find the compiler recorded in ${w}"
+         nerrors=$((nerrors + 1));;
+    (/*) echo "::error::FAILED: ${w} records the absolute path ${recorded}"
+         nerrors=$((nerrors + 1));;
+    (*)  echo "PASSED: ${w} records ${recorded}";;
   esac
-  sed "s|\"${recorded}\"|\"/nonexistent${recorded}\"|" "${ROOT}/bin/${w}" > "${ROOT}/bin/${w}-moved"
-  chmod +x "${ROOT}/bin/${w}-moved"
 done
 
-check "h5cc, compiler moved"  c_test   "${ROOT}/bin/h5cc-moved"  c_test.c -o c_test
-check "h5c++, compiler moved" cpp_test "${ROOT}/bin/h5c++-moved" cpp_test.cpp -o cpp_test
-check "h5fc, compiler moved"  f_test   "${ROOT}/bin/h5fc-moved"  f_test.f90 -o f_test
+# The environment variables override the recorded compiler. Only h5cc
+# compiles with a substitute, since another C++ or Fortran compiler may not
+# read the library's headers or .mod files; for h5c++ and h5fc, check what
+# they would run.
+check "HDF5_CC=cc h5cc" c_test env HDF5_CC=cc "${ROOT}/bin/h5cc" c_test.c -o c_test
+for pair in h5c++:HDF5_CXX h5fc:HDF5_FC; do
+  w=${pair%%:*} var=${pair#*:}
+  echo "=== ${var} ${w} -show ==="
+  if [ "$(env "${var}=my-compiler" "${ROOT}/bin/${w}" -show x | awk '{print $1}')" = my-compiler ]; then
+    echo "PASSED: ${var} ${w} -show"
+  else
+    echo "::error::FAILED: ${var} ${w} -show"
+    nerrors=$((nerrors + 1))
+  fi
+done
 
-# When a compile fails after the fallback, the wrapper must say which
-# compiler it substituted
-echo "=== h5cc, compiler moved, failed compile ==="
-echo 'int main(void) { return undeclared_symbol; }' > bad_test.c
-if "${ROOT}/bin/h5cc-moved" bad_test.c -o bad_test 2> bad_test.err; then
-  echo "::error::FAILED: h5cc, compiler moved, failed compile: bad_test.c compiled"
+# A compiler that cannot be found is reported with the variable to set
+echo "=== h5cc, missing compiler ==="
+if HDF5_CC=/nonexistent/cc "${ROOT}/bin/h5cc" c_test.c -o c_test 2> missing.err; then
+  echo "::error::FAILED: h5cc, missing compiler: compile succeeded"
   nerrors=$((nerrors + 1))
-elif grep -q "tried .* from PATH because /nonexistent/.* does not exist" bad_test.err; then
-  echo "PASSED: h5cc, compiler moved, failed compile"
+elif grep -q "set HDF5_CC to the compiler h5cc should run" missing.err; then
+  echo "PASSED: h5cc, missing compiler"
 else
-  cat bad_test.err
-  echo "::error::FAILED: h5cc, compiler moved, failed compile: no message about the substituted compiler"
+  cat missing.err
+  echo "::error::FAILED: h5cc, missing compiler: no message naming HDF5_CC"
   nerrors=$((nerrors + 1))
 fi
-rm -f "${ROOT}/bin/"h5*-moved
 
 # The .pc files record the build-time prefix; --define-prefix relocates them
 # to where they were extracted, as the binary's README documents

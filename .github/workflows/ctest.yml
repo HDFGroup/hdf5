@@ -1475,7 +1475,14 @@ jobs:
           CC: ${{ steps.setup-fortran.outputs.cc }}
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-Intel --fresh
+          # Record the compilers by name, so the published wrappers run the
+          # oneAPI compilers on PATH rather than this runner's install path.
+          # Set here rather than in the preset, which Windows Intel shares.
+          cmake --preset=${{ inputs.preset_name }}-Intel --fresh \
+            -DHDF5_H5CC_C_COMPILER=icx \
+            -DHDF5_H5CC_CXX_COMPILER=icpx \
+            -DHDF5_H5CC_Fortran_COMPILER=ifx
+          cmake --workflow --preset=${{ inputs.preset_name }}-Intel
         shell: bash
 
       # Use the binary the way a user would. The oneAPI compilers are on PATH
