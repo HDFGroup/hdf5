@@ -19,6 +19,7 @@ const {
   serializeExcluded,
   withExcluded,
   addExcluded,
+  recordRemoval,
   parseManuallyAdded,
   serializeManuallyAdded,
   parseAssigned,
@@ -1708,7 +1709,7 @@ asyncTest('coordinateReviewers: bot-sender review_requested does NOT mark the re
   assert.ok(!manuallyAdded.has('jhendersonHDF'));
 });
 
-asyncTest('coordinateReviewers: review_requested for a non-CODEOWNER does not mark them manually-added', async () => {
+asyncTest('coordinateReviewers: human review_requested for a non-CODEOWNER marks them manually-added', async () => {
   const github = makeGithubMock();
   const args = makeCoordinateBaseArgs({
     hasExistingComment: true,
@@ -1723,7 +1724,8 @@ asyncTest('coordinateReviewers: review_requested for a non-CODEOWNER does not ma
     github, makeManualAddContext('User', 'driveby'), makeCore(), args
   );
 
-  assert.ok(!manuallyAdded.has('driveby'));
+  // Anyone a person deliberately requests owes an approval, CODEOWNER or not.
+  assert.ok(manuallyAdded.has('driveby'));
 });
 
 asyncTest('coordinateReviewers: human-sender review_request_removed clears a prior manually-added flag', async () => {
@@ -2033,6 +2035,161 @@ test('addExcluded: adds logins to an existing exclusion marker without duplicate
 test('addExcluded: appends the marker when the body has none', () => {
   const out = addExcluded(`${MARKER}\n## Review Checklist`, ['bob']);
   assert.deepStrictEqual([...parseExcluded(out)], ['bob']);
+});
+
+// ----------------------------------------------------------------
+// Manually requested reviewers who own no touched area (#6903): they get a
+// checklist item of their own, are detected on the first coordination pass,
+// and drop off the checklist when removed.
+// ----------------------------------------------------------------
+
+test('recordRemoval: excludes the logins and drops them from the manual list', () => {
+  const body = `${MARKER}\n## Review Checklist\n${serializeExcluded(new Set(['alice']))}\n`
+    + serializeManuallyAdded(new Set(['bob', 'carol']));
+  const out = recordRemoval(body, ['bob']);
+  assert.deepStrictEqual([...parseExcluded(out)].sort(), ['alice', 'bob']);
+  assert.deepStrictEqual([...parseManuallyAdded(out)], ['carol']);
+  assert.ok(out.startsWith(`${MARKER}\n## Review Checklist\n`), 'Rest of the body is unchanged');
+});
+
+test('recordRemoval: appends both markers when the body has neither', () => {
+  const out = recordRemoval(`${MARKER}\n## Review Checklist`, ['bob']);
+  assert.deepStrictEqual([...parseExcluded(out)], ['bob']);
+  assert.ok(out.includes(serializeManuallyAdded(new Set())));
+});
+
+// PR #6901: .github and release_docs touched, brtnfld requested by hand.
+function makeManualNonOwnerAreas() {
+  return [makeArea('release_docs', ['lrknox', 'hyoklee'], 10), makeArea('.github', ['hyoklee', 'lrknox'], 10)];
+}
+
+test('buildBody: manually requested non-owner gets a checklist item, not an Additional reviewers mention', () => {
+  const body = buildBody(makeManualNonOwnerAreas(), new Set(), new Set(['hyoklee', 'brtnfld']),
+    new Map(), new Set(['brtnfld']));
+  assert.ok(body.includes('**Manually requested reviewers**'));
+  assert.ok(body.includes('- [ ] @brtnfld — approval required'));
+  assert.ok(!body.includes('Additional reviewers'));
+});
+
+test('buildBody: area approvals alone do not complete the checklist while a manual non-owner has not approved', () => {
+  const body = buildBody(makeManualNonOwnerAreas(), new Set(['hyoklee']), new Set(['brtnfld']),
+    new Map(), new Set(['brtnfld']));
+  assert.ok(body.includes('- [x] **release_docs** ✅'));
+  assert.ok(body.includes('- [x] **.github** ✅'));
+  assert.ok(!body.includes('All areas have been signed off'));
+});
+
+test('buildBody: checklist completes once the manual non-owner approves too', () => {
+  const body = buildBody(makeManualNonOwnerAreas(), new Set(['hyoklee', 'brtnfld']), new Set(),
+    new Map(), new Set(['brtnfld']), new Set(['hyoklee', 'brtnfld']));
+  assert.ok(body.includes('- [x] @brtnfld ✅'));
+  assert.ok(body.includes('All areas have been signed off'));
+});
+
+test('buildBody: a manual non-owner who left a comment-only review still owes an approval', () => {
+  // GitHub drops a reviewer from requested_reviewers once they submit any
+  // review, so confirmedRequested no longer has brtnfld.
+  const body = buildBody(makeManualNonOwnerAreas(), new Set(['hyoklee']), new Set(),
+    new Map(), new Set(['brtnfld']), new Set(['hyoklee', 'brtnfld']));
+  assert.ok(body.includes('- [ ] @brtnfld — approval required'));
+  assert.ok(!body.includes('All areas have been signed off'));
+});
+
+test('buildBody: a removed manual non-owner (neither requested nor reviewed) is not listed', () => {
+  const body = buildBody(makeManualNonOwnerAreas(), new Set(['hyoklee']), new Set(['hyoklee']),
+    new Map(), new Set(['brtnfld']), new Set(['hyoklee']));
+  assert.ok(!body.includes('brtnfld'));
+  assert.ok(body.includes('All areas have been signed off'));
+});
+
+test('buildBody: a manually-added CODEOWNER who left a comment-only review keeps their line', () => {
+  const areas = [makeArea('src', ['alice', 'bob'], 10)];
+  const body = buildBody(areas, new Set(['alice']), new Set(['alice']), new Map(), new Set(['bob']),
+    new Set(['alice', 'bob']));
+  assert.ok(body.includes('  - [ ] @bob (manually added) — approval required'));
+  assert.ok(body.split('\n').find(l => l.startsWith('- [')).startsWith('- [ ] **src**'));
+});
+
+function makeFirstPassArgs(requested) {
+  return makeCoordinateBaseArgs({
+    hasExistingComment: false,
+    allCodeOwners: new Set(['hyoklee', 'lrknox', 'jhendersonHDF', 'glennsong09', 'brtnfld']),
+    catchAllOwners: new Set(['catchall']),
+    prData: { user: { login: 'gheber' }, draft: false, requested_reviewers: requested },
+  });
+}
+const openedContext = { eventName: 'pull_request_target', payload: { action: 'opened', sender: { type: 'User' } } };
+
+asyncTest('coordinateReviewers: an out-of-scope CODEOWNER requested at PR creation is kept and marked manual (PR #6901)', async () => {
+  const github = makeGithubMock();
+  const args = makeFirstPassArgs([{ login: 'hyoklee' }, { login: 'jhendersonHDF' }, { login: 'brtnfld' }]);
+
+  const { manuallyAdded, confirmedRequested } = await coordinateReviewers(github, openedContext, makeCore(), args);
+
+  assert.ok(manuallyAdded.has('brtnfld'));
+  assert.ok(!github.calls.removeRequestedReviewers.includes('brtnfld'));
+  assert.ok(confirmedRequested.has('brtnfld'), 'shown on the first checklist, not only after a later event');
+  // The avalanche of area owners is still pruned and not marked manual.
+  assert.ok(!manuallyAdded.has('jhendersonHDF'));
+  assert.ok(!manuallyAdded.has('hyoklee'));
+});
+
+asyncTest('coordinateReviewers: a draft opened with a manual non-owner keeps them on the checklist', async () => {
+  const github = makeGithubMock();
+  const args = makeFirstPassArgs([{ login: 'hyoklee' }, { login: 'brtnfld' }]);
+  args.prData.draft = true;
+
+  const { manuallyAdded, confirmedRequested } = await coordinateReviewers(github, openedContext, makeCore(), args);
+
+  assert.ok(github.calls.removeRequestedReviewers.includes('hyoklee'), 'area owners still cleared on a draft');
+  assert.ok(manuallyAdded.has('brtnfld'));
+  assert.deepStrictEqual([...confirmedRequested], ['brtnfld']);
+});
+
+asyncTest('coordinateReviewers: a non-CODEOWNER requested at PR creation is marked manual', async () => {
+  const github = makeGithubMock();
+  const args = makeFirstPassArgs([{ login: 'hyoklee' }, { login: 'driveby' }]);
+
+  const { manuallyAdded } = await coordinateReviewers(github, openedContext, makeCore(), args);
+
+  assert.ok(manuallyAdded.has('driveby'));
+});
+
+asyncTest('coordinateReviewers: catch-all owners and bot reviewers at PR creation are not marked manual', async () => {
+  const github = makeGithubMock();
+  const args = makeFirstPassArgs([{ login: 'hyoklee' }, { login: 'catchall' }, { login: 'Copilot', type: 'Bot' }]);
+
+  const { manuallyAdded } = await coordinateReviewers(github, openedContext, makeCore(), args);
+
+  assert.ok(!manuallyAdded.has('catchall'));
+  assert.ok(!manuallyAdded.has('Copilot'));
+});
+
+asyncTest('coordinateReviewers: human review_requested for a bot reviewer does not mark it manual', async () => {
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs({
+    prData: { user: { login: 'lrknox' }, draft: false, requested_reviewers: [{ login: 'hyoklee' }, { login: 'Copilot', type: 'Bot' }] },
+  });
+  const context = {
+    eventName: 'pull_request_target',
+    payload: { action: 'review_requested', requested_reviewer: { login: 'Copilot', type: 'Bot' }, sender: { type: 'User' } },
+  };
+
+  const { manuallyAdded } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.ok(!manuallyAdded.has('Copilot'));
+});
+
+asyncTest('coordinateReviewers: issue_comment (/remove-reviewer re-render) changes no reviewers', async () => {
+  const github = makeGithubMock();
+  const args = makeCoordinateBaseArgs(); // three .github owners requested: an unpruned avalanche
+  const context = { eventName: 'issue_comment', payload: { action: 'created', sender: { type: 'User' } } };
+
+  const { confirmedRequested } = await coordinateReviewers(github, context, makeCore(), args);
+
+  assert.strictEqual(github.calls.removeRequestedReviewers.length, 0);
+  assert.strictEqual(github.calls.requestReviewers.length, 0);
+  assert.strictEqual(confirmedRequested.size, 3);
 });
 
 // ----------------------------------------------------------------
