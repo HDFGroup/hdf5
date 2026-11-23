@@ -385,9 +385,9 @@ These are options that control how the HDF5 compiler wrapper scripts are built.
 | `HDF5_H5CC_Fortran_COMPILER` | `STRING` | Fortran compiler set at configure time for serial HDF5. <br /> MPI Fortran compiler set at configure time for parallel HDF5 (usually `mpif90` or similar). | The program to use for compiling programs with `h5fc` / `h5pfc`. |
 | `HDF5_H5CC_CXX_COMPILER` | `STRING` | C++ compiler set at configure time. | The program to use for compiling programs with `h5c++`. |
 
-CMake records the compiler as an absolute path. If that path does not exist when a wrapper runs, for example because the installation was built on another system, the wrapper runs the compiler of the same name found on `PATH`.
+CMake records the compiler as an absolute path. If that path does not exist when a wrapper runs, for example because the installation was built on another system, the wrapper runs the compiler of the same name found on `PATH`. If that compile fails, the wrapper names both compilers in its error message. `h5cc -show` prints the compiler a wrapper will run.
 
-When running the installed wrappers, the `HDF5_CC` (`h5cc` and `h5pcc`), `HDF5_CXX` (`h5c++`) and `HDF5_FC` (`h5fc` and `h5pfc`) environment variables override the compiler recorded in the wrapper.
+When running the installed wrappers, the `HDF5_CC` (`h5cc`), `HDF5_PCC` (`h5pcc`), `HDF5_CXX` (`h5c++`), `HDF5_FC` (`h5fc`) and `HDF5_PFC` (`h5pfc`) environment variables override the compiler recorded in the wrapper. The parallel wrappers have their own variables so that a serial and a parallel installation can be used side by side.
 
 ## Debugging options
 

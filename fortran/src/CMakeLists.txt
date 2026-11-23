@@ -630,6 +630,7 @@ if (H5_HAVE_PKGCONFIG)
       COMPONENT fortlibraries
   )
   if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
+    set (_PKG_CONFIG_COMPILER_ENV HDF5_PFC)
     configure_file (
         ${HDF_CONFIG_DIR}/libh5cc.in
         ${HDF5_BINARY_DIR}/CMakeFiles/h5pfc

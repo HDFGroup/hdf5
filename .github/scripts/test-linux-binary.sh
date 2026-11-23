@@ -95,7 +95,7 @@ check() {
   fi
 }
 
-unset HDF5_CC HDF5_CXX HDF5_FC
+unset HDF5_CC HDF5_PCC HDF5_CXX HDF5_FC HDF5_PFC
 
 check "h5cc"  c_test   "${ROOT}/bin/h5cc"  c_test.c -o c_test
 check "h5c++" cpp_test "${ROOT}/bin/h5c++" cpp_test.cpp -o cpp_test
@@ -119,6 +119,21 @@ done
 check "h5cc, compiler moved"  c_test   "${ROOT}/bin/h5cc-moved"  c_test.c -o c_test
 check "h5c++, compiler moved" cpp_test "${ROOT}/bin/h5c++-moved" cpp_test.cpp -o cpp_test
 check "h5fc, compiler moved"  f_test   "${ROOT}/bin/h5fc-moved"  f_test.f90 -o f_test
+
+# When a compile fails after the fallback, the wrapper must say which
+# compiler it substituted
+echo "=== h5cc, compiler moved, failed compile ==="
+echo 'int main(void) { return undeclared_symbol; }' > bad_test.c
+if "${ROOT}/bin/h5cc-moved" bad_test.c -o bad_test 2> bad_test.err; then
+  echo "::error::FAILED: h5cc, compiler moved, failed compile: bad_test.c compiled"
+  nerrors=$((nerrors + 1))
+elif grep -q "tried .* from PATH because /nonexistent/.* does not exist" bad_test.err; then
+  echo "PASSED: h5cc, compiler moved, failed compile"
+else
+  cat bad_test.err
+  echo "::error::FAILED: h5cc, compiler moved, failed compile: no message about the substituted compiler"
+  nerrors=$((nerrors + 1))
+fi
 rm -f "${ROOT}/bin/"h5*-moved
 
 # The .pc files record the build-time prefix; --define-prefix relocates them

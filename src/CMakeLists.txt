@@ -1454,6 +1454,7 @@ if (H5_HAVE_PKGCONFIG)
   )
   if (HDF5_ENABLE_PARALLEL)
     #legacy requires a different name
+    set (_PKG_CONFIG_COMPILER_ENV HDF5_PCC)
     configure_file (
         ${HDF_CONFIG_DIR}/libh5cc.in
         ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc

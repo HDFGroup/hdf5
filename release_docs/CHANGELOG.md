@@ -449,11 +449,14 @@ Fixes GitHub issue #6679.
    so the wrappers in the glibc 2.28 Linux binary failed looking for
    `/opt/rh/gcc-toolset-14/root/usr/bin/cc`, and those in the Intel Linux binary needed exactly
    `/opt/intel/oneapi/compiler/2025.0/bin/icx`. When the recorded path does not exist, the
-   wrappers now run the compiler of the same name found on `PATH`, for any compiler.
+   wrappers now run the compiler of the same name found on `PATH`, for any compiler. If that
+   compile fails, the error message names the missing compiler and the one that was run.
 
-   The wrappers also honor the `HDF5_CC`, `HDF5_CXX` and `HDF5_FC` environment variables, as the
-   Autotools wrappers did, to run a different compiler. For example, `HDF5_CC=clang h5cc foo.c`.
-   `h5pcc` reads `HDF5_CC` and `h5pfc` reads `HDF5_FC`.
+   The wrappers also honor environment variables to run a different compiler: `HDF5_CC` for
+   `h5cc`, `HDF5_CXX` for `h5c++` and `HDF5_FC` for `h5fc`, as the Autotools wrappers did, and
+   `HDF5_PCC` for `h5pcc` and `HDF5_PFC` for `h5pfc`. For example, `HDF5_CC=clang h5cc foo.c`.
+   Unlike the Autotools wrappers, the parallel wrappers do not read `HDF5_CC` or `HDF5_FC`, so
+   setting one for a serial installation does not change a parallel one.
 
    The release CI now compiles and runs a C, C++ and Fortran program with the glibc 2.28 binary
    (outside its build container) and the Intel Linux binary, each also with the recorded compiler

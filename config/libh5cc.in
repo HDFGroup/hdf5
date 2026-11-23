@@ -66,12 +66,14 @@ compiler=${@_PKG_CONFIG_COMPILER_ENV@:-"@_PKG_CONFIG_COMPILER@"}
 
 # The recorded compiler is usually an absolute path, which may not exist when
 # this installation was built elsewhere, as with a binary package. Then run
-# the compiler of the same name found on PATH.
+# the compiler of the same name found on PATH, and say so if the compile fails.
+missing_compiler=
 if test -z "${@_PKG_CONFIG_COMPILER_ENV@}"; then
   case $compiler in
     (*" "*) ;;
     (/*)
       if test ! -x "$compiler"; then
+        missing_compiler=$compiler
         compiler=$(basename -- "$compiler")
       fi
       ;;
@@ -305,7 +307,9 @@ status=$?
 
 if test $status -ne 0; then
   echo "compile failed with command: $compiler $compile_args $@ $pc_flags" >&2
-  if test $status -eq 127; then
+  if test -n "$missing_compiler"; then
+    echo "$prog_name tried $compiler from PATH because $missing_compiler, the compiler HDF5 was built with, does not exist; set @_PKG_CONFIG_COMPILER_ENV@ to choose the compiler" >&2
+  elif test $status -eq 127; then
     echo "set @_PKG_CONFIG_COMPILER_ENV@ to the compiler $prog_name should run" >&2
   fi
 fi
