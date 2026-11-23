@@ -60,7 +60,9 @@ prefix=$(
 
 libdir=@H5_WRAPPER_LIB_DIR@
 
-export PKG_CONFIG_PATH=$libdir/pkgconfig
+# Look for HDF5's pkg-config files first, then for MPI's (which HDF5's
+# require in a parallel build) and the user's
+export PKG_CONFIG_PATH=$libdir/pkgconfig@H5_WRAPPER_MPI_PKG_CONFIG_PATH@${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
 
 # Show the configuration summary of the library recorded in the
 # libhdf5.settings file residing in the lib directory.
@@ -213,7 +215,11 @@ elif test "${USE_SHARED_LIB}" = "no" -a "${STATIC_AVAILABLE}" != "ON"; then
 fi
 
 # Add in relevant flags to pkg-config command
-pc_args="${pc_args:+${pc_args} }--define-variable=prefix=$prefix"
+# Point pkg-config at this installation only if it was moved: the definition
+# applies to every module pkg-config reads, including MPI's
+if test "$prefix" != "$(cd -P -- "@_PKG_CONFIG_PREFIX@" 2>/dev/null && pwd -P)"; then
+  pc_args="${pc_args:+${pc_args} }--define-variable=prefix=$prefix"
+fi
 
 if test "$do_compile" = "yes"; then
   pc_args="${pc_args:+${pc_args} }--cflags"
