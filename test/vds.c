@@ -1459,7 +1459,9 @@ error:
  * Function:    test_basic_io
  *
  * Purpose:     Tests VDS I/O without unlimited selections or
- *              pattern-matching file/dataset strings
+ *              pattern-matching file/dataset strings (tests 1-6; tests
+ *              7-10 are in test_basic_io_2() to keep each stack frame
+ *              small)
  *
  * Return:      Success:        0
  *              Failure:        number of errors
@@ -1494,14 +1496,13 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     hsize_t     count[4];                                    /* Hyperslab count */
     hsize_t     block[4];                                    /* Hyperslab block */
     hssize_t    offset[2] = {0, 0};                          /* Selection offset */
-    int         buf[10][26];                                 /* Write and expected read buffer */
-    int         rbuf[10][26];                                /* Read buffer */
-    int         rbuf99[9][9];                                /* 9x9 Read buffer */
-    int         evbuf[10][26];                               /* Expected VDS "buffer" */
-    int         erbuf[10][26];                               /* Expected read buffer */
-    int         fill = -1;                                   /* Fill value */
-    herr_t      ret;                                         /* Generic return value */
-    int         i, j, u, v;
+    /* Buffers are static to keep this large function's stack frame small */
+    static int buf[10][26];   /* Write and expected read buffer */
+    static int rbuf[10][26];  /* Read buffer */
+    static int evbuf[10][26]; /* Expected VDS "buffer" */
+    static int erbuf[10][26]; /* Expected read buffer */
+    int        fill = -1;     /* Fill value */
+    int        i, j;
 
     TESTING_2_SUPPRESSED("basic virtual dataset I/O");
 
@@ -2986,6 +2987,114 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
         TEST_ERROR_SUPPRESSED;
     memspace = -1;
 
+    /* Close */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR_SUPPRESSED;
+    dcpl = -1;
+
+    free(srcfilename);
+    free(srcfilename_map);
+    free(vfilename);
+    free(vfilename2);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
+
+    PASSED_SUPPRESSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        for (i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++)
+            H5Dclose(srcdset[i]);
+        H5Dclose(vdset);
+        for (i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++)
+            H5Fclose(srcfile[i]);
+        H5Fclose(vfile);
+        H5Fclose(vfile2);
+        for (i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++)
+            H5Sclose(srcspace[i]);
+        for (i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++)
+            H5Sclose(vspace[i]);
+        H5Sclose(memspace);
+        H5Pclose(dcpl);
+    }
+    H5E_END_TRY
+
+    free(srcfilename);
+    free(srcfilename_map);
+    free(vfilename);
+    free(vfilename2);
+    free(srcfilenamepct);
+    free(srcfilenamepct_map);
+
+    return 1;
+} /* end test_basic_io() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_basic_io_2
+ *
+ * Purpose:     Tests VDS I/O without unlimited selections or
+ *              pattern-matching file/dataset strings (tests 7-10,
+ *              continued from test_basic_io())
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test_basic_io_2(unsigned config, hid_t vds_fapl, hid_t src_fapl)
+{
+    char   *srcfilename     = NULL;
+    char   *srcfilename_map = NULL;
+    char   *vfilename       = NULL;
+    hid_t   srcfile[4]      = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                               H5I_INVALID_HID}; /* Files with source dsets */
+    hid_t   vfile           = H5I_INVALID_HID;   /* File with virtual dset */
+    hid_t   dcpl            = H5I_INVALID_HID;   /* Dataset creation property list */
+    hid_t   srcspace[4]     = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                               H5I_INVALID_HID}; /* Source dataspaces */
+    hid_t   vspace[4]       = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                               H5I_INVALID_HID}; /* Virtual dset dataspaces */
+    hid_t   memspace        = H5I_INVALID_HID;   /* Memory dataspace */
+    hid_t   srcdset[4]      = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
+                               H5I_INVALID_HID}; /* Source datasets */
+    hid_t   vdset           = H5I_INVALID_HID;   /* Virtual dataset */
+    hsize_t dims[4]         = {10, 26, 0, 0};    /* Data space current size */
+    hsize_t start[4];                            /* Hyperslab start */
+    hsize_t stride[4];                           /* Hyperslab stride */
+    hsize_t count[4];                            /* Hyperslab count */
+    hsize_t block[4];                            /* Hyperslab block */
+    /* Buffers are static to keep this large function's stack frame small */
+    static int buf[10][26];   /* Write and expected read buffer */
+    static int rbuf[10][26];  /* Read buffer */
+    static int rbuf99[9][9];  /* 9x9 Read buffer */
+    static int erbuf[10][26]; /* Expected read buffer */
+    int        fill = -1;     /* Fill value */
+    herr_t     ret;           /* Generic return value */
+    int        i, j, u, v;
+
+    TESTING_2_SUPPRESSED("basic virtual dataset I/O");
+
+    if ((srcfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR_SUPPRESSED;
+    if ((srcfilename_map = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR_SUPPRESSED;
+    if ((vfilename = (char *)calloc(FILENAME_BUF_SIZE, sizeof(char))) == NULL)
+        TEST_ERROR_SUPPRESSED;
+
+    h5_fixname(FILENAME[0], vds_fapl, vfilename, FILENAME_BUF_SIZE);
+    h5_fixname(FILENAME[2], src_fapl, srcfilename, FILENAME_BUF_SIZE);
+    h5_fixname_printf(FILENAME[2], src_fapl, srcfilename_map, FILENAME_BUF_SIZE);
+
+    /* Create DCPL */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR_SUPPRESSED;
+
+    /* Set fill value */
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fill) < 0)
+        TEST_ERROR_SUPPRESSED;
+
     /*
      * Test 7: 1 Source dataset, two mappings, 4 dimensional virtual dataset
      * and 3 dimensional source dataset
@@ -4354,9 +4463,6 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     free(srcfilename);
     free(srcfilename_map);
     free(vfilename);
-    free(vfilename2);
-    free(srcfilenamepct);
-    free(srcfilenamepct_map);
 
     PASSED_SUPPRESSED();
     return 0;
@@ -4370,7 +4476,6 @@ error:
         for (i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++)
             H5Fclose(srcfile[i]);
         H5Fclose(vfile);
-        H5Fclose(vfile2);
         for (i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++)
             H5Sclose(srcspace[i]);
         for (i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++)
@@ -4383,12 +4488,9 @@ error:
     free(srcfilename);
     free(srcfilename_map);
     free(vfilename);
-    free(vfilename2);
-    free(srcfilenamepct);
-    free(srcfilenamepct_map);
 
     return 1;
-} /* end test_basic_io() */
+} /* end test_basic_io_2() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_unlim
@@ -12446,6 +12548,7 @@ main(void)
 
                 /* Run tests */
                 nerrors += test_basic_io(bit_config, vds_fapl, src_fapl);
+                nerrors += test_basic_io_2(bit_config, vds_fapl, src_fapl);
                 nerrors += test_vds_prefix_first(bit_config, vds_fapl, src_fapl);
                 nerrors += test_unlim(bit_config, vds_fapl, src_fapl);
                 nerrors += test_printf(bit_config, vds_fapl, src_fapl);

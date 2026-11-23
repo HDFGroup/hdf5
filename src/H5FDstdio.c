@@ -555,6 +555,8 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long /*OUT*/ *flags)
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations    */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD      */
+        *flags |=
+            H5FD_FEAT_READWRITE_NO_H5_CALLS; /* read() and write() callbacks do not re-enter the HDF5 API */
     }
 
     return 0;

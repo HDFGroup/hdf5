@@ -1,4 +1,4 @@
-v2.3.0 --- July X , 2026
+v2.4.0 --- November X , 2026
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -22,7 +22,7 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 * [Platforms Tested](CHANGELOG.md#%EF%B8%8F-platforms-tested)
 * [Known Problems](CHANGELOG.md#-known-problems)
 
-# 🔆 Executive Summary: HDF5 Version 2.3.0
+# 🔆 Executive Summary: HDF5 Version 2.4.0
 
 
 ## Performance Enhancements:
@@ -175,7 +175,7 @@ We would like to thank the many HDF5 community members who contributed to this r
    H5Z_FEAT_FILTER_THREADSAFE, which should be set when the filter callback is
    threadsafe, and H5Z_FEAT_FILTER_NO_H5_CALLS, which should be set when the
    filter makes no HDF5 calls except for H5OPEN, H5allocate_memory(),
-   H5resize_memory(), and H5free_memory().
+   H5resize_memory(), H5free_memory(), and all H5E functions.
 
 ### Added support for internally concurrent multithreaded reads of chunked datasets
 
