@@ -1,0 +1,326 @@
+name: Patch release plan
+description: Plan and track one HDF5 patch release (x.y.Z) from scoping through retro. For release managers.
+title: "Patch release: HDF5 x.y.Z"
+labels: ["release", "patch-release"]
+# Uncomment to add every release tracking issue to the release dashboard.
+# The person opening the issue needs write access to the project.
+# projects: ["HDFGroup/39"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form creates the **tracking issue** for one patch release. The issue is the release plan: scope, guarantees, criteria, owners, and what we are learning.
+
+        **How to use it**
+        - Fill in what you know now and leave the rest. Tables and checklists are meant to be edited in the issue body as the release progresses.
+        - Every patch release follows the [Patch Release Charter](https://github.com/HDFGroup/hdf5/blob/develop/release_docs/PATCH_RELEASE_CHARTER.md).
+        - Use **comments on this issue as the release log**: decisions, surprises, scope exceptions, sign-offs, and the go/no-go decision. Comment timestamps feed the retro.
+        - **Never put embargoed security details in this issue.** Track them in a private security advisory and refer to them here only as "embargoed item 1", "embargoed item 2", and so on.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release this issue tracks.
+      placeholder: x.y.Z
+    validations:
+      required: true
+
+  - type: input
+    id: baseline
+    attributes:
+      label: Baseline release
+      description: The previous release in this series. ABI checks, regression comparisons, and metrics are measured against it.
+      placeholder: x.y.(Z-1)
+    validations:
+      required: true
+
+  - type: input
+    id: branch
+    attributes:
+      label: Maintenance branch
+      placeholder: e.g. hdf5_x_y
+    validations:
+      required: true
+
+  - type: dropdown
+    id: trigger
+    attributes:
+      label: Release trigger
+      description: An out-of-band release must match one of the triggers in the charter.
+      options:
+        - Scheduled (regular cadence)
+        - "Out-of-band: security"
+        - "Out-of-band: data corruption"
+        - "Out-of-band: critical regression or Tier 1 build failure"
+    validations:
+      required: true
+
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      description: Link to the GitHub milestone that holds this release's issues and pull requests.
+
+  - type: textarea
+    id: owners
+    attributes:
+      label: Owners
+      description: One named person per role. Sign-off owners can block the release for problems in their area. The release manager's shadow is, by default, the release manager for the next release.
+      value: |
+        | Role | Owner |
+        |---|---|
+        | Release manager | @ |
+        | Release manager shadow | @ |
+        | Engineering sign-off | @ |
+        | Testing sign-off | @ |
+        | Security sign-off | @ |
+        | Documentation and release notes sign-off | @ |
+        | Community and packager communication | @ |
+    validations:
+      required: true
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Timeline
+      description: Fill in target dates now. Record actual dates as each milestone happens; the difference is the schedule-slip metric.
+      value: |
+        | Milestone | Target | Actual |
+        |---|---|---|
+        | Scope lock | | |
+        | Code freeze | | |
+        | RC1 published | | |
+        | Downstream testing window closes | | |
+        | Go/no-go | | |
+        | Release | | |
+        | Post-release watch ends (release + 2 weeks) | | |
+        | Retro | | |
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: charter_ack
+    attributes:
+      label: Charter
+      options:
+        - label: I have read the Patch Release Charter, and this release is planned under it.
+          required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Every item needs a charter category. After code freeze, any change to this table needs release manager approval, recorded as a comment with the reason.
+      value: |
+        | Issue | Category | Backport PR | Release note | Status |
+        |---|---|---|---|---|
+        | # | regression / corruption / crash / security / build / docs / tests | # | yes / no | open |
+
+        **Considered and deferred, with reason**
+        - 
+
+  - type: textarea
+    id: matrix
+    attributes:
+      label: Test matrix and checks
+      description: Edit to match the supported platform list in the charter. Tier 1 must show no new failures relative to the baseline release. Tier 2 is best effort; failures are documented, not blocking.
+      value: |
+        | Tier | Configuration or check | Result | Link |
+        |---|---|---|---|
+        | 1 | Linux, GCC | | |
+        | 1 | Linux, Clang | | |
+        | 1 | macOS, Apple Clang | | |
+        | 1 | Windows, MSVC | | |
+        | 1 | Parallel (MPI) build | | |
+        | 1 | Thread-safe build | | |
+        | 1 | Fortran, C++, Java, and high-level libraries | | |
+        | 1 | ABI comparison against baseline | | |
+        | 1 | Cross-version file compatibility against baseline | | |
+        | 2 | Intel oneAPI | | |
+        | 2 | NVHPC | | |
+        | 2 | Parallel at scale on a partner HPC system | | |
+        | 2 | Performance smoke test against baseline | | |
+
+  - type: textarea
+    id: flaky
+    attributes:
+      label: Known flaky tests
+      description: List each by name. A failure in any test not listed here counts as a real failure.
+      placeholder: "- testname (platform): link to issue"
+
+  - type: textarea
+    id: downstream
+    attributes:
+      label: Downstream testing
+      description: Projects and packagers asked to test the release candidate. Edit the list to match your actual consumers.
+      value: |
+        | Project | Contact | RC sent | Result |
+        |---|---|---|---|
+        | h5py | | | |
+        | netCDF-C | | | |
+        | PyTables | | | |
+        | HDF5 filter plugins | | | |
+        | VOL connectors | | | |
+        | conda-forge | | | |
+        | Spack | | | |
+        | Linux distributions | | | |
+
+  - type: dropdown
+    id: security
+    attributes:
+      label: Security fixes
+      options:
+        - None
+        - Yes, all public
+        - Yes, some embargoed
+    validations:
+      required: true
+
+  - type: textarea
+    id: security_details
+    attributes:
+      label: Security details
+      description: Public items only. Refer to embargoed items by number and track their details in a private security advisory.
+      value: |
+        | Item | CVE | Advisory | Public disclosure date |
+        |---|---|---|---|
+        | | | | |
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Pre-mortem and risks
+      description: Imagine this release went badly. What most likely went wrong? List those causes and what you will do about each.
+      value: |
+        | Risk | Likelihood | Mitigation | Owner |
+        |---|---|---|---|
+        | | | | |
+
+  - type: textarea
+    id: improvements
+    attributes:
+      label: Improvements from the last retro
+      description: Action items from the previous release's retro, and the one process experiment this release is trying.
+      value: |
+        **Previous retro:** (link)
+
+        | Action item | Owner | Done |
+        |---|---|---|
+        | | | |
+
+        **This release's experiment**
+        - Change:
+        - Expected result:
+        - How we will measure it:
+
+  - type: checkboxes
+    id: phase_planning
+    attributes:
+      label: "Phase 1: Planning"
+      options:
+        - label: Release manager and shadow named in Owners
+        - label: Milestone created and linked, and scope populated from backport candidates
+        - label: Target dates set in Timeline and published
+        - label: Pre-mortem held and risks recorded
+        - label: Downstream contacts and packagers told the target dates
+        - label: Security owner confirmed whether embargoed fixes are included, and their disclosure dates
+
+  - type: checkboxes
+    id: phase_development
+    attributes:
+      label: "Phase 2: Development"
+      options:
+        - label: Every fix landed on the development branch first, or the exception is noted in Scope
+        - label: Every backport PR has a release note entry and a test, or a stated reason why not
+        - label: Maintenance branch CI green at scope lock
+        - label: Scope locked, and the considered-and-deferred list filled in
+
+  - type: checkboxes
+    id: phase_stabilization
+    attributes:
+      label: "Phase 3: Stabilization"
+      options:
+        - label: Code freeze announced
+        - label: RC1 built by the same pipeline as the final release, and published
+        - label: Full Tier 1 matrix run on the release candidate
+        - label: ABI comparison against baseline is clean
+        - label: Cross-version file compatibility checks pass
+        - label: Release candidate announced to downstreams, with the testing window close date
+        - label: Release notes drafted, including known issues and upgrade guidance
+        - label: Documentation built for this version
+        - label: Every fix merged after freeze produced a new release candidate
+
+  - type: checkboxes
+    id: phase_gonogo
+    attributes:
+      label: "Phase 4: Go/no-go"
+      options:
+        - label: Tier 1 shows no new failures relative to baseline
+        - label: ABI report clean
+        - label: No open release blockers in the milestone
+        - label: Downstream testing results reviewed
+        - label: Release notes reviewed by the documentation owner
+        - label: Security advisories staged with CVE IDs
+        - label: Each sign-off owner recorded sign-off in a comment
+        - label: Release manager recorded the decision in a comment, including any waived criterion and why
+
+  - type: checkboxes
+    id: phase_release
+    attributes:
+      label: "Phase 5: Release day"
+      options:
+        - label: Final release built from the last release candidate commit, with only the version string changed
+        - label: Tag created and pushed
+        - label: Source archives, binaries, and checksums published
+        - label: GitHub release created with release notes
+        - label: Documentation published
+        - label: Security advisories published
+        - label: Announcements posted on the website and forum
+        - label: Packagers notified
+        - label: Maintenance branch version bumped to the next development version
+        - label: Milestone closed
+
+  - type: checkboxes
+    id: phase_post_release
+    attributes:
+      label: "Phase 6: Post-release watch"
+      options:
+        - label: Reports of problems with this release triaged daily for two weeks
+        - label: Downstream CI and packaging checked for breakage
+        - label: Any hotfix decision made against the charter criteria and recorded in a comment
+
+  - type: checkboxes
+    id: phase_retro
+    attributes:
+      label: "Phase 7: Retro"
+      options:
+        - label: Metrics table filled in
+        - label: Blameless retro held, using this issue's comments as the timeline
+        - label: Each escaped defect analyzed for what would have caught it
+        - label: At most three action items, with owners, copied into the next release's tracking issue
+        - label: Charter or issue form updated by pull request where the retro called for it
+        - label: Short public summary posted (optional)
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Metrics
+      description: Filled in for the retro. Compare with the baseline release and look at the trend across releases. The 30-day regression count is filled in later.
+      value: |
+        | Metric | Baseline release | This release |
+        |---|---|---|
+        | Median days from fix merged to released | | |
+        | Days from code freeze to release | | |
+        | Release candidates | | |
+        | Scope changes after freeze (added / removed) | | |
+        | Manual steps in the release-day runbook | | |
+        | Waived go/no-go criteria | | |
+        | Schedule slip at release (days) | | |
+        | Regressions reported within 30 days | | |
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything else the plan needs.
