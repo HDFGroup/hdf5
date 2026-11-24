@@ -679,7 +679,7 @@ jobs:
           minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
           release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
           H5_VERSION="${major}.${minor}.${release}"
-          cmake --preset=${{ inputs.preset_name }}-macos-Clang --fresh -DH5_DEFAULT_PLUGINDIR="/Applications/HDF_Group/HDF5/${H5_VERSION}/lib/plugin:/usr/local/hdf5/lib/plugin"
+          cmake --preset=${{ inputs.preset_name }}-macos-Clang --fresh -DH5_DEFAULT_PLUGINDIR="/Applications/HDF_Group/HDF5/${H5_VERSION}/lib/plugin"
           cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang
         shell: bash
 
