@@ -47,37 +47,53 @@ function serializeExcluded(excluded) {
 // writers, e.g. the /remove-reviewer slash command) so the marker format
 // only needs to be understood in one place.
 function withExcluded(commentBody, excluded) {
-  const marker = serializeExcluded(excluded);
-  const start = commentBody.indexOf(EXCLUDED_PREFIX);
-  if (start === -1) return `${commentBody}\n${marker}`;
-  const end = commentBody.indexOf(EXCLUDED_SUFFIX, start);
-  if (end === -1) return `${commentBody}\n${marker}`;
-  return commentBody.slice(0, start) + marker + commentBody.slice(end + EXCLUDED_SUFFIX.length);
+  return replaceMarker(commentBody, EXCLUDED_PREFIX, EXCLUDED_SUFFIX, serializeExcluded(excluded));
 }
 
-// Persisted record of CODEOWNERS who were review-requested directly by a
+// Returns commentBody with the hidden marker that starts with `prefix`
+// replaced by `marker`, or with `marker` appended if there is none.
+function replaceMarker(commentBody, prefix, suffix, marker) {
+  const start = commentBody.indexOf(prefix);
+  if (start === -1) return `${commentBody}\n${marker}`;
+  const end = commentBody.indexOf(suffix, start);
+  if (end === -1) return `${commentBody}\n${marker}`;
+  return commentBody.slice(0, start) + marker + commentBody.slice(end + suffix.length);
+}
+
+// Persisted record of reviewers who were review-requested directly by a
 // human (github.rest.pulls.requestReviewers called by the bot itself, or
 // GitHub's own CODEOWNERS auto-assignment, both fire the identical
 // review_requested webhook — see the isBotSender guard in
 // coordinateReviewers for how a human's own action is told apart from
-// those). A manually-added CODEOWNER is presumed deliberately chosen for
+// those). A manually requested reviewer is presumed deliberately chosen for
 // their judgment, not just load-balanced into the slot — so buildBody
-// requires their own approval for that area's sign-off, on top of (not
-// instead of) whichever owner was auto-picked. Same durability rules as
-// EXCLUDED_PREFIX: it's the only persistent storage available, so it rides
-// along as a third hidden marker in the checklist comment body.
+// requires their own approval: for an owner of a touched area, on top of
+// (not instead of) whichever owner was auto-picked; for anyone else, as a
+// checklist item of its own. Same durability rules as EXCLUDED_PREFIX: it's
+// the only persistent storage available, so it rides along as a third
+// hidden marker in the checklist comment body.
 const MANUAL_PREFIX = '<!-- hdf5-review-checklist-manual:';
 const MANUAL_SUFFIX = '-->';
 
 // Returns `commentBody` with `logins` added to its persisted exclusion list.
-// Used by the /remove-reviewer workflow, whose removals are made with the
-// workflow token and so never reach the review_request_removed handling in
-// coordinateReviewers.
 function addExcluded(commentBody, logins) {
   return withExcluded(commentBody, new Set([...parseExcluded(commentBody), ...logins]));
 }
 
-// Extracts the persisted manually-added-CODEOWNER list. Returns an empty Set
+// Returns `commentBody` with `logins` recorded as removed: added to the
+// exclusion list and dropped from the manually-requested list, so they are
+// neither re-requested nor still owed an approval. Used by the
+// /remove-reviewer workflow, whose removals are made with the workflow token
+// and so never reach the review_request_removed handling in
+// coordinateReviewers.
+function recordRemoval(commentBody, logins) {
+  const manuallyAdded = parseManuallyAdded(commentBody);
+  for (const login of logins) manuallyAdded.delete(login);
+  return replaceMarker(addExcluded(commentBody, logins), MANUAL_PREFIX, MANUAL_SUFFIX,
+    serializeManuallyAdded(manuallyAdded));
+}
+
+// Extracts the persisted manually-requested-reviewer list. Returns an empty Set
 // if there's no comment yet or no marker in it.
 function parseManuallyAdded(commentBody) {
   if (!commentBody) return new Set();
@@ -89,7 +105,7 @@ function parseManuallyAdded(commentBody) {
   return new Set(list.split(',').map(s => s.trim()).filter(Boolean));
 }
 
-// Serializes the manually-added-CODEOWNER list back into its hidden-marker form.
+// Serializes the manually-requested-reviewer list back into its hidden-marker form.
 function serializeManuallyAdded(manuallyAdded) {
   return `${MANUAL_PREFIX}${[...manuallyAdded].join(',')}${MANUAL_SUFFIX}`;
 }
@@ -331,15 +347,27 @@ function chooseReviewers(touchedAreas, {
 // Builds the markdown checklist comment body (pure, no I/O).
 //
 // `changeRequestFilesByUser` (Map<login, Set<filename>>, from
-// buildChangeRequestFileMap) and `manuallyAdded` (Set<login>, from
-// parseManuallyAdded) are both optional — callers that don't track them can
-// omit either and get the pre-existing behavior.
-function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser = new Map(), manuallyAdded = new Set()) {
+// buildChangeRequestFileMap), `manuallyAdded` (Set<login>, from
+// parseManuallyAdded) and `reviewedUsers` (Set<login> of everyone who has
+// submitted any review) are all optional — callers that don't track them can
+// omit them and get the pre-existing behavior.
+function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser = new Map(), manuallyAdded = new Set(), reviewedUsers = new Set()) {
   // Reviewers manually assigned who are not CODEOWNERS for any touched area.
   // Used as a fallback for areas that have no CODEOWNER assigned — their
   // approval also counts as sign-off for that area.
   const allAreaOwners     = new Set(touchedAreas.flatMap(a => a.owners));
   const nonOwnerReviewers = [...confirmedRequested].filter(o => !allAreaOwners.has(o));
+
+  // Manually requested reviewers who still owe (or have given) an approval.
+  // GitHub drops a reviewer from requested_reviewers as soon as they submit
+  // any review, so someone who has reviewed still counts; someone who is
+  // neither requested nor has reviewed was removed and no longer counts.
+  const activeManual = new Set(
+    [...manuallyAdded].filter(o => confirmedRequested.has(o) || reviewedUsers.has(o))
+  );
+  // Manually requested reviewers who own none of the touched areas get their
+  // own checklist items below rather than a line under an area.
+  const manualNonOwners = [...activeManual].filter(o => !allAreaOwners.has(o));
 
   // Tracks which nonOwnerReviewers ended up displayed in some area's row (as
   // the no-CODEOWNER fallback), so we know who's left over for the catch-all
@@ -352,8 +380,8 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeReques
     // (see MANUAL_PREFIX) rather than auto-picked — their own approval is
     // required in addition to the area's usual sign-off, shown on its own
     // line below rather than folded into the main mention list.
-    const manualOwnersHere = ownerReviewers.filter(o => manuallyAdded.has(o));
-    const autoOwnersHere   = ownerReviewers.filter(o => !manuallyAdded.has(o));
+    const manualOwnersHere = area.owners.filter(o => activeManual.has(o));
+    const autoOwnersHere   = ownerReviewers.filter(o => !activeManual.has(o));
     // If no CODEOWNER is assigned for this area, fall back to non-CODEOWNER
     // reviewers so manually-assigned people are shown and their approval counts.
     const effectiveReviewers = ownerReviewers.length > 0 ? ownerReviewers : nonOwnerReviewers;
@@ -395,15 +423,16 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeReques
     };
   });
 
-  const allDone = rowData.every(r => r.signedOff);
+  const allDone = rowData.every(r => r.signedOff)
+    && manualNonOwners.every(o => approvedUsers.has(o));
   const rows    = rowData.map(r => r.text);
 
-  // Reviewers on the PR who aren't an owner of any touched area and weren't
-  // pulled in as a no-CODEOWNER fallback either — e.g. a project lead added
-  // by hand for their judgment, not their path ownership. They don't gate any
-  // area's sign-off, but should still be visible rather than silently absent
-  // from the checklist.
-  const extraReviewers = nonOwnerReviewers.filter(o => !usedAsFallback.has(o));
+  // Reviewers on the PR who aren't an owner of any touched area, weren't
+  // pulled in as a no-CODEOWNER fallback, and weren't requested by a human
+  // (those are checklist items above) — e.g. someone requested before this
+  // checklist tracked manual requests. They don't gate sign-off, but should
+  // still be visible rather than silently absent from the checklist.
+  const extraReviewers = nonOwnerReviewers.filter(o => !usedAsFallback.has(o) && !activeManual.has(o));
 
   const parts = [
     MARKER,
@@ -414,6 +443,12 @@ function buildBody(touchedAreas, approvedUsers, confirmedRequested, changeReques
     '',
     ...rows,
   ];
+  if (manualNonOwners.length > 0) {
+    parts.push('', '**Manually requested reviewers** (not owners of a touched area):', '');
+    for (const o of manualNonOwners) {
+      parts.push(approvedUsers.has(o) ? `- [x] @${o} ✅` : `- [ ] @${o} — approval required`);
+    }
+  }
   if (extraReviewers.length > 0) {
     const mentions = extraReviewers.map(o => approvedUsers.has(o) ? `@${o} ✅` : `@${o}`).join(', ');
     parts.push('', `**Additional reviewers** (not owners of a touched area): ${mentions}`);
@@ -559,6 +594,12 @@ async function removeUnselected(github, core, { owner, repo, pr_number }, prunab
   }
 }
 
+// The requested reviewers removeUnselected never removes (anyone outside
+// prunableOwners), so they stay on the checklist after a prune.
+function notPrunable(currentRequested, prunableOwners) {
+  return new Set([...currentRequested].filter(r => !prunableOwners.has(r)));
+}
+
 // Requests each reviewer individually (so one bad login can't block the rest).
 // Returns the Set of logins that were successfully requested.
 async function requestReviewers(github, core, { owner, repo, pr_number }, selected) {
@@ -617,7 +658,7 @@ function planSynchronizeSwaps(eligibleAreas, allReviews, {
 // Determines who should be in confirmedRequested (the checklist display set).
 // Returns { confirmedRequested: Set<login>, excludedReviewers: Set<login>,
 // manuallyAdded: Set<login>, assignedReviewers: Map<areaLabel, login> } —
-// manuallyAdded tracks CODEOWNERS requested directly by a human (see
+// manuallyAdded tracks reviewers requested directly by a human (see
 // MANUAL_PREFIX); assignedReviewers tracks the settled pick per area (see
 // ASSIGNED_PREFIX). Both are updated alongside excludedReviewers wherever a
 // review_requested/review_request_removed event is inspected below.
@@ -731,7 +772,7 @@ async function coordinateReviewers(github, context, core, {
   // this PR again, even after a draft becomes ready for review.
   const isBotSender = context.payload.sender?.type === 'Bot';
   const updatedExcluded = new Set(excludedReviewers);
-  // CODEOWNERS review-requested directly by a human — see MANUAL_PREFIX.
+  // Reviewers review-requested directly by a human — see MANUAL_PREFIX.
   // Gated on !isBotSender same as the review_requested branch below: the
   // bot's own requestReviewers calls (the normal load-balanced auto-pick)
   // fire this identical webhook event with a bot sender, and must not be
@@ -764,9 +805,11 @@ async function coordinateReviewers(github, context, core, {
     if (updatedExcluded.delete(login)) {
       core.info(`${login} explicitly re-requested — clearing prior exclusion`);
     }
-    if (allCodeOwners.has(login)) {
+    // Bot reviewers (e.g. Copilot) only ever leave comment reviews, so
+    // requiring their approval would block sign-off for good.
+    if (context.payload.requested_reviewer.type !== 'Bot') {
       updatedManuallyAdded.add(login);
-      core.info(`${login} manually requested by a human — their own approval will be required on areas they own`);
+      core.info(`${login} manually requested by a human — their own approval will be required`);
     }
     for (const area of touchedAreas) {
       if (area.owners.includes(login)) {
@@ -794,8 +837,27 @@ async function coordinateReviewers(github, context, core, {
     prData.requested_reviewers.map(r => r.login).filter(Boolean).filter(l => !updatedExcluded.has(l))
   );
 
+  const touchedAreaOwners = new Set([...touchedAreas.flatMap(a => a.owners), ...catchAllOwners]);
+
+  // The first-pass guard above can't tell a human's review_requested from
+  // GitHub's CODEOWNERS auto-assignment, but GitHub only auto-requests owners
+  // of touched areas and catch-all "*" owners. Anyone else requested on the
+  // first pass was picked by a person (e.g. in the PR-creation form) and must
+  // be kept and required, not pruned below as an out-of-scope CODEOWNER.
+  if (isFirstCoordinationPass) {
+    for (const r of prData.requested_reviewers) {
+      if (r.login && r.type !== 'Bot' && existingRequested.has(r.login) && !touchedAreaOwners.has(r.login)) {
+        updatedManuallyAdded.add(r.login);
+        core.info(`${r.login} requested at PR creation but owns no touched area — treating as manually requested`);
+      }
+    }
+  }
+
   // ── read-only events ─────────────────────────────────────────────────────
-  if (context.eventName === 'pull_request_review' || context.eventName === 'workflow_run') {
+  // issue_comment is the /remove-reviewer command re-rendering the checklist
+  // after recording its removals.
+  if (context.eventName === 'pull_request_review' || context.eventName === 'workflow_run'
+      || context.eventName === 'issue_comment') {
     core.info('Read-only event — reflecting current reviewer assignments');
     // Excluded owners are dropped first so a still-engaged sticky pick is
     // only honored while they remain a legitimate (non-excluded) owner —
@@ -852,8 +914,6 @@ async function coordinateReviewers(github, context, core, {
     core.info(`Author ${prAuthor} is not a code owner — skipping assignee`);
   }
 
-  const touchedAreaOwners = new Set([...touchedAreas.flatMap(a => a.owners), ...catchAllOwners]);
-
   if (isDraft) {
     if (action === 'opened' || action === 'reopened' || isFirstCoordinationPass) {
       // (Re)opened directly as a draft — clear the CODEOWNERS avalanche from
@@ -870,7 +930,7 @@ async function coordinateReviewers(github, context, core, {
       // should resurface as the same people when it's marked ready again
       // instead of being re-rolled by the load-balancer.
       return {
-        confirmedRequested: new Set(),
+        confirmedRequested: notPrunable(existingRequested, touchedAreaOwners),
         excludedReviewers: updatedExcluded,
         manuallyAdded: updatedManuallyAdded,
         assignedReviewers: updatedAssigned,
@@ -952,7 +1012,7 @@ async function coordinateReviewers(github, context, core, {
 
     core.info(`Non-draft PR ${action} — pruned to selection: ${[...selected].join(', ') || '(none)'}`);
     return {
-      confirmedRequested: selected,
+      confirmedRequested: new Set([...selected, ...notPrunable(existingRequested, touchedAreaOwners)]),
       excludedReviewers: updatedExcluded,
       manuallyAdded: updatedManuallyAdded,
       assignedReviewers: updatedAssigned,
@@ -1179,6 +1239,10 @@ module.exports = async function run({ github, context, core }) {
       return;
     }
     pr_number = pr.number;
+  } else if (context.eventName === 'issue_comment') {
+    // The /remove-reviewer command (remove-reviewer.yml), which only calls
+    // this for PRs that already have a checklist.
+    pr_number = context.payload.issue.number;
   } else {
     pr_number = context.payload.pull_request.number;
   }
@@ -1290,6 +1354,7 @@ module.exports = async function run({ github, context, core }) {
   }
   const approvedUsers      = computeApprovals(allReviews);
   const changesRequestedBy = computeChangesRequested(allReviews);
+  const reviewedUsers      = new Set(allReviews.map(r => r.user && r.user.login).filter(Boolean));
 
   // Inline comments, so a change-requester's row-line can be scoped to the
   // area(s) their feedback actually falls under. Only fetched when someone's
@@ -1372,7 +1437,8 @@ module.exports = async function run({ github, context, core }) {
   // 8. Build and post (or update) the checklist comment.
   // ----------------------------------------------------------------
   const checklistBody = buildBody(
-    touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser, updatedManuallyAdded
+    touchedAreas, approvedUsers, confirmedRequested, changeRequestFilesByUser, updatedManuallyAdded,
+    reviewedUsers
   );
   const allDone  = checklistBody.includes(ALL_DONE_MARKER);
   const pingBody = computeAssigneePing(checklistBody, existingComment, prData);
@@ -1442,6 +1508,7 @@ module.exports.parseExcluded             = parseExcluded;
 module.exports.serializeExcluded         = serializeExcluded;
 module.exports.withExcluded              = withExcluded;
 module.exports.addExcluded               = addExcluded;
+module.exports.recordRemoval             = recordRemoval;
 module.exports.parseManuallyAdded        = parseManuallyAdded;
 module.exports.serializeManuallyAdded    = serializeManuallyAdded;
 module.exports.parseAssigned             = parseAssigned;
