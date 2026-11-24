@@ -1241,11 +1241,13 @@ extern char H5_lib_vers_info_g[];
 #define H5_API_INTLOCK(err)                                                                                  \
     {                                                                                                        \
         H5CANCEL_DECL_INTLOCK;                                                                               \
+        bool internal_lock_locked = false;                                                                   \
                                                                                                              \
         if (H5TS_currently_concurrent_g) {                                                                   \
             /* Lock internal mutex instead of API */                                                         \
             if (H5TS_internal_lock() < 0)                                                                    \
                 HGOTO_ERROR(H5E_FUNC, H5E_CANTLOCK, err, "can't lock internal mutex");                       \
+            internal_lock_locked = true;                                                                     \
                                                                                                              \
             /* Set thread cancellation state to 'disable', and remember previous state */                    \
             H5TS_DISABLE_CANCEL;                                                                             \
@@ -1258,7 +1260,8 @@ extern char H5_lib_vers_info_g[];
 #define H5_API_INTUNLOCK                                                                                     \
     if (H5TS_currently_concurrent_g) {                                                                       \
         /* Unlock internal mutex instead of API */                                                           \
-        (void)H5TS_internal_unlock();                                                                        \
+        if (internal_lock_locked)                                                                            \
+            (void)H5TS_internal_unlock();                                                                    \
                                                                                                              \
         /* Restore previous thread cancellation state */                                                     \
         H5TS_RESTORE_CANCEL;                                                                                 \
