@@ -1,4 +1,4 @@
-HDF5 version 2.3.0 released on 2026-11-20
+HDF5 version 2.3.0 released on 2026-11-24
 
 # 🔺 HDF5 Changelog
 All notable changes to this project will be documented in this file. This document describes the differences between this release and the previous
@@ -30,9 +30,17 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Significant Advancements:
 
+- Added support for internally concurrent multithreaded reads of chunked datasets
+
+- Added a new version of the `H5Z_class_t` structure, `H5Z_class3_t`, to include feature flags
+
+- Added a Linux binary which runs with glibc 2.28 and newer
 
 ## Enhanced Features:
 
+- Updated the ROS3 VFD to read an alternate endpoint URL from the AWS configuration file
+
+- Made several improvements to the installed CMake package configuration files, including introducing new linkage-agnostic CMake target names (`hdf5::hdf5`, `hdf5::hdf5_hl`, `hdf5::hdf5_fortran`, etc.) for compatibility with CMake's FindHDF5 module
 
 ## Java Enhancements:
 
@@ -40,6 +48,12 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 ## Acknowledgements:
 
 We would like to thank the many HDF5 community members who contributed to this release of HDF5.
+
+## Changelog and release information:
+
+The full list of changes in this release can be found in [CHANGELOG.md](https://github.com/HDFGroup/hdf5/blob/2.3.0/release_docs/CHANGELOG.md).
+
+Information about a specific HDF5 release can be found at https://support.hdfgroup.org/documentation/hdf5/latest/release_specific_info.html.
 
 # ⚠️ Breaking Changes
 
