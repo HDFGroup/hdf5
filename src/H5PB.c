@@ -1033,7 +1033,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
 
 #ifdef H5_HAVE_PARALLEL
         if (bypass_pb) {
-            if (H5PB_update_entry(page_buf, addr, size, buf) > 0)
+            if (H5PB_update_entry(page_buf, addr, size, buf) < 0)
                 HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTUPDATE, FAIL, "failed to update PB with metadata cache");
             HGOTO_DONE(SUCCEED);
         } /* end if */
