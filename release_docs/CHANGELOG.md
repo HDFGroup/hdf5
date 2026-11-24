@@ -442,6 +442,27 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
+### Fixed h5cc, h5c++ and h5fc in the glibc 2.28 and Intel Linux binaries
+
+   The wrappers run the compiler CMake recorded at configure time, by default as an absolute
+   path. The wrappers in the glibc 2.28 Linux binary failed looking for
+   `/opt/rh/gcc-toolset-14/root/usr/bin/cc`, which exists only in its build container, and
+   those in the Intel Linux binary needed exactly `/opt/intel/oneapi/compiler/2025.0/bin/icx`.
+   These binaries now record the compiler names (`gcc`, `g++`, `gfortran` and `icx`, `icpx`,
+   `ifx`) through `HDF5_H5CC_C_COMPILER`, `HDF5_H5CC_CXX_COMPILER` and
+   `HDF5_H5CC_Fortran_COMPILER`, so the wrappers run the compiler found on `PATH`. A build from
+   source still records the absolute path unless these options are set.
+
+   The wrappers also honor environment variables to run a different compiler: `HDF5_CC` for
+   `h5cc`, `HDF5_CXX` for `h5c++` and `HDF5_FC` for `h5fc`, as the Autotools wrappers did, and
+   `HDF5_PCC` for `h5pcc` and `HDF5_PFC` for `h5pfc`. For example, `HDF5_CC=clang h5cc foo.c`.
+   Unlike the Autotools wrappers, the parallel wrappers do not read `HDF5_CC` or `HDF5_FC`, so
+   setting one for a serial installation does not change a parallel one.
+
+   The release CI now compiles and runs C, C++ and Fortran programs with the glibc 2.28 binary
+   (outside its build container) and the Intel Linux binary, checks that their wrappers record
+   no absolute compiler path, and checks `pkg-config --define-prefix` on them.
+
 ### Fixed pkg-config and the compiler wrappers when HDF5_LIB_INFIX is set
 
    With `HDF5_LIB_INFIX` set, for example to `_openmpi`, the pkg-config files were still installed as `hdf5.pc`, `hdf5_hl.pc` and so on, while their `Name` and `Requires` fields, and the compiler wrappers, used the name with the infix (`hdf5_openmpi`). `h5cc` and the other wrappers failed with "Package hdf5_openmpi was not found", and `pkg-config hdf5_hl` could not resolve its requirement. The pkg-config files are now named after the library (`hdf5_openmpi.pc`, `hdf5_openmpi_hl.pc`, ...), and `libhdf5.settings` is installed as `libhdf5_openmpi.settings`, which `h5cc -showconfig` reads.
