@@ -500,7 +500,10 @@
         "ci-StdShar-GNUC"
       ],
       "cacheVariables": {
-        "HDF5_BUILD_DOC": "OFF"
+        "HDF5_BUILD_DOC": "OFF",
+        "HDF5_H5CC_C_COMPILER": "gcc",
+        "HDF5_H5CC_CXX_COMPILER": "g++",
+        "HDF5_H5CC_Fortran_COMPILER": "gfortran"
       }
     },
     {

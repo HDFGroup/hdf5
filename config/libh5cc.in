@@ -60,6 +60,10 @@ prefix=$(
 
 libdir=@H5_WRAPPER_LIB_DIR@
 
+# Compiler to run; @_PKG_CONFIG_COMPILER_ENV@ in the environment overrides
+# the one recorded at configure time
+compiler=${@_PKG_CONFIG_COMPILER_ENV@:-"@_PKG_CONFIG_COMPILER@"}
+
 export PKG_CONFIG_PATH=$libdir/pkgconfig
 
 # Show the configuration summary of the library recorded in the
@@ -102,7 +106,8 @@ usage() {
   echo "  <compile line>  - the normal compile line options for your compiler."
   echo "                    $prog_name uses the same compiler you used to compile"
   echo "                    HDF5, unless an alternate compiler is specified at"
-  echo "                    configuration time. Check with your compiler's man"
+  echo "                    configuration time or with @_PKG_CONFIG_COMPILER_ENV@ (see below)."
+  echo "                    Check with your compiler's man"
   echo "                    pages for more information on which options are needed."
   echo " "
   echo "                    All options specific to $prog_name should appear BEFORE"
@@ -115,6 +120,11 @@ usage() {
   echo "                               precedence is given to the -shlib/-noshlib options."
   echo "                                 [default: yes except when built with only"
   echo "                                           static libraries]"
+  echo " "
+  echo " You can override the compiler $prog_name runs by setting the following"
+  echo " environment variable:"
+  echo " "
+  echo "   @_PKG_CONFIG_COMPILER_ENV@  -  compiler command [default: @_PKG_CONFIG_COMPILER@]"
   echo " "
   echo " $prog_name uses pkg-config to determine additional flags to pass to the"
   echo " compiler. You can specify any options to pass to pkg-config by setting the"
@@ -271,15 +281,18 @@ fi
 
 # If -show was passed, only output the command-line, don't execute it
 if test "$do_show" = "yes"; then
-  echo @_PKG_CONFIG_COMPILER@ ${compile_args:+"${compile_args} "}"$@" "$pc_flags"
+  echo $compiler ${compile_args:+"${compile_args} "}"$@" "$pc_flags"
   exit $EXIT_SUCCESS
 fi
 
-@_PKG_CONFIG_COMPILER@ $compile_args "$@" $pc_flags
+$compiler $compile_args "$@" $pc_flags
 status=$?
 
 if test $status -ne 0; then
-  echo "compile failed with command: @_PKG_CONFIG_COMPILER@ $compile_args $@ $pc_flags" >&2
+  echo "compile failed with command: $compiler $compile_args $@ $pc_flags" >&2
+  if test $status -eq 127; then
+    echo "set @_PKG_CONFIG_COMPILER_ENV@ to the compiler $prog_name should run" >&2
+  fi
 fi
 
 exit $status
