@@ -109,6 +109,7 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DPLUGIN_USE_LOCALCONTENT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DENABLE_ZFP:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DENABLE_ZSTD:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DENABLE_SZ3:BOOL=OFF")
 
       - name: Run CTest (Cygwin)
         shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
