@@ -12,6 +12,7 @@
 
 package test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -28,6 +29,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -58,6 +66,9 @@ public class TestH5 {
     private static final String EXPORT_DREG_FILE   = "testExportDReg.txt";
     private static final String H5_AREG_FILE       = "tattrreg.h5";
     private static final String EXPORT_AREG_FILE   = "testExportAReg.txt";
+    private static final String H5_TYPES_FILE      = "texporttypes.h5";
+    private static final String EXPORT_TYPES_TEXT  = "testExportTypes.txt";
+    private static final String EXPORT_TYPES_BIN   = "testExportTypes.bin";
     private static final int DIM_X                 = 4;
     private static final int DIM_Y                 = 6;
     private static final int DIM_BLKS              = 36;
@@ -656,5 +667,198 @@ public class TestH5 {
         for (int row = 0; row < DIM_X; row++)
             assertTrue("testH5export_attrdataset: <" + row + ">" + dset_indata[row],
                        dset_indata[row] == dset_data_expect[row]);
+    }
+
+    private static ArrayList<Object> list(Object... items) { return new ArrayList<>(Arrays.asList(items)); }
+
+    /**
+     * Creates H5_TYPES_FILE holding one dataset of fileTid written from data through H5DwriteVL,
+     * or, when attrName is given, an empty dataset carrying an attribute of fileTid written from data.
+     */
+    private final void _writeTypesFile(String dsetName, String attrName, long fileTid, long memTid,
+                                       long[] dims, Object[] data) throws Exception
+    {
+        long fid = HDF5Constants.H5I_INVALID_HID, sid = HDF5Constants.H5I_INVALID_HID;
+        long did = HDF5Constants.H5I_INVALID_HID, aid = HDF5Constants.H5I_INVALID_HID;
+        try {
+            fid = H5.H5Fcreate(H5_TYPES_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+                               HDF5Constants.H5P_DEFAULT);
+            sid = H5.H5Screate_simple(dims.length, dims, null);
+            did =
+                H5.H5Dcreate(fid, dsetName, (attrName == null) ? fileTid : HDF5Constants.H5T_NATIVE_INT, sid,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            if (attrName == null)
+                H5.H5DwriteVL(did, memTid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, data);
+            else {
+                aid = H5.H5Acreate(did, attrName, fileTid, sid, HDF5Constants.H5P_DEFAULT,
+                                   HDF5Constants.H5P_DEFAULT);
+                H5.H5AwriteVL(aid, memTid, data);
+            }
+        }
+        finally {
+            if (aid >= 0)
+                H5.H5Aclose(aid);
+            if (did >= 0)
+                H5.H5Dclose(did);
+            if (sid >= 0)
+                H5.H5Sclose(sid);
+            if (fid >= 0)
+                H5.H5Fclose(fid);
+        }
+    }
+
+    /**
+     * Exports a dataset of H5_TYPES_FILE, or its attribute attrName, as text and as native order
+     * binary and compares both.
+     */
+    private final void _checkExport(String dsetName, String attrName, String expectedText,
+                                    byte[] expectedBinary)
+    {
+        try {
+            H5fid = H5.H5Fopen(H5_TYPES_FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            if (attrName == null) {
+                H5.H5export_dataset(EXPORT_TYPES_TEXT, H5fid, dsetName, 99);
+                H5.H5export_dataset(EXPORT_TYPES_BIN, H5fid, dsetName, 1);
+            }
+            else {
+                H5did = H5.H5Dopen(H5fid, dsetName, HDF5Constants.H5P_DEFAULT);
+                H5.H5export_attribute(EXPORT_TYPES_TEXT, H5did, attrName, 99);
+                H5.H5export_attribute(EXPORT_TYPES_BIN, H5did, attrName, 1);
+            }
+
+            assertEquals(dsetName + " text", Arrays.asList(expectedText),
+                         Files.readAllLines(Paths.get(EXPORT_TYPES_TEXT)));
+            assertArrayEquals(dsetName + " binary", expectedBinary,
+                              Files.readAllBytes(Paths.get(EXPORT_TYPES_BIN)));
+        }
+        catch (Exception err) {
+            err.printStackTrace();
+            fail("H5export_dataset " + dsetName + ": " + err);
+        }
+        finally {
+            _closeH5File();
+            _deleteFile(H5_TYPES_FILE);
+            _deleteFile(EXPORT_TYPES_TEXT);
+            _deleteFile(EXPORT_TYPES_BIN);
+        }
+    }
+
+    /**
+     * Returns a buffer filled with the bytes a native order binary export writes
+     * for the provided values.
+     */
+    private static byte[] binaryExportOf(Object... values)
+    {
+        ByteBuffer buf = ByteBuffer.allocate(1024).order(ByteOrder.nativeOrder());
+        for (Object v : values) {
+            if (v instanceof Integer)
+                buf.putInt((Integer)v);
+            else if (v instanceof Long)
+                buf.putLong((Long)v);
+            else if (v instanceof Double)
+                buf.putDouble((Double)v);
+            else if (v instanceof byte[])
+                buf.put((byte[])v);
+            else
+                buf.put(((String)v).getBytes(StandardCharsets.US_ASCII));
+        }
+        return Arrays.copyOf(buf.array(), buf.position());
+    }
+
+    /** Several variable-length strings in one dataset. */
+    @Test
+    public void testH5export_dataset_strings() throws Exception
+    {
+        long str = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        try {
+            H5.H5Tset_size(str, HDF5Constants.H5T_VARIABLE);
+            _writeTypesFile("strings", null, str, str, new long[] {3},
+                            new Object[] {"displacement", "b", "cc"});
+        }
+        finally {
+            H5.H5Tclose(str);
+        }
+        _checkExport("/strings", null, "displacement, b, cc", binaryExportOf("displacement", "b", "cc"));
+    }
+
+    /** Several variable-length strings in one attribute. */
+    @Test
+    public void testH5export_attribute_strings() throws Exception
+    {
+        long str = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        try {
+            H5.H5Tset_size(str, HDF5Constants.H5T_VARIABLE);
+            _writeTypesFile("dset", "strings", str, str, new long[] {3},
+                            new Object[] {"displacement", "b", "cc"});
+        }
+        finally {
+            H5.H5Tclose(str);
+        }
+        _checkExport("/dset", "strings", "displacement, b, cc", binaryExportOf("displacement", "b", "cc"));
+    }
+
+    /** COMPOUND{id:int, names:VLEN of variable-length string}, with two strings in one sequence. */
+    @Test
+    public void testH5export_dataset_nested() throws Exception
+    {
+        long str = HDF5Constants.H5I_INVALID_HID, names = HDF5Constants.H5I_INVALID_HID;
+        long cmpd = HDF5Constants.H5I_INVALID_HID;
+        try {
+            str = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(str, HDF5Constants.H5T_VARIABLE);
+            names = H5.H5Tvlen_create(str);
+            cmpd  = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8 + H5.H5Tget_size(names));
+            H5.H5Tinsert(cmpd, "id", 0, HDF5Constants.H5T_NATIVE_INT32);
+            H5.H5Tinsert(cmpd, "names", 8, names);
+
+            _writeTypesFile("nested", null, cmpd, cmpd, new long[] {2},
+                            new Object[] {list(1, list("displacement", "stress")), list(2, list("x"))});
+        }
+        finally {
+            for (long tid : new long[] {cmpd, names, str})
+                if (tid >= 0)
+                    H5.H5Tclose(tid);
+        }
+        _checkExport("/nested", null, "{1, (displacement, stress)}, {2, (x)}",
+                     binaryExportOf(1, "displacement", "stress", 2, "x"));
+    }
+
+    /**
+     * COMPOUND{id:int, items:VLEN of COMPOUND{tag:variable-length string,
+     * pt:COMPOUND{x:int, y:double}}}, with one NULL tag.
+     */
+    @Test
+    public void testH5export_dataset_multi_nested() throws Exception
+    {
+        long str = HDF5Constants.H5I_INVALID_HID, pt = HDF5Constants.H5I_INVALID_HID;
+        long item = HDF5Constants.H5I_INVALID_HID, items = HDF5Constants.H5I_INVALID_HID;
+        long cmpd = HDF5Constants.H5I_INVALID_HID;
+        try {
+            str = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+            H5.H5Tset_size(str, HDF5Constants.H5T_VARIABLE);
+            pt = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 16);
+            H5.H5Tinsert(pt, "x", 0, HDF5Constants.H5T_NATIVE_INT32);
+            H5.H5Tinsert(pt, "y", 8, HDF5Constants.H5T_NATIVE_DOUBLE);
+            long strSize = H5.H5Tget_size(str);
+            item         = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, strSize + 16);
+            H5.H5Tinsert(item, "tag", 0, str);
+            H5.H5Tinsert(item, "pt", strSize, pt);
+            items = H5.H5Tvlen_create(item);
+            cmpd  = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8 + H5.H5Tget_size(items));
+            H5.H5Tinsert(cmpd, "id", 0, HDF5Constants.H5T_NATIVE_INT32);
+            H5.H5Tinsert(cmpd, "items", 8, items);
+
+            _writeTypesFile("multi_nested", null, cmpd, cmpd, new long[] {2},
+                            new Object[] {list(1, list(list("a", list(2, 0.5)), list(null, list(3, 1.5)))),
+                                          list(2, list(list("ccc", list(4, 2.5))))});
+        }
+        finally {
+            for (long tid : new long[] {cmpd, items, item, pt, str})
+                if (tid >= 0)
+                    H5.H5Tclose(tid);
+        }
+        _checkExport("/multi_nested", null, "{1, ({a, {2, 0.5}}, {NULL, {3, 1.5}})}, {2, ({ccc, {4, 2.5}})}",
+                     binaryExportOf(1, "a", 2, 0.5, 3, 1.5, 2, "ccc", 4, 2.5));
     }
 }
