@@ -2,8 +2,8 @@
 
 # Build HDF5 inside a glibc 2.28 container, so that the Linux tarball we
 # publish runs on every distribution with glibc 2.28 or newer. Run by the
-# "AlmaLinux 8 gcc (glibc 2.28)" job in .github/workflows/ctest.yml, which mounts the
-# workspace at /work.
+# "AlmaLinux 8 gcc (glibc 2.28, <arch>)" jobs (x86_64 and aarch64) in
+# .github/workflows/ctest.yml, which mount the workspace at /work.
 #
 # Usage: build-linux-glibc228.sh <source-dir> <preset> <uid> <gid>
 
