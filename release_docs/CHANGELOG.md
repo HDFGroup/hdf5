@@ -102,6 +102,13 @@ We would like to thank the many HDF5 community members who contributed to this r
    as in the other binaries, so it needs nothing from the system but libc and libm. CI
    fails the build if that requirement ever rises.
 
+### Added a Linux ARM64 binary that runs on glibc 2.28 and newer
+
+   Releases now also carry `hdf5-<version>-linux-aarch64_gcc.tar.gz`, the ARM64 (aarch64)
+   counterpart of `hdf5-<version>-linux-x86_64_gcc.tar.gz`. It is built the same way, in an
+   AlmaLinux 8 container with gcc-toolset-14, natively on an ARM64 runner, and has the same
+   **glibc 2.28** requirement, which CI checks just as it does for x86_64.
+
 ### Re-added HDF5_ENABLE_THREADS option
 
    The HDF5_ENABLE_THREADS option now controls whether the library builds in any
