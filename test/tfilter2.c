@@ -1442,6 +1442,359 @@ error:
 }
 
 /* -----------------------------------------------------------------------
+ * get_config round-trip: cd_values -> string -> cd_values
+ *
+ * H5Pget_filter_params_by_idx returns an entry's stored string when it has
+ * one, so a filter appended with a string never exercises get_config.  Each
+ * cycle therefore starts from a raw-path entry (the dedicated H5Pset_* call
+ * or H5Pset_filter), reconstructs the string with get_config, feeds it back
+ * through set_config, and requires identical flags and cd_values.  It then
+ * clears the stored string and checks that get_config reproduces the same
+ * text, i.e. the reconstruction is a fixed point.
+ * ---------------------------------------------------------------------- */
+#define RT_FILTER_ID 539
+#define RT_MAX_CD    16
+
+static void
+rt_print_cd(const char *tag, size_t n, const unsigned cd[])
+{
+    size_t u;
+
+    fprintf(stderr, "      %s (%zu):", tag, n);
+    for (u = 0; u < n && u < RT_MAX_CD; u++)
+        fprintf(stderr, " %u", cd[u]);
+    fprintf(stderr, "\n");
+}
+
+/* Run one cycle on filter 0 of DCPL1, which must have been configured
+ * through the raw path.  Returns 0 on success, -1 on failure. */
+static int
+rt_cycle(hid_t dcpl1, H5Z_filter_t id, const char *label)
+{
+    hid_t         dcpl2 = H5I_INVALID_HID;
+    H5Z_config_t *cfg   = NULL;
+    unsigned      f1 = 0, f2 = 0;
+    size_t        n1 = RT_MAX_CD, n2 = RT_MAX_CD;
+    unsigned      cd1[RT_MAX_CD], cd2[RT_MAX_CD];
+    char          s1[512], s2[512];
+    size_t        len = 0;
+
+    memset(cd1, 0, sizeof(cd1));
+    memset(cd2, 0, sizeof(cd2));
+
+    /* cd_values_1 and its get_config reconstruction s' */
+    if (H5Pget_filter2(dcpl1, 0, &f1, &n1, cd1, 0, NULL, NULL) != id)
+        goto fail;
+    if (n1 > RT_MAX_CD)
+        goto fail;
+    if (H5Pget_filter_params_by_idx(dcpl1, 0, s1, sizeof(s1), &len) < 0)
+        goto fail;
+    if (len == 0 || len >= sizeof(s1))
+        goto fail;
+
+    /* s' must be valid set_config input */
+    if (NULL == (cfg = H5Zconfig_parse(s1)))
+        goto fail;
+    if (H5Zconfig_close(cfg) < 0)
+        goto fail;
+    cfg = NULL;
+
+    /* set_config(s') -> cd_values_2 */
+    if ((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto fail;
+    {
+        H5Z_params_t p = H5Z_PARAMS_STR(s1);
+        if (H5Pappend_filter(dcpl2, id, f1, &p) < 0)
+            goto fail;
+    }
+    if (H5Pget_filter2(dcpl2, 0, &f2, &n2, cd2, 0, NULL, NULL) != id)
+        goto fail;
+    if (f1 != f2 || n1 != n2 || (n1 > 0 && memcmp(cd1, cd2, n1 * sizeof(cd1[0])) != 0)) {
+        fprintf(stderr, "\n    %s: s' = '%s'\n", label, s1);
+        fprintf(stderr, "      flags: %u -> %u\n", f1, f2);
+        rt_print_cd("cd_values_1", n1, cd1);
+        rt_print_cd("cd_values_2", n2, cd2);
+        goto fail;
+    }
+
+    /* Clear the stored string so the next read calls get_config again */
+    if (H5Pmodify_filter(dcpl2, id, f2, n2, cd2) < 0)
+        goto fail;
+    if (H5Pget_filter_params_by_idx(dcpl2, 0, s2, sizeof(s2), &len) < 0)
+        goto fail;
+    if (strcmp(s1, s2) != 0) {
+        fprintf(stderr, "\n    %s: get_config not a fixed point: '%s' then '%s'\n", label, s1, s2);
+        goto fail;
+    }
+
+    if (H5Pclose(dcpl2) < 0)
+        goto fail;
+    return 0;
+
+fail:
+    H5E_BEGIN_TRY
+    {
+        if (cfg)
+            H5Zconfig_close(cfg);
+        if (dcpl2 != H5I_INVALID_HID)
+            H5Pclose(dcpl2);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* Test filter with an int, a double (two slots) and a bool:
+ * cd_values = {level, rate bytes 0-3, rate bytes 4-7, fast} */
+static herr_t
+rt_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
+              unsigned cd_values[], size_t cd_values_size)
+{
+    static const char *const known[] = {"level", "rate", "fast", NULL};
+    int64_t                  level   = 1;
+    double                   rate    = 1.0;
+    bool                     fast    = false;
+
+    if (H5Zconfig_validate_keys(config, known) < 0)
+        return -1;
+    if (H5Zconfig_get_int(config, "level", &level) < 0 || level < 0 || level > 100)
+        return -1;
+    if (H5Zconfig_get_double(config, "rate", &rate) < 0)
+        return -1;
+    if (H5Zconfig_get_bool(config, "fast", &fast) < 0)
+        return -1;
+
+    *cd_nelmts = 4;
+    if (cd_values) {
+        if (cd_values_size < 4)
+            return -1;
+        cd_values[0] = (unsigned)level;
+        memcpy(&cd_values[1], &rate, sizeof(rate));
+        cd_values[3] = fast ? 1 : 0;
+    }
+    return 0;
+}
+
+static herr_t
+rt_get_config(unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts, const unsigned cd_values[], char *buf,
+              size_t *buf_size)
+{
+    double rate;
+    int    n;
+
+    if (cd_nelmts != 4)
+        return -1;
+    memcpy(&rate, &cd_values[1], sizeof(rate));
+
+    /* %.16e: 17 significant digits, always a float token in TOML */
+    n = snprintf(buf, buf ? *buf_size : 0, "level = %u, rate = %.16e, fast = %s", cd_values[0], rate,
+                 cd_values[3] ? "true" : "false");
+    if (n < 0 || (buf && (size_t)n >= *buf_size))
+        return -1;
+    *buf_size = (size_t)n;
+    return 0;
+}
+
+static size_t
+rt_filter_func(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+               const unsigned int H5_ATTR_UNUSED *cd_values, hid_t H5_ATTR_UNUSED dxpl_id,
+               const hsize_t H5_ATTR_UNUSED *scaled, size_t H5_ATTR_UNUSED ndims, size_t nbytes,
+               size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+{
+    return nbytes;
+}
+
+static int
+test_get_config_roundtrip(void)
+{
+    static const H5Z_class4_t rt_cls = {
+        H5Z_CLASS_T_VERS_4, /* version         */
+        RT_FILTER_ID,       /* id              */
+        1,                  /* encoder_present */
+        1,                  /* decoder_present */
+        "rt_filter",        /* name            */
+        NULL,               /* can_apply       */
+        NULL,               /* set_local       */
+        rt_filter_func,     /* filter          */
+        0,                  /* feature_flags   */
+        rt_set_config,      /* set_config      */
+        rt_get_config,      /* get_config      */
+        NULL,               /* description     */
+    };
+    hid_t    dcpl       = H5I_INVALID_HID;
+    bool     registered = false;
+    unsigned cfg_flags  = 0;
+    size_t   u;
+
+    /* --- deflate: H5Pset_deflate -> get_config -> set_config --- */
+    TESTING("get_config round-trip: deflate (cd_values -> string -> cd_values)");
+    if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) > 0) {
+        static const unsigned levels[] = {0, 1, 6, 9};
+
+        for (u = 0; u < NELMTS(levels); u++) {
+            char label[64];
+
+            snprintf(label, sizeof(label), "deflate level %u", levels[u]);
+            if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                TEST_ERROR;
+            if (H5Pset_deflate(dcpl, levels[u]) < 0)
+                TEST_ERROR;
+            if (rt_cycle(dcpl, H5Z_FILTER_DEFLATE, label) < 0)
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+        }
+        PASSED();
+    }
+    else
+        SKIPPED();
+
+    /* --- scale-offset: H5Pset_scaleoffset -> get_config -> set_config --- */
+    TESTING("get_config round-trip: scale-offset (cd_values -> string -> cd_values)");
+    {
+        static const struct {
+            H5Z_SO_scale_type_t type;
+            int                 factor;
+        } so[] = {{H5Z_SO_INT, 0},
+                  {H5Z_SO_INT, 7},
+                  {H5Z_SO_FLOAT_DSCALE, 3},
+                  {H5Z_SO_FLOAT_ESCALE, 2},
+                  {H5Z_SO_INT, INT_MAX}};
+
+        for (u = 0; u < NELMTS(so); u++) {
+            char label[64];
+
+            snprintf(label, sizeof(label), "scale-offset type %d factor %d", (int)so[u].type, so[u].factor);
+            if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                TEST_ERROR;
+            if (H5Pset_scaleoffset(dcpl, so[u].type, so[u].factor) < 0)
+                TEST_ERROR;
+            if (rt_cycle(dcpl, H5Z_FILTER_SCALEOFFSET, label) < 0)
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+        }
+    }
+    PASSED();
+
+    /* --- SZIP: H5Pset_szip -> get_config -> set_config.  This also checks
+     *     that the string path stores what H5Pset_szip stores (mask bits,
+     *     forced H5Z_FLAG_OPTIONAL). --- */
+    TESTING("get_config round-trip: szip (cd_values -> string -> cd_values)");
+    if (H5Zfilter_avail(H5Z_FILTER_SZIP) > 0 && H5Zget_filter_info(H5Z_FILTER_SZIP, &cfg_flags) >= 0 &&
+        (cfg_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED)) {
+        static const struct {
+            unsigned mask;
+            unsigned ppb;
+        } sz[] = {{H5_SZIP_NN_OPTION_MASK, 16}, {H5_SZIP_EC_OPTION_MASK, 8}, {H5_SZIP_EC_OPTION_MASK, 32}};
+
+        for (u = 0; u < NELMTS(sz); u++) {
+            char label[64];
+
+            snprintf(label, sizeof(label), "szip mask %u ppb %u", sz[u].mask, sz[u].ppb);
+            if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                TEST_ERROR;
+            if (H5Pset_szip(dcpl, sz[u].mask, sz[u].ppb) < 0)
+                TEST_ERROR;
+            if (rt_cycle(dcpl, H5Z_FILTER_SZIP, label) < 0)
+                TEST_ERROR;
+
+            /* rt-12: the equivalent string, appended as mandatory, must store
+             * exactly what H5Pset_szip stores, flags included */
+            {
+                hid_t        dcpl_str = H5I_INVALID_HID;
+                unsigned     f_ref = 0, f_str = 0;
+                size_t       n_ref = RT_MAX_CD, n_str = RT_MAX_CD;
+                unsigned     cd_ref[RT_MAX_CD], cd_str[RT_MAX_CD];
+                char         str[96];
+                H5Z_params_t p;
+
+                snprintf(str, sizeof(str), "coding = \"%s\", pixels_per_block = %u",
+                         sz[u].mask == H5_SZIP_EC_OPTION_MASK ? "entropy" : "nn", sz[u].ppb);
+                p = H5Z_PARAMS_STR(str);
+                if (H5Pget_filter2(dcpl, 0, &f_ref, &n_ref, cd_ref, 0, NULL, NULL) != H5Z_FILTER_SZIP)
+                    TEST_ERROR;
+                if ((dcpl_str = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                    TEST_ERROR;
+                if (H5Pappend_filter(dcpl_str, H5Z_FILTER_SZIP, H5Z_FLAG_MANDATORY, &p) < 0) {
+                    H5Pclose(dcpl_str);
+                    TEST_ERROR;
+                }
+                if (H5Pget_filter2(dcpl_str, 0, &f_str, &n_str, cd_str, 0, NULL, NULL) != H5Z_FILTER_SZIP) {
+                    H5Pclose(dcpl_str);
+                    TEST_ERROR;
+                }
+                if (H5Pclose(dcpl_str) < 0)
+                    TEST_ERROR;
+                if (f_ref != f_str || n_ref != n_str ||
+                    memcmp(cd_ref, cd_str, n_ref * sizeof(cd_ref[0])) != 0) {
+                    fprintf(stderr, "\n    '%s': flags %u vs H5Pset_szip %u\n", str, f_str, f_ref);
+                    rt_print_cd("H5Pset_szip", n_ref, cd_ref);
+                    rt_print_cd("string    ", n_str, cd_str);
+                    TEST_ERROR;
+                }
+            }
+
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+        }
+        PASSED();
+    }
+    else
+        SKIPPED();
+
+    /* --- class4 test filter: int, double, bool via H5Pset_filter --- */
+    TESTING("get_config round-trip: test filter with int, double, bool");
+    {
+        static const double rates[] = {0.1,    1.0 / 3.0, 0x1p-36, 8.0,       -2.5,
+                                       1e-300, DBL_MIN,   DBL_MAX, 0x1p-1074, 0.0};
+
+        if (H5Zregister(&rt_cls) < 0)
+            TEST_ERROR;
+        registered = true;
+
+        for (u = 0; u < NELMTS(rates); u++) {
+            unsigned cd[4];
+            char     label[64];
+
+            cd[0] = (unsigned)(u * 7);
+            memcpy(&cd[1], &rates[u], sizeof(rates[u]));
+            cd[3] = (unsigned)(u & 1);
+            snprintf(label, sizeof(label), "rt_filter rate %a", rates[u]);
+
+            if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+                TEST_ERROR;
+            if (H5Pset_filter(dcpl, RT_FILTER_ID, 0, 4, cd) < 0)
+                TEST_ERROR;
+            if (rt_cycle(dcpl, RT_FILTER_ID, label) < 0)
+                TEST_ERROR;
+            if (H5Pclose(dcpl) < 0)
+                TEST_ERROR;
+            dcpl = H5I_INVALID_HID;
+        }
+
+        if (H5Zunregister(RT_FILTER_ID) < 0)
+            TEST_ERROR;
+        registered = false;
+    }
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (dcpl != H5I_INVALID_HID)
+            H5Pclose(dcpl);
+        if (registered)
+            H5Zunregister(RT_FILTER_ID);
+    }
+    H5E_END_TRY
+    return -1;
+}
+
+/* -----------------------------------------------------------------------
  * H5Pget_filter_by_id2 reports a class4 filter's registered name
  * ---------------------------------------------------------------------- */
 
@@ -5160,6 +5513,7 @@ main(void)
     nerrors += test_roundtrip_fletcher32(file) < 0 ? 1 : 0;
     nerrors += test_scaleoffset_params(file) < 0 ? 1 : 0;
     nerrors += test_scaleoffset_scale_factor_upper_bound() < 0 ? 1 : 0;
+    nerrors += test_get_config_roundtrip() < 0 ? 1 : 0;
 
     /* Regression tests */
     nerrors += test_regression_old_api(file) < 0 ? 1 : 0;
