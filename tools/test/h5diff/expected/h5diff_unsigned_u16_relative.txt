@@ -1,0 +1,6 @@
+dataset: </u16_max> and </u16_zero>
+size:           [1]           [1]
+position        u16_max         u16_zero        difference      relative       
+------------------------------------------------------------------------
+[ 0 ]          65535           0               65535           1.000000      
+1 differences found
