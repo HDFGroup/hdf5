@@ -2029,7 +2029,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
     if (H5C__flush_single_entry(f, pf_entry_ptr, flush_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "can't expunge prefetched entry");
 
-#ifndef NDEGUG /* verify deletion */
+#ifndef NDEBUG /* verify deletion */
     H5C__SEARCH_INDEX(cache_ptr, addr, pf_entry_ptr, FAIL);
 
     assert(NULL == pf_entry_ptr);
