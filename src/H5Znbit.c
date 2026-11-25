@@ -1625,7 +1625,7 @@ H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigne
 
     FUNC_ENTER_PACKAGE
 
-    (*parms_index)++; /* skip size of compound datatype */
+    *parms_index += 1; /* skip size of compound datatype */
     nmembers = parms[(*parms_index)++];
 
     for (i = 0; i < nmembers; i++) {
@@ -1678,7 +1678,7 @@ H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer
     size_t       new_size = 0;
     size_t       buf_len;
     parms_atomic p;
-    unsigned     parms_index; /* index in array parms used by compression/decompression functions */
+    unsigned     parms_index;         /* index in array parms used by compression/decompression functions */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
