@@ -31,6 +31,8 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 - **Running on HPC?** Check out [README_HPC.md](docs/README_HPC.md) for parallel HDF5 configuration.
 
+- **On Linux?** Install prebuilt packages for openSUSE, Fedora, RHEL-compatible distributions, Debian and Ubuntu from our package repositories. See [INSTALL_Linux_Packages.md](docs/INSTALL_Linux_Packages.md).
+
 ## Table of Contents
 
 - [What is HDF5?](#what-is-hdf5)
@@ -134,6 +136,7 @@ Click the badges to view the detailed project board with current release items.
 - **Latest Release**: https://github.com/HDFGroup/hdf5/releases
 - **Previous Releases**: https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
 - **Development Code**: https://github.com/HDFGroup/hdf5.git
+- **Linux Package Repositories**: [docs/INSTALL_Linux_Packages.md](docs/INSTALL_Linux_Packages.md)
 
 ### HPC Testing Results
 
