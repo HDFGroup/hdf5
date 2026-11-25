@@ -70,12 +70,21 @@ static H5Z_class4_t H5Z_SZIP[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__szip_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags, size_t *cd_nelmts,
-                     unsigned cd_values[], size_t cd_values_size)
+H5Z__szip_set_config(const H5Z_config_t *config, unsigned *flags, size_t *cd_nelmts, unsigned cd_values[],
+                     size_t cd_values_size)
 {
-    herr_t ret_value = SUCCEED;
+    unsigned int config_flags;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
+
+    /* Same precondition and flags as H5Pset_szip(), so both paths store the
+     * same pipeline entry */
+    if (H5Z_get_filter_info(H5Z_FILTER_SZIP, &config_flags) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get filter info");
+    if (!(config_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED))
+        HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled.");
+    *flags |= H5Z_FLAG_OPTIONAL;
 
     *cd_nelmts = H5Z_SZIP_USER_NPARMS;
 
@@ -125,6 +134,14 @@ H5Z__szip_set_config(const H5Z_config_t *config, unsigned H5_ATTR_UNUSED *flags,
                 }
             }
         }
+
+        /* Normalize the mask exactly as H5Pset_szip() does: always K13 (never
+         * CHIP), always raw (no szip header), and no LSB/MSB, which set_local
+         * fills in from the datatype */
+        mask &= (unsigned)(~H5_SZIP_CHIP_OPTION_MASK);
+        mask |= H5_SZIP_ALLOW_K13_OPTION_MASK;
+        mask |= H5_SZIP_RAW_OPTION_MASK;
+        mask &= (unsigned)(~(H5_SZIP_LSB_OPTION_MASK | H5_SZIP_MSB_OPTION_MASK));
 
         cd_values[H5Z_SZIP_PARM_MASK] = mask;
         cd_values[H5Z_SZIP_PARM_PPB]  = ppb;
