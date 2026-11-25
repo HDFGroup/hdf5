@@ -675,7 +675,12 @@ jobs:
           SIGNER: ${{ secrets.SIGNER }}
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
-          cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang --fresh
+          major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+          minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+          release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+          H5_VERSION="${major}.${minor}.${release}"
+          cmake --preset=${{ inputs.preset_name }}-macos-Clang --fresh -DH5_DEFAULT_PLUGINDIR="/Applications/HDF_Group/HDF5/${H5_VERSION}/lib/plugin"
+          cmake --workflow --preset=${{ inputs.preset_name }}-macos-Clang
         shell: bash
 
       - name: Sign dmg (MacOS_latest)
@@ -1343,13 +1348,24 @@ jobs:
             json: '{"Endpoint": "${{ secrets.AZURE_ENDPOINT }}","CodeSigningAccountName": "${{ secrets.AZURE_CODE_SIGNING_NAME }}","CertificateProfileName": "${{ secrets.AZURE_CERT_PROFILE_NAME }}"}'
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
+      - name: Get HDF5 version (Windows_intel)
+        id: h5-version
+        run: |
+          major=$(grep '^#define H5_VERS_MAJOR' src/H5public.h | awk '{print $3}')
+          minor=$(grep '^#define H5_VERS_MINOR' src/H5public.h | awk '{print $3}')
+          release=$(grep '^#define H5_VERS_RELEASE' src/H5public.h | awk '{print $3}')
+          echo "H5_VERSION=${major}.${minor}.${release}" >> $GITHUB_OUTPUT
+        working-directory: ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}
+        shell: bash
+
       - name: Run CTest (Windows_intel) with oneapi
         env:
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
           call "%ONEAPI_VARS%" || exit /b 1
-          cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel --fresh
+          cmake --preset=${{ inputs.preset_name }}-Intel --fresh -DH5_DEFAULT_PLUGINDIR="C:\\Program Files\\HDF_Group\\HDF5\\${{ steps.h5-version.outputs.H5_VERSION }}\\lib\\plugin;%%ALLUSERSPROFILE%%\\hdf5\\lib\\plugin" || exit /b 1
+          cmake --workflow --preset=${{ inputs.preset_name }}-win-Intel
         working-directory: ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}
         shell: cmd
 
