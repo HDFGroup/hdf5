@@ -436,6 +436,7 @@ endforeach ()
 
 set_tests_properties (H5TESTXPR-fheap PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+set_tests_properties (H5TEST-vds PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 set_tests_properties (H5TESTXPR-btree2 PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
 
 
