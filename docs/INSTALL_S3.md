@@ -11,6 +11,7 @@
 * [Section III: Building the aws-c-s3 library from source](#section-iii)
 * [Section IV: Building HDF5 with the ROS3 VFD enabled](#section-iv)
 * [Section V: Testing the ROS3 VFD](#section-v)
+* [Section VI: Configuring the ROS3 VFD](#section-vi)
 
 ---
 
@@ -168,3 +169,14 @@ ctest -R "S3TEST" -VV .
 ```
 
 These tests are separated into different groups based on the particular functionality being tested. For each group of tests, the CMake logic will bring up s3proxy, create a testing bucket and populate that bucket with any testing files needed, run all of the tests for the testing group and then bring down s3proxy.
+
+---
+
+<a id="section-vi"></a>
+## VI. Configuring the ROS3 VFD
+
+How the ROS3 VFD processes AWS settings (region, credentials, endpoint URL,
+request addressing style, etc.) is explained in the HDF5 reference
+documentation. See the "Configuring the Read-Only S3 (ROS3) VFD" page under
+Additional Resources in the HDF5 User's Guide, generated from
+[docs/doxygen/dox/ROS3.dox](./doxygen/dox/ROS3.dox).

@@ -606,17 +606,18 @@ set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.fpc.in
-    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_F90_LIB_CORENAME}.pc
+    ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     @ONLY
 )
 install (
-    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_F90_LIB_CORENAME}.pc
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT fortlibraries
 )
 
 if (H5_HAVE_PKGCONFIG)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
+  set (_PKG_CONFIG_COMPILER_ENV HDF5_FC)
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5fc
@@ -629,6 +630,7 @@ if (H5_HAVE_PKGCONFIG)
       COMPONENT fortlibraries
   )
   if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
+    set (_PKG_CONFIG_COMPILER_ENV HDF5_PFC)
     configure_file (
         ${HDF_CONFIG_DIR}/libh5cc.in
         ${HDF5_BINARY_DIR}/CMakeFiles/h5pfc

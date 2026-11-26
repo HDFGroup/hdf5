@@ -8,4 +8,9 @@ libgfortran_path=`ls /usr/lib/gcc/${mingw_prefix}/*/libgfortran.dll.a 2>/dev/nul
 if test -n "${libgfortran_path}"; then
   export WINEPATH=`dirname ${libgfortran_path}`
 fi
-/usr/lib/wine/wine64 "$@"
+# Wine 10 (e.g. Ubuntu 26.04) no longer ships /usr/lib/wine/wine64
+if test -x /usr/lib/wine/wine64; then
+  /usr/lib/wine/wine64 "$@"
+else
+  wine "$@"
+fi

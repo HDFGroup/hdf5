@@ -1216,7 +1216,7 @@ endif ()
 # Generate the H5build_settings.c file
 #-----------------------------------------------------------------------------
 H5_SET_LANG_SETTINGS ()
-configure_file (${HDF5_SOURCE_DIR}/src/H5build_settings.cmake.c.in ${HDF5_SRC_BINARY_DIR}/H5build_settings.c @ONLY)
+configure_file (${HDF5_SOURCE_DIR}/src/H5build_settings.cmake.c.in ${HDF5_SRC_BINARY_DIR}/H5build_settings.c ESCAPE_QUOTES @ONLY)
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_SRC_BINARY_DIR}/shared")
@@ -1429,17 +1429,18 @@ set (_PKG_CONFIG_LIBS_PRIVATE "${pkg_config_lib_list}")
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in
-    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
+    ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     @ONLY
 )
 install (
-    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT libraries
 )
 
 if (H5_HAVE_PKGCONFIG)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_C_COMPILER})
+  set (_PKG_CONFIG_COMPILER_ENV HDF5_CC)
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
@@ -1453,6 +1454,7 @@ if (H5_HAVE_PKGCONFIG)
   )
   if (HDF5_ENABLE_PARALLEL)
     #legacy requires a different name
+    set (_PKG_CONFIG_COMPILER_ENV HDF5_PCC)
     configure_file (
         ${HDF_CONFIG_DIR}/libh5cc.in
         ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc

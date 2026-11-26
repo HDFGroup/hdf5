@@ -227,7 +227,14 @@ macro (HDF5_SUPPORT)
         endif ()
         get_filename_component (_LIBRARY_PATH ${HDF5_INCLUDE_DIR} DIRECTORY)
         set (HDF5_LIBRARY_PATH "${_LIBRARY_PATH}/lib")
-        if (H5EXAMPLE_USE_SHARED_LIBS AND HDF5_shared_C_FOUND)
+        # This configures against an external HDF5, which may predate 2.3.0.
+        # As such, the arms that decide between HDF5_C_SHARED_LIBRARY and
+        # HDF5_C_STATIC_LIBRARY are left in place, even though from 2.3.0 on
+        # the stable target names do not encode the linkage and find_package()
+        # has already selected one via the component list.
+        if (TARGET hdf5::hdf5)
+          set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} hdf5::hdf5)
+        elseif (H5EXAMPLE_USE_SHARED_LIBS AND HDF5_shared_C_FOUND)
           set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_C_SHARED_LIBRARY})
         else ()
           set (H5EXAMPLE_HDF5_LINK_LIBS ${H5EXAMPLE_HDF5_LINK_LIBS} ${HDF5_C_STATIC_LIBRARY})

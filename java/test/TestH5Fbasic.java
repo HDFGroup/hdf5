@@ -25,6 +25,7 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -122,6 +123,8 @@ public class TestH5Fbasic {
         // set the file to read-only
         File file = new File(H5_FILE);
         if (file.setWritable(false)) {
+            // root ignores file permissions, so the open below would succeed
+            Assume.assumeFalse("Skipping - file permissions do not apply to this user", file.canWrite());
             // this should fail.
             fid = H5.H5Fopen(H5_FILE, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
 

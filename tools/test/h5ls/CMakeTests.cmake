@@ -87,7 +87,6 @@ set (LIST_OTHER_TEST_FILES
     tdset-1.ls
     tdset2-1.ls
     tdset_idx-1.ls
-    tdset_idx-2.ls
     tempty.ls
     textlink-1.ls
     textlinksrc-1.ls
@@ -142,9 +141,12 @@ set (LIST_OTHER_TEST_FILES
     tvldtypes2be.ls
 )
 
-set (LIST_OTHER_TEST_FILES_LE
+# Expected output that depends on the host byte order; a big-endian host
+# uses <name>BE.ls instead of <name>.ls
+set (LIST_OTHER_TEST_FILES_END
     tall-3
     tdset2-2
+    tdset_idx-2
 )
 
 set (H5LS_S3PROXY_TEST_FILES

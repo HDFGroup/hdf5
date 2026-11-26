@@ -326,7 +326,8 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
         H5MM_memcpy(write_buf, obj, write_size);
 
         /* Push direct block data through I/O filter pipeline */
-        nbytes = write_size;
+        nbytes      = write_size;
+        filter_mask = hdr->universal_filter_mask;
         if (H5Z_pipeline(&(hdr->pline), 0, &filter_mask, H5Z_NO_EDC, filter_cb, &nbytes, &write_size,
                          &write_buf) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed");

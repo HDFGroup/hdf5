@@ -29,9 +29,9 @@
 /* Headers */
 /***********/
 /* Disable free lists in this package when concurrency is enabled until free lists are threadsafe */
-#ifdef H5_HAVE_CONCURRENCY
+#ifdef H5_HAVE_THREADS
 #define H5_NO_FREE_LISTS
-#endif /* H5_HAVE_CONCURRENCY */
+#endif /* H5_HAVE_THREADS */
 
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Epkg.h"      /* Error handling                           */
@@ -83,12 +83,12 @@ static herr_t H5E__close_stack(void *err_stack, void **request);
 /* Package Variables */
 /*********************/
 
-#ifndef H5_HAVE_THREADSAFE_API
+#ifndef H5_HAVE_THREADS
 /*
  * The current error stack.
  */
 H5E_stack_t H5E_stack_g[1];
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
 
 /* Declare a free list to manage the H5E_stack_t struct */
 H5FL_DEFINE(H5E_stack_t);
@@ -260,9 +260,9 @@ H5E__init_package(void)
     if (H5I_register_type(H5I_ERRSTK_CLS) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
-#ifndef H5_HAVE_THREADSAFE_API
+#ifndef H5_HAVE_THREADS
     H5E__set_default_auto(H5E_stack_g);
-#endif /* H5_HAVE_THREADSAFE_API */
+#endif /* H5_HAVE_THREADS */
 
     /* Register the HDF5 error class */
     if ((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, &H5E_err_cls_s, false)) < 0)
@@ -2065,3 +2065,48 @@ H5E_resume_stack(void)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5E_resume_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_errors_disabled
+ *
+ * Purpose:     Determine if errors are disabled for this error stack.
+ *
+ *              Errors can be disabled either by being paused, i.e. with
+ *              H5E_pause_stack, or by having no auto function, i.e. with
+ *              H5E_BEGIN_TRY. Note that these methods have different
+ *              semantics - the first prevents pusing errors to the stack
+ *              while the second only prevents printing the stack. This
+ *              function makes no distinction between the two.
+ *
+ * Return:      true if errors are disabled, false otherwise
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5E_errors_disabled(void)
+{
+    H5E_stack_t *estack    = H5E__get_my_stack();
+    bool         ret_value = false;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(estack);
+
+    /* Check if error stack is paused */
+    if (estack->paused)
+        HGOTO_DONE(true);
+
+        /* Check if there's no error printing function */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (estack->auto_op.vers == 1) {
+        if (!estack->auto_op.func1)
+            HGOTO_DONE(true);
+    }
+    else
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+        if (!estack->auto_op.func2)
+            HGOTO_DONE(true);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5E_errors_disabled() */

@@ -212,17 +212,18 @@ set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in
-    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_CPP_LIB_CORENAME}.pc
+    ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     @ONLY
 )
 install (
-    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_CPP_LIB_CORENAME}.pc
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${_PKG_CONFIG_LIBNAME}.pc
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT cpplibraries
 )
 
 if (H5_HAVE_PKGCONFIG)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_CXX_COMPILER})
+  set (_PKG_CONFIG_COMPILER_ENV HDF5_CXX)
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5c++

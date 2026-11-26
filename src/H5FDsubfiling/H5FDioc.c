@@ -971,9 +971,11 @@ H5FD__ioc_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
-        *flags |= H5FD_FEAT_HAS_MPI;             /* This driver uses MPI */
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;    /* OK to aggregate metadata allocations  */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;   /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_HAS_MPI;               /* This driver uses MPI */
+        *flags |= H5FD_FEAT_READWRITE_NO_H5_CALLS; /* The read() and write() callbacks do not re-enter the
+                                                      HDF5 API */
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

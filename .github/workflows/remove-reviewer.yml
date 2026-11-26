@@ -14,6 +14,8 @@ on:
 permissions:
   pull-requests: write
   issues: write
+  # Re-rendering the checklist reads .github/CODEOWNERS through the API.
+  contents: read
 
 jobs:
   remove:
@@ -25,9 +27,18 @@ jobs:
       contains(github.event.comment.body, '/remove-reviewer')
 
     steps:
+      # issue_comment runs on the default branch, so this checks out develop's
+      # scripts, never code from the PR.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+          fetch-depth: 1
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
+            const renderChecklist = require('${{ github.workspace }}/.github/scripts/review-checklist.js');
+            const { MARKER, recordRemoval } = renderChecklist;
             const body      = context.payload.comment.body;
             const commenter = context.payload.comment.user.login;
             const { owner, repo } = context.repo;
@@ -87,6 +98,29 @@ jobs:
                 removed.push(username);
               } catch (e) {
                 failed.push(`${username} (${e.message})`);
+              }
+            }
+
+            // Record the removals in the Review Checklist comment, then
+            // re-render it. Removals made with the workflow token trigger no
+            // workflow, so the checklist would otherwise never learn of them:
+            // it would keep listing the removed reviewers, keep requiring
+            // their approval if they were manually requested, and could
+            // request them again on the next push.
+            if (removed.length) {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: pr_number, per_page: 100,
+              });
+              const checklist = comments.find(c => c.user?.type === 'Bot' && c.body?.includes(MARKER));
+              if (checklist) {
+                try {
+                  await github.rest.issues.updateComment({
+                    owner, repo, comment_id: checklist.id, body: recordRemoval(checklist.body, removed),
+                  });
+                  await renderChecklist({ github, context, core });
+                } catch (e) {
+                  core.warning(`Could not update the checklist: ${e.message}`);
+                }
               }
             }
 

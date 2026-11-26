@@ -87,6 +87,8 @@ static bool H5_crc_table_computed = false;
  *              0xffff (for backward compatibility reasons with earlier
  *              HDF5 fletcher32 I/O filter routine, mostly).
  *
+ * Note #4:     This function is threadsafe.
+ *
  * Return:	32-bit fletcher checksum of input buffer (can't fail)
  *
  *-------------------------------------------------------------------------
