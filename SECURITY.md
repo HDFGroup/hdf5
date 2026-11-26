@@ -93,12 +93,13 @@ For the full HDF Group security development framework, see the [SSP Policies](ht
 
 HDF5-specific practices:
 - **Artifact Verification:** All binaries and source tarballs on [GitHub Releases](https://github.com/HDFGroup/hdf5/releases) include SHA-256 checksums. Users should verify downloaded artifacts against these checksums.
+- **Linux Package Signing:** Packages in The HDF Group's Linux package repositories are signed by the openSUSE Build Service. The signing key's fingerprint is published in [docs/INSTALL_Linux_Packages.md](docs/INSTALL_Linux_Packages.md#signing-key); verify it before trusting the key.
 - **SBOM:** We provide CycloneDX SBOM fragments for core, tools, and plugins where applicable.
 - **Fuzzing:** Continuous fuzzing of HDF5 file parsing and API entry points via OSS-Fuzz.
 - **Build from Source:** General build instructions are available in [docs/INSTALL.md](docs/INSTALL.md).
 
 ---
 
-**Last Updated:** 2026-03-09
+**Last Updated:** 2026-11-25
 
 **Note:** The HDF Group maintains this project with community contributions. While we make every good faith effort to address security issues promptly, please understand that response times may vary based on available resources.
