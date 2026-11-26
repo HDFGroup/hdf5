@@ -192,6 +192,30 @@ We would like to thank the many HDF5 community members who contributed to this r
    a chunked dataset. Currently only the filter operations are executed
    concurrently, the others are serialized.
 
+### Added reads of a byte range of a raw chunk
+
+   Added H5Pset_sub_chunk() and H5Pget_sub_chunk(). They set, on a dataset
+   transfer property list, a byte range that H5Dread_chunk2() then reads from
+   the raw stored chunk instead of the whole chunk. A codec whose stream is
+   progressive, such as a JPEG 2000 codestream whose tile-parts are split by
+   resolution, can then read only the bytes that a reduced-resolution decode
+   needs. The range must lie within the chunk. H5Dread_chunk1() ignores it.
+
+### Direct chunk reads now work on virtual datasets
+
+   H5Dread_chunk2(), H5Dget_chunk_storage_size() and
+   H5Dget_chunk_info_by_coord() now accept a virtual dataset when the offset,
+   in the virtual dataset's dataspace, is the image of the first element of a
+   chunk of a source dataset under one mapping. The mapping must be a
+   translation of single blocks that covers the whole source chunk, no other
+   mapping may intersect the chunk's image, the source dataset must be chunked
+   and have the virtual dataset's datatype, and the mapping must not use
+   printf-style source names. The functions fail otherwise. The source dataset
+   is opened as H5Dread() would open it, with the virtual dataset's access
+   properties. The filter mask, size and address that are returned are those of
+   the source chunk, and the address is in the source dataset's file. A
+   sub-chunk range set with H5Pset_sub_chunk() applies to the source chunk.
+
 
 ## Parallel Library
 

@@ -7992,6 +7992,32 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size /*out*/);
  *
  * \ingroup  DXPL
  *
+ * \brief Gets the direct chunk sub-range byte offset and size
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] byte_offset Byte offset into the raw chunk data
+ * \param[out] byte_size   Number of bytes to read from the raw chunk data
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_sub_chunk() retrieves the raw byte range previously set on
+ *          the dataset transfer property list \p plist_id by
+ *          H5Pset_sub_chunk().
+ *
+ *          These properties only affect H5Dread_chunk2(). The range is
+ *          relative to the raw bytes stored for a chunk on disk.
+ *
+ *          A returned \p byte_offset of 0 and \p byte_size of 0 means that
+ *          H5Dread_chunk2() will read the entire raw chunk.
+ *
+ * \since 2.4.0
+ *
+ */
+H5_DLL herr_t H5Pget_sub_chunk(hid_t plist_id, size_t *byte_offset /*out*/, size_t *byte_size /*out*/);
+/**
+ *
+ * \ingroup  DXPL
+ *
  * \brief Checks status of the dataset transfer property list (\b DEPRECATED)
  *
  * \deprecated{H5Pget_preserve() is deprecated as it is no longer useful;
@@ -8288,6 +8314,33 @@ H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, voi
  *
  */
 H5_DLL herr_t H5Pset_hyper_vector_size(hid_t plist_id, size_t size);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Sets the direct chunk sub-range byte offset and size
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] byte_offset Byte offset into the raw chunk data
+ * \param[in] byte_size   Number of bytes to read from the raw chunk data
+ * \return \herr_t
+ *
+ * \details H5Pset_sub_chunk() sets a contiguous raw byte range to be read by
+ *          H5Dread_chunk2() from a chunk.
+ *
+ *          The range is relative to the raw bytes stored for the chunk on
+ *          disk, not the logical unfiltered chunk contents.
+ *
+ *          These properties only affect H5Dread_chunk2().
+ *
+ *          Passing \p byte_offset = 0 and \p byte_size = 0 disables sub-chunk
+ *          mode and restores the default behavior of reading the entire raw
+ *          chunk.
+ *
+ * \since 2.4.0
+ *
+ */
+H5_DLL herr_t H5Pset_sub_chunk(hid_t plist_id, size_t byte_offset, size_t byte_size);
 
 /**
  * \ingroup DXPL

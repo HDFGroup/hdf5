@@ -585,6 +585,8 @@ main(void)
                 FAIL_STACK_ERROR;
             if ((H5Pset_hyper_vector_size(dxpl, 5)) < 0)
                 FAIL_STACK_ERROR;
+            if ((H5Pset_sub_chunk(dxpl, 17, 31)) < 0)
+                FAIL_STACK_ERROR;
 
 #ifdef H5_HAVE_PARALLEL
             if ((H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE)) < 0)

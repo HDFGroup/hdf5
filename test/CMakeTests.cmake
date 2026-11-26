@@ -267,6 +267,7 @@ endif ()
 set (test_CLEANFILES
     cmpd_dtransform.h5
     direct_chunk.h5
+    direct_chunk_vds_src.h5
     dt_arith1.h5
     dt_arith2.h5
     dtransform.h5

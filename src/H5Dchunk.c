@@ -368,7 +368,6 @@ static herr_t H5D__chunk_dest(H5D_t *dset);
 /* Chunk query operation callbacks */
 static int H5D__get_num_chunks_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 static int H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
-static int H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 static int H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata);
 
 /* Format convert cb */
@@ -582,13 +581,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc)
+H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc,
+                       bool use_sub_chunk, size_t sub_chunk_offset, size_t sub_chunk_size)
 {
     const H5O_layout_t *layout = &(dset->shared->layout);      /* Dataset layout */
     const H5D_rdcc_t   *rdcc   = &(dset->shared->cache.chunk); /* raw data chunk cache */
     H5D_chunk_ud_t      udata;                                 /* User data for querying chunk info */
     hsize_t             scaled[H5S_MAX_RANK];                  /* Scaled coordinates for this chunk */
-    herr_t              ret_value = SUCCEED;                   /* Return value */
+    size_t              read_size   = 0;                       /* Size of raw data to read */
+    haddr_t             read_offset = HADDR_UNDEF;             /* File address to read from */
+    herr_t              ret_value   = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
@@ -597,6 +599,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     assert(offset);
     assert(filters);
     assert(buf || nalloc);
+    assert(!use_sub_chunk || nalloc);
 
     *filters = 0;
 
@@ -621,10 +624,6 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     /* Sanity check */
     assert((H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
            (!H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
-
-    /* Check for size_t overflow */
-    if (H5_UNLIKELY((hsize_t)((size_t)udata.chunk_block.length) != udata.chunk_block.length))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size does not fit in size_t");
 
     /* Check if the requested chunk exists in the chunk cache */
     if (UINT_MAX != udata.idx_hint) {
@@ -656,18 +655,38 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     if (!H5_addr_defined(udata.chunk_block.offset))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined");
 
+    /* Check for size_t overflow */
+    if (H5_UNLIKELY((hsize_t)((size_t)udata.chunk_block.length) != udata.chunk_block.length))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size does not fit in size_t");
+
+    read_offset = udata.chunk_block.offset;
+    read_size   = (size_t)udata.chunk_block.length;
+
+    /* Apply the requested direct chunk sub-range, if present */
+    if (use_sub_chunk) {
+        if (sub_chunk_offset > read_size)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "sub-chunk byte offset exceeds chunk size");
+        if (sub_chunk_size > (read_size - sub_chunk_offset))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "sub-chunk byte range exceeds chunk size");
+        if (H5_addr_overflow(read_offset, sub_chunk_offset))
+            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "sub-chunk address overflowed");
+
+        read_offset += (haddr_t)sub_chunk_offset;
+        read_size = sub_chunk_size;
+    }
+
     /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large enough
      * (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must support it
      * here for the deprecated H5Dreach_chunk1()). */
-    if (udata.chunk_block.length > 0 && buf && (!nalloc || *nalloc >= udata.chunk_block.length))
+    if (read_size > 0 && buf && (!nalloc || *nalloc >= read_size))
         /* Read the chunk data into the supplied buffer */
-        if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset,
-                                  (size_t)udata.chunk_block.length, buf) < 0)
+        if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, read_offset, read_size, buf) <
+            0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
 
     /* Return the size of the chunk block in *nalloc if nalloc is provided */
     if (nalloc)
-        *nalloc = (size_t)udata.chunk_block.length;
+        *nalloc = read_size;
 
     /* Return the filter mask */
     *filters = udata.filter_mask;
@@ -8873,54 +8892,10 @@ done:
 } /* end H5D__get_chunk_info() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__get_chunk_info_by_coord_cb
- *
- * Purpose:     Get the chunk info of the desired chunk, given its offset
- *              coordinates.
- *
- * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
- *              Failure:    Negative (H5_ITER_ERROR)
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
-{
-    H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
-    bool                      different  = false;       /* true when a scaled value pair mismatch */
-    hsize_t                   ii;                       /* Local index value */
-    int                       ret_value = H5_ITER_CONT; /* Callback return value */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Check args */
-    assert(chunk_rec);
-    assert(chunk_info);
-
-    /* Going through the scaled, stop when a mismatch is found */
-    for (ii = 0; ii < chunk_info->ndims && !different; ii++)
-        if (chunk_info->scaled[ii] != chunk_rec->scaled[ii])
-            different = true;
-
-    /* Same scaled coords means the chunk is found, copy the chunk info */
-    if (!different) {
-        chunk_info->nbytes      = chunk_rec->nbytes;
-        chunk_info->filter_mask = chunk_rec->filter_mask;
-        chunk_info->chunk_addr  = chunk_rec->chunk_addr;
-        chunk_info->found       = true;
-
-        /* Stop iterating */
-        ret_value = H5_ITER_STOP;
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__get_chunk_info_by_coord_cb() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5D__get_chunk_info_by_coord
  *
- * Purpose:     Iterate over the chunks in the dataset to get the info
- *              of the desired chunk, given by its offset coordinates.
+ * Purpose:     Look up the info of the desired chunk, given by its offset
+ *              coordinates, in the chunk index.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -8970,34 +8945,43 @@ H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset, unsigned 
 
     /* If the dataset is not written, return without errors */
     if (H5_addr_defined(idx_info.layout->storage.u.chunk.idx_addr)) {
-
-        H5D_chunk_info_iter_ud_t udata;
+        H5D_chunk_ud_t udata;                    /* User data for the index lookup */
+        hsize_t        scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of the chunk */
+        bool           in_extent = true;         /* Whether the chunk is in the dataset's extent */
+        unsigned       u;                        /* Local index variable */
 
         /* Calculate the scaled of this chunk */
-        H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, udata.scaled);
-        udata.scaled[dset->shared->ndims] = 0;
+        H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
+        scaled[dset->shared->ndims] = 0;
 
-        /* Initialize before iteration */
-        udata.ndims       = dset->shared->ndims;
-        udata.nbytes      = 0;
-        udata.filter_mask = 0;
-        udata.chunk_addr  = HADDR_UNDEF;
-        udata.found       = false;
+        /* No chunk is stored outside the dataset's extent, and the index
+         * can't be queried there */
+        for (u = 0; u < dset->shared->ndims; u++)
+            if (scaled[u] * layout->u.chunk.dim[u] >= dset->shared->curr_dims[u])
+                in_extent = false;
 
-        /* Iterate over the allocated chunks to find the requested chunk */
-        if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__get_chunk_info_by_coord_cb,
-                                                                &udata) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "unable to retrieve information of the chunk by its scaled coordinates");
+        if (in_extent) {
+            /* Query the index for the chunk.  The chunk cache was flushed
+             * above, so the index is up to date. */
+            memset(&udata, 0, sizeof(udata));
+            udata.common.layout      = &layout->u.chunk;
+            udata.common.storage     = &layout->storage.u.chunk;
+            udata.common.scaled      = scaled;
+            udata.chunk_block.offset = HADDR_UNDEF;
+            udata.chunk_block.length = 0;
+            udata.idx_hint           = UINT_MAX;
+            if ((layout->storage.u.chunk.ops->get_addr)(&idx_info, &udata) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address");
 
-        /* Obtain requested info if the chunk is found */
-        if (udata.found) {
-            if (filter_mask)
-                *filter_mask = udata.filter_mask;
-            if (addr)
-                *addr = udata.chunk_addr + H5F_BASE_ADDR(dset->oloc.file);
-            if (size)
-                *size = udata.nbytes;
+            /* Obtain requested info if the chunk is found */
+            if (H5_addr_defined(udata.chunk_block.offset)) {
+                if (filter_mask)
+                    *filter_mask = udata.filter_mask;
+                if (addr)
+                    *addr = udata.chunk_block.offset + H5F_BASE_ADDR(dset->oloc.file);
+                if (size)
+                    *size = udata.chunk_block.length;
+            }
         }
     }
 

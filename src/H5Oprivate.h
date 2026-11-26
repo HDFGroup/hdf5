@@ -604,6 +604,8 @@ typedef struct H5O_storage_virtual_t {
     hid_t source_fapl;  /* FAPL to use to open source files */
     hid_t source_dapl;  /* DAPL to use to open source datasets */
     bool  init;         /* Whether all information has been completely initialized */
+    bool  has_unlim;    /* Whether a mapping has an unlimited dimension, set when the dataset's layout is
+                           initialized */
     H5O_storage_virtual_ent_t
         *source_file_hash_table; /* Hash table of virtual entries sorted by source file name. Only the first
                                     occurrence of each source file name is stored. */

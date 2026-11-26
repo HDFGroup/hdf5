@@ -787,7 +787,8 @@ H5_DLL herr_t H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offse
 H5_DLL herr_t H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, hsize_t *offset, size_t data_size,
                                       const void *buf);
 H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf,
-                                     size_t *nalloc);
+                                     size_t *nalloc, bool use_sub_chunk, size_t sub_chunk_offset,
+                                     size_t sub_chunk_size);
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, bool headers);
 #endif /* H5D_CHUNK_DEBUG */
@@ -812,6 +813,8 @@ H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src, H5O_layout_t *layout_dst);
 H5_DLL herr_t H5D__virtual_hold_source_dset_files(const H5D_t *dset, H5D_virtual_held_file_t **head);
 H5_DLL herr_t H5D__virtual_refresh_source_dsets(H5D_t *dset);
 H5_DLL herr_t H5D__virtual_release_source_dset_files(H5D_virtual_held_file_t *head);
+H5_DLL herr_t H5D__virtual_chunk_source(const H5D_t *dset, const hsize_t *offset, H5D_t **src_dset,
+                                        hsize_t *src_offset);
 
 /* Functions that operate on EFL (External File List)*/
 H5_DLL bool   H5D__efl_is_space_alloc(const H5O_storage_t *storage);
