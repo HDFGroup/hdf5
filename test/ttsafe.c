@@ -149,10 +149,10 @@ main(int argc, char *argv[])
 
     AddTest("dcreate", tts_dcreate, NULL, cleanup_dcreate, NULL, 0, "multi-dataset creation");
     AddTest("error", tts_error, NULL, cleanup_error, NULL, 0, "per-thread error stacks");
-#ifdef H5_HAVE_PTHREAD_H
-    /* Thread cancellability only supported with pthreads ... */
+#if defined(H5_HAVE_PTHREAD_H) && !defined(__ANDROID__)
+    /* Thread cancellation is not supported on Android. */
     AddTest("cancel", tts_cancel, NULL, cleanup_cancel, NULL, 0, "thread cancellation safety test");
-#endif /* H5_HAVE_PTHREAD_H */
+#endif
     AddTest("acreate", tts_acreate, NULL, cleanup_acreate, NULL, 0, "multi-attribute creation");
     AddTest("attr_vlen", tts_attr_vlen, NULL, cleanup_attr_vlen, NULL, 0, "multi-file-attribute-vlen read");
 

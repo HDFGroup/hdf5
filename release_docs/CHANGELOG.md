@@ -216,6 +216,17 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed thread-enabled builds on Android
+
+   Android's Bionic libc does not implement POSIX thread cancellation.
+   The library now uses its existing no-op cancellation path on Android
+   while retaining thread synchronization and thread-safe support.
+
+   The thread cancellation test is excluded on Android because the
+   required pthread cancellation functions are unavailable.
+
+   Addresses GitHub issue #4987.
+
 ### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
 
    An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds
