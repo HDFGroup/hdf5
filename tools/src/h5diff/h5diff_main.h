@@ -147,6 +147,12 @@
  *  If there are multiple paths to an object, only the specified path(s) will be excluded;
  *  the comparison will include any path not explicitly excluded.<br />
  *  This option can be used repeatedly to exclude multiple paths.
+ * \li <strong>-B "path/to/attr"</strong>, <strong>\--exclude-attr "path/to/attr"</strong> Exclude
+ *  the specified attribute from comparison. The path uses the same convention as h5dump:
+ *  the last component is the attribute name and the preceding path is the object that owns it.<br />
+ *  For example, to exclude attribute "timestamp" on "/group1": <code>-B "/group1/timestamp"</code><br />
+ *  To target an attribute on the root group: <code>-B "/timestamp"</code><br />
+ *  This option can be used repeatedly to exclude multiple attributes.
  *
  * \subsubsection subsubsec_cltools_h5diff_modee Modes of output
  * \li <strong>Default mode</strong> print the number of differences found and where they occurred
