@@ -89,8 +89,9 @@ We would like to thank the many HDF5 community members who contributed to this r
    The `.deb` and `.rpm` files built on Ubuntu were not real distribution packages: they
    were CPack output with the layout and dependencies of the tarball, and they conflicted
    with the HDF5 packages the distributions themselves ship. Native packages come from the
-   distributions and from the HDF Group's build service project instead. The Linux tarballs
-   are unaffected.
+   distributions and from the HDF Group's Linux package repositories instead; see
+   [INSTALL_Linux_Packages.md](https://github.com/HDFGroup/hdf5/blob/develop/docs/INSTALL_Linux_Packages.md). The Linux tarballs are
+   unaffected.
 
 ### Added a Linux binary that runs on glibc 2.28 and newer
 
@@ -210,6 +211,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 ## Internal header file
 
 ## Documentation
+
+### Added instructions for the HDF Group's Linux package repositories
+
+   The HDF Group publishes HDF5 packages for openSUSE, Fedora, RHEL-compatible distributions
+   (AlmaLinux, Rocky, RHEL), Debian and Ubuntu through the openSUSE Build Service. They
+   replace the distribution's HDF5 with the current release and keep programs built against
+   the distribution's HDF5 working. [INSTALL_Linux_Packages.md](https://github.com/HDFGroup/hdf5/blob/develop/docs/INSTALL_Linux_Packages.md)
+   explains how to add the repositories, verify the signing key, and upgrade or install.
 
 
 # 🪲 Bug Fixes
