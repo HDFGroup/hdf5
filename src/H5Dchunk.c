@@ -582,13 +582,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc)
+H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc,
+                       bool use_sub_chunk, size_t sub_chunk_offset, size_t sub_chunk_size)
 {
     const H5O_layout_t *layout = &(dset->shared->layout);      /* Dataset layout */
     const H5D_rdcc_t   *rdcc   = &(dset->shared->cache.chunk); /* raw data chunk cache */
     H5D_chunk_ud_t      udata;                                 /* User data for querying chunk info */
     hsize_t             scaled[H5S_MAX_RANK];                  /* Scaled coordinates for this chunk */
-    herr_t              ret_value = SUCCEED;                   /* Return value */
+    size_t              read_size   = 0;                       /* Size of raw data to read */
+    haddr_t             read_offset = HADDR_UNDEF;             /* File address to read from */
+    herr_t              ret_value   = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
@@ -597,6 +600,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     assert(offset);
     assert(filters);
     assert(buf || nalloc);
+    assert(!use_sub_chunk || nalloc);
 
     *filters = 0;
 
@@ -621,10 +625,6 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     /* Sanity check */
     assert((H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) ||
            (!H5_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
-
-    /* Check for size_t overflow */
-    if (H5_UNLIKELY((hsize_t)((size_t)udata.chunk_block.length) != udata.chunk_block.length))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size does not fit in size_t");
 
     /* Check if the requested chunk exists in the chunk cache */
     if (UINT_MAX != udata.idx_hint) {
@@ -656,18 +656,38 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     if (!H5_addr_defined(udata.chunk_block.offset))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined");
 
+    /* Check for size_t overflow */
+    if (H5_UNLIKELY((hsize_t)((size_t)udata.chunk_block.length) != udata.chunk_block.length))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size does not fit in size_t");
+
+    read_offset = udata.chunk_block.offset;
+    read_size   = (size_t)udata.chunk_block.length;
+
+    /* Apply the requested direct chunk sub-range, if present */
+    if (use_sub_chunk) {
+        if (sub_chunk_offset > read_size)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "sub-chunk byte offset exceeds chunk size");
+        if (sub_chunk_size > (read_size - sub_chunk_offset))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "sub-chunk byte range exceeds chunk size");
+        if (H5_addr_overflow(read_offset, sub_chunk_offset))
+            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "sub-chunk address overflowed");
+
+        read_offset += (haddr_t)sub_chunk_offset;
+        read_size = sub_chunk_size;
+    }
+
     /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large enough
      * (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must support it
-     * here for the deprecated H5Dreach_chunk1()). */
-    if (udata.chunk_block.length > 0 && buf && (!nalloc || *nalloc >= udata.chunk_block.length))
+     * here for the deprecated H5Dread_chunk1()). */
+    if (read_size > 0 && buf && (!nalloc || *nalloc >= read_size))
         /* Read the chunk data into the supplied buffer */
-        if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset,
-                                  (size_t)udata.chunk_block.length, buf) < 0)
+        if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, read_offset, read_size, buf) <
+            0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
 
     /* Return the size of the chunk block in *nalloc if nalloc is provided */
     if (nalloc)
-        *nalloc = (size_t)udata.chunk_block.length;
+        *nalloc = read_size;
 
     /* Return the filter mask */
     *filters = udata.filter_mask;
