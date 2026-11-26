@@ -522,6 +522,15 @@ Fixes #5723.
 
 ## Tools
 
+### Fixed a heap buffer over-read in h5diff when comparing fixed-length strings
+
+   h5diff computed the length of fixed-length, null-terminated strings with `strlen()` and only
+   then clamped it to the string size. A string that fills its whole buffer has no terminator
+   inside it, so `strlen()` read past the end of the buffer. This could crash h5diff and the
+   h5repack tests, as seen on OpenBSD with the stdio, split and family drivers. The length is now
+   computed with `strnlen()` bounded by the string size, which gives the same result without the
+   over-read.
+
 ### Fixed a double free in h5repack
 
    The tool h5repack produced a double free crash on a malicious HDF5 file in copy_refs_attr()
