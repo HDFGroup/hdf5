@@ -9577,7 +9577,7 @@ static bool
 overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
 {
     bool          ret_value = false;
-    hsize_t       expt;
+    hsize_t       biased_expt, expt;
     size_t        mant_digits = 0, expt_digits = 0, bias = 0;
     size_t        epos, mpos;
     size_t        src_prec = 0; /*source type precision in bits*/
@@ -9616,8 +9616,13 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
         goto done;
     }
 
-    /* get exponent */
-    expt = H5T__bit_get_d(bits, mant_digits, expt_digits) - bias;
+    /* get exponent.  A biased exponent below the bias means a magnitude
+     * below 1, which can't overflow.  Subtracting the bias from it would
+     * wrap around and report an overflow for every such value. */
+    biased_expt = H5T__bit_get_d(bits, mant_digits, expt_digits);
+    if (biased_expt < bias)
+        goto done;
+    expt = biased_expt - bias;
 
     if (expt >= (dst_num_bits - 1)) {
         ret_value = true;
