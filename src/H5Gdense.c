@@ -68,7 +68,7 @@
 /* Data exchange structure to use when building table of links in group */
 typedef struct {
     H5G_link_table_t *ltable;   /* Pointer to link table to build */
-    size_t            curr_lnk; /* Current link to operate on */
+    size_t            capacity; /* Allocated entries in the link table */
 } H5G_dense_bt_ud_t;
 
 /*
@@ -711,17 +711,9 @@ H5G__dense_build_table_cb(const H5O_link_t *lnk, void *_udata)
 
     FUNC_ENTER_PACKAGE
 
-    /* check arguments */
-    assert(lnk);
-    assert(udata);
-    assert(udata->curr_lnk < udata->ltable->nlinks);
-
-    /* Copy link information */
-    if (H5O_msg_copy(H5O_LINK_ID, lnk, &(udata->ltable->lnks[udata->curr_lnk])) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy link message");
-
-    /* Increment number of links stored */
-    udata->curr_lnk++;
+    /* Grow from the records found, not the stored count. */
+    if (H5G__link_append_table(udata->ltable, &udata->capacity, lnk) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR, "can't append link to table");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -744,48 +736,36 @@ herr_t
 H5G__dense_build_table(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
                        H5G_link_table_t *ltable)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5G_dense_bt_ud_t udata;               /* User data for iteration callback */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     assert(f);
     assert(linfo);
     assert(ltable);
 
-    /* Set size of table */
-    H5_CHECK_OVERFLOW(linfo->nlinks, /* From: */ hsize_t, /* To: */ size_t);
-    ltable->nlinks = (size_t)linfo->nlinks;
+    ltable->lnks   = NULL;
+    ltable->nlinks = 0;
+    udata.ltable   = ltable;
+    udata.capacity = 0;
 
-    /* Allocate space for the table entries */
-    if (ltable->nlinks > 0) {
-        H5G_dense_bt_ud_t udata; /* User data for iteration callback */
+    /* Visit records even when the declared count is zero. */
+    if (H5G__dense_iterate(f, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL,
+                           H5G__dense_build_table_cb, &udata) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links");
 
-        /* Allocate the table to store the links */
-        if ((ltable->lnks = (H5O_link_t *)H5MM_calloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    /* Keep rejecting inconsistent metadata, without using it to size memory. */
+    if (ltable->nlinks != linfo->nlinks)
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "dense link count does not match the links found");
 
-        /* Initialize all links to invalid. NOTE: If H5O_link_t changes, update this loop. */
-        for (size_t i = 0; i < ltable->nlinks; i++)
-            ltable->lnks[i].type = H5L_TYPE_ERROR;
-
-        /* Set up user data for iteration */
-        udata.ltable   = ltable;
-        udata.curr_lnk = 0;
-
-        /* Iterate over the links in the group, building a table of the link messages */
-        if (H5G__dense_iterate(f, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL,
-                               H5G__dense_build_table_cb, &udata) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links");
-
-        /* Sort link table in correct iteration order */
-        if (H5G__link_sort_table(ltable, idx_type, order) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting link messages");
-    } /* end if */
-    else
-        ltable->lnks = NULL;
+    if (ltable->nlinks > 0 && H5G__link_sort_table(ltable, idx_type, order) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting link messages");
 
 done:
+    if (ret_value < 0 && ltable->lnks && H5G__link_release_table(ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__dense_build_table() */
 
