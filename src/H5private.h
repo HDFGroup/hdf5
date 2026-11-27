@@ -1149,8 +1149,8 @@ extern char H5_lib_vers_info_g[];
 
 #ifdef H5_HAVE_THREADS
 
-/* Android's pthread implementation does not support thread cancellation. */
-#if defined(H5_HAVE_PTHREAD_H) && !defined(__ANDROID__)
+/* Thread cancellation is only possible when the pthread cancellation APIs are available. */
+#ifdef H5_HAVE_PTHREAD_CANCELLATION
 
 /* Local variable for saving cancellation state */
 #define H5CANCEL_DECL_REAL int oldstate = 0;

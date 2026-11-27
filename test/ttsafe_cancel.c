@@ -30,7 +30,7 @@
 #include "ttsafe.h"
 
 #ifdef H5_HAVE_THREADSAFE_API
-#if defined(H5_HAVE_PTHREAD_H) && !defined(__ANDROID__)
+#ifdef H5_HAVE_PTHREAD_CANCELLATION
 
 #define FILENAME    "ttsafe_cancel.h5"
 #define DATASETNAME "commonname"
@@ -209,5 +209,5 @@ cleanup_cancel(void H5_ATTR_UNUSED *params)
     }
 }
 
-#endif
+#endif /* H5_HAVE_PTHREAD_CANCELLATION */
 #endif /* H5_HAVE_THREADSAFE_API */

@@ -73,7 +73,9 @@
 #define H5TS_thread_self()         pthread_self()
 #define H5TS_thread_equal(t1, t2)  pthread_equal((t1), (t2))
 #define H5TS_THREAD_RETURN_TYPE    H5TS_thread_ret_t
+#ifdef H5_HAVE_PTHREAD_CANCELLATION
 #define H5TS_THREAD_CANCEL_DISABLE PTHREAD_CANCEL_DISABLE
+#endif
 
 /* Mutex macros */
 #define H5TS_MUTEX_TYPE_PLAIN      0

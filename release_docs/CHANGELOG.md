@@ -216,14 +216,16 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
-### Fixed thread-enabled builds on Android
+### Fixed thread-enabled builds on platforms without pthread cancellation support
 
-   Android's Bionic libc does not implement POSIX thread cancellation.
-   The library now uses its existing no-op cancellation path on Android
-   while retaining thread synchronization and thread-safe support.
+   CMake now checks whether the pthread cancellation APIs can be compiled and
+   linked. On platforms without these APIs, such as Android, the library uses
+   its existing no-op cancellation path while retaining thread synchronization
+   and thread-safe support. The existing cancellation behavior is unchanged
+   on platforms where the check succeeds.
 
-   The thread cancellation test is excluded on Android because the
-   required pthread cancellation functions are unavailable.
+   The thread cancellation test is only enabled when the required pthread
+   cancellation APIs are available.
 
    Addresses GitHub issue #4987.
 
