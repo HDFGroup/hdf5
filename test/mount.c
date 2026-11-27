@@ -47,43 +47,43 @@ setup(hid_t fapl)
     /* file 1 */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/mnt1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/mnt1/file1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/mnt_unlink", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/mnt_move_a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_hard(file, "/mnt1/file1", H5L_SAME_LOC, "/file1", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Lcreate_hard(file, "/mnt1", H5L_SAME_LOC, "/mnt1_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* file 2 */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/file2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/rename_a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/rename_b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(H5Gcreate2(file, "/rename_a/x", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* file 3 */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     return 0;
 
@@ -120,19 +120,19 @@ test_basic(hid_t fapl)
 
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((grp = H5Gopen2(file1, "/mnt1/file2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(grp) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -177,11 +177,11 @@ test_illegal(hid_t fapl)
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file3 = H5Fopen(filename3, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((file1b = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((file3b = H5Fopen(filename3, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Try mounting a file on itself */
     H5E_BEGIN_TRY
@@ -201,9 +201,9 @@ test_illegal(hid_t fapl)
      * the root of file2 and the mount will succeed.
      */
     if ((mnt = H5Gopen2(file1, "/mnt1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(mnt, ".", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Fmount(mnt, ".", file3, H5P_DEFAULT);
@@ -215,9 +215,9 @@ test_illegal(hid_t fapl)
         TEST_ERROR;
     } /* end if */
     if (H5Funmount(mnt, ".") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(mnt) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Try mounting the same file opened twice at the same place.
@@ -226,9 +226,9 @@ test_illegal(hid_t fapl)
      * end up mounting file3b at the root of file3 and the mount will succeed.
      */
     if ((mnt = H5Gopen2(file1, "/mnt1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(mnt, ".", file3, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Fmount(mnt, ".", file3b, H5P_DEFAULT);
@@ -240,13 +240,13 @@ test_illegal(hid_t fapl)
         TEST_ERROR;
     } /* end if */
     if (H5Funmount(mnt, ".") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(mnt) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Try to create a "weak" cycle */
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Fmount(file2, "/mnt1/file2", file1b, H5P_DEFAULT);
@@ -258,11 +258,11 @@ test_illegal(hid_t fapl)
         TEST_ERROR;
     } /* end if */
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Try passing in IDs that are not a file or group ID */
     if ((dtype = H5Tcopy(H5T_C_S1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Fmount(dtype, "/mnt1", file1b, H5P_DEFAULT);
@@ -286,15 +286,15 @@ test_illegal(hid_t fapl)
 
     /* Close everything and return */
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1b) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file3) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file3b) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -341,13 +341,13 @@ test_samefile(hid_t fapl)
 
     /* Open the files */
     if ((file1a = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((file1b = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((file3 = H5Fopen(filename3, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Try mounting different files at the same place in each of the "top"
@@ -357,21 +357,21 @@ test_samefile(hid_t fapl)
      * end up mounting file4 at the root of file3 and the mount will succeed.
      */
     if ((mnt1a = H5Gopen2(file1a, "/mnt1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_info(mnt1a, &grp_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (grp_info.mounted)
         FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.");
     if ((mnt1b = H5Gopen2(file1b, "/mnt1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_info(mnt1b, &grp_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (grp_info.mounted)
         FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.");
     if (H5Fmount(mnt1a, ".", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_info(mnt1a, &grp_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (!grp_info.mounted)
         FAIL_PUTS_ERROR("    Group should have 'mounted' flag set.");
     H5E_BEGIN_TRY
@@ -382,11 +382,11 @@ test_samefile(hid_t fapl)
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting different files at one mount point should have failed.");
     if (H5Funmount(mnt1a, ".") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(mnt1a) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(mnt1b) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Try mounting same files at the same place in each of the "top"
@@ -396,21 +396,21 @@ test_samefile(hid_t fapl)
      * end up mounting file4 at the root of file3 and the mount will succeed.
      */
     if ((mnt1a = H5Gopen2(file1a, "/mnt1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_info(mnt1a, &grp_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (grp_info.mounted)
         FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.");
     if ((mnt1b = H5Gopen2(file1b, "/mnt1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_info(mnt1b, &grp_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (grp_info.mounted)
         FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.");
     if (H5Fmount(mnt1a, ".", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gget_info(mnt1a, &grp_info) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (!grp_info.mounted)
         FAIL_PUTS_ERROR("    Group should have 'mounted' flag set.");
     H5E_BEGIN_TRY
@@ -421,21 +421,21 @@ test_samefile(hid_t fapl)
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting same files at one mount point should have failed.");
     if (H5Funmount(mnt1a, ".") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(mnt1a) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(mnt1b) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close everything and return */
     if (H5Fclose(file1a) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1b) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file3) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -481,15 +481,15 @@ test_hide(hid_t fapl)
 
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get information about file1:/mnt1/file1 for later */
     if (H5Oget_info_by_name3(file1, "/mnt1/file1", &oi1, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Build the virtual file */
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Original names under file1:/mnt1 should not be accessible */
     H5E_BEGIN_TRY
@@ -508,14 +508,14 @@ test_hide(hid_t fapl)
      * other names.  This is a rather stupid test but demonstrates a point.
      */
     if (H5Oget_info_by_name3(file1, "/file1", &oi2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     same_obj = true;
     if (oi1.fileno == oi2.fileno) {
         int token_cmp;
 
         if (H5Otoken_cmp(file1, &oi1.token, &oi2.token, &token_cmp) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (token_cmp)
             same_obj = false;
     }
@@ -530,11 +530,11 @@ test_hide(hid_t fapl)
 
     /* Unmount and close objects */
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -577,29 +577,29 @@ test_assoc(hid_t fapl)
     /* Open the files */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get information about the root of file2 */
     if (H5Oget_info3(file2, &oi1, H5O_INFO_BASIC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the virtual file */
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Get info about the mount point -- should be the same as the root group
      * of file2.
      */
     if (H5Oget_info_by_name3(file1, "/mnt1", &oi2, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     same_obj = true;
     if (oi1.fileno == oi2.fileno) {
         int token_cmp;
 
         if (H5Otoken_cmp(file1, &oi1.token, &oi2.token, &token_cmp) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (token_cmp)
             same_obj = false;
     }
@@ -614,11 +614,11 @@ test_assoc(hid_t fapl)
 
     /* Shut down */
     if (H5Funmount(file1, "/mnt1_link") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -659,30 +659,30 @@ test_mntlnk(hid_t fapl)
     /* Build the virtual file */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Can we see file2:/file2 as both file1:/mnt1/file2 and
      * file1:/mnt1_link/file2?
      */
     if ((grp = H5Gopen2(file1, "/mnt1/file2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(grp) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((grp = H5Gopen2(file1, "/mnt1_link/file2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(grp) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unlink using second name */
     if (H5Funmount(file1, "/mnt1_link") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -725,13 +725,13 @@ test_move(hid_t fapl)
     /* Build the virtual file */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* First rename an object in the mounted file, then try it across files */
     if (H5Lmove(file1, "/mnt1/rename_a/x", H5L_SAME_LOC, "/mnt1/rename_b/y", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Lmove(file1, "/mnt1/rename_b/y", H5L_SAME_LOC, "/y", H5P_DEFAULT, H5P_DEFAULT);
@@ -745,11 +745,11 @@ test_move(hid_t fapl)
 
     /* Shut down */
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -789,29 +789,29 @@ test_preopen(hid_t fapl)
 
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open something under the mount point */
     if ((grp = H5Gopen2(file1, "/mnt1/file1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Build the virtual file */
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now access the thing we previously opened */
     if (H5Oget_info3(grp, &oinfo, H5O_INFO_BASIC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Shut down */
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(grp) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -855,33 +855,33 @@ test_postopen(hid_t fapl)
     /* Create the virtual file */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open some object in the mounted file */
     if ((grp = H5Gopen2(file1, "/mnt1/file2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Unmount the file */
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Now access the thing we previously opened */
     if (H5Oget_info3(grp, &oinfo, H5O_INFO_BASIC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Try accessing it from the file */
     if (H5Oget_info_by_name3(file2, "/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Shut down */
     if (H5Gclose(grp) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -925,7 +925,7 @@ test_unlink(hid_t fapl)
     /* Open files */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Opening the mount point before mounting opens the group in the parent
@@ -933,11 +933,11 @@ test_unlink(hid_t fapl)
      * opening the root group of the child file.
      */
     if ((mnt = H5Gopen2(file1, "/mnt_unlink", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt_unlink", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((root = H5Gopen2(file1, "/mnt_unlink", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * "/file2" of file2 should be visible as an absolute name through either
@@ -946,13 +946,13 @@ test_unlink(hid_t fapl)
      * than the group mounted there.
      */
     if (H5Oget_info_by_name3(file1, "/mnt_unlink/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(mnt, "/mnt_unlink/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(root, "/mnt_unlink/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(root, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Oget_info_by_name3(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
@@ -966,14 +966,14 @@ test_unlink(hid_t fapl)
 
     /* Unlink the mount point */
     if (H5Ldelete(file1, "/mnt_unlink", H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * We should still be able to get to "/file2" of file2 by starting at
      * `root' which is still open, but not by name.
      */
     if (H5Oget_info_by_name3(root, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         status = H5Oget_info_by_name3(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
@@ -1021,17 +1021,17 @@ test_unlink(hid_t fapl)
         TEST_ERROR;
     } /* end if */
     if (H5Funmount(mnt, ".") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close files */
     if (H5Gclose(mnt) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(root) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -1073,25 +1073,25 @@ test_mvmpt(hid_t fapl)
     /* Build the virtual file */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt_move_a", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Rename the mount point */
     if (H5Lmove(file1, "/mnt_move_a", H5L_SAME_LOC, "/mnt_move_b", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Access something under the new name */
     if (H5Oget_info_by_name3(file1, "/mnt_move_b/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Shut down */
     if (H5Funmount(file1, "/mnt_move_b") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -1135,9 +1135,9 @@ test_interlink(hid_t fapl)
     /* Build the virtual file */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Try an interfile hard link directly */
     H5E_BEGIN_TRY
@@ -1170,11 +1170,11 @@ test_interlink(hid_t fapl)
 #ifdef NOT_NOW
     /* Try an interfile hard link by sharing a data type */
     if ((type = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tcommit2(file1, "/type1", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((space = H5Screate_simple(1, cur_dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     H5E_BEGIN_TRY
     {
         dset = H5Dcreate2(file1, "/mnt1/file2/dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1188,9 +1188,9 @@ test_interlink(hid_t fapl)
 
     /* Close IDs */
     if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Tclose(type) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 #else  /* NOT_NOW */
     SKIPPED();
     puts("    Test skipped due file pointer sharing issue (Jira 7638).");
@@ -1198,11 +1198,11 @@ test_interlink(hid_t fapl)
 
     /* Shut down */
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -1248,41 +1248,41 @@ test_uniformity(hid_t fapl)
     /* Build the virtual file */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Access some things from the file1 handle */
     if (H5Oget_info_by_name3(file1, "/", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file1, "/mnt1", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file1, "mnt1", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file1, "/mnt1/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file1, "mnt1/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Access the same things from the file2 handle */
     if (H5Oget_info_by_name3(file2, "/", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file2, "/mnt1", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file2, "mnt1", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file2, "/mnt1/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file2, "mnt1/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Shut down */
     if (H5Funmount(file1, "/mnt1") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -1322,49 +1322,49 @@ test_close(hid_t fapl)
     /* Build the virtual file */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Close file1 unmounting it from the virtual file.  Objects in file1 are
      * still accessible through the file2 handle.
      */
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file2, "/mnt1", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0) {
         H5_FAILED();
         puts("    File1 contents are not accessible!");
         TEST_ERROR;
     } /* end if */
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Build the virtual file again */
     if ((file1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0 ||
         (file2 = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Close file2.  It is not actually closed because it's a child of file1.
      */
     if (H5Fclose(file2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Oget_info_by_name3(file1, "/mnt1/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Shut down */
@@ -1428,30 +1428,30 @@ test_mount_after_close(hid_t fapl)
       /A/B/T                   -> /A
     */
     if ((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gidAB = H5Gcreate2(gidA, "B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Mount point */
     if ((gidABM = H5Gcreate2(gidAB, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Soft link */
     if (H5Lcreate_soft("./M/X/Y", gidAB, "C", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Soft link */
     if (H5Lcreate_soft("/A", gidAB, "T", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close groups and file */
     if (H5Gclose(gidABM) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gidAB) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gidA) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create second file and dataset "D" in it. */
     /* h5ls shows: */
@@ -1461,38 +1461,38 @@ test_mount_after_close(hid_t fapl)
        /X/Y/D                   Dataset {4, 5}
      */
     if ((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     dims[0] = NX;
     dims[1] = NY;
     if ((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((gidX = H5Gcreate2(fid2, "/X", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((gidXY = H5Gcreate2(gidX, "Y", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did = H5Dcreate2(gidXY, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Soft link */
     if (H5Lcreate_soft("./Y", gidX, "T", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write data to the dataset. */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close all identifiers. */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gidXY) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Gclose(gidX) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Beginning of the actual test code */
 
@@ -1500,93 +1500,93 @@ test_mount_after_close(hid_t fapl)
      * Reopen both files
      */
     if ((fid1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /*
      *  Open /A/B to use as a mount point
      */
     if ((gidAB = H5Gopen2(fid1, "/A/B", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      *  Close the parent file. This keeps the file open because of the other handle on the group within
      */
     /* We close the file (it should stay open from the group) */
     if (H5Fclose(fid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Mount second file under G in the first file.
      */
     if (H5Fmount(gidAB, "M", fid2, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open "normal" group in mounted file */
     /* (This shows we successfully mounted) */
     if ((gidABMX = H5Gopen2(gidAB, "M/X", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     *objname = '\0';
     if (H5Iget_name(gidABMX, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/A/B/M/X") != 0)
         TEST_ERROR;
 
     /* Close object in mounted file */
     if (H5Gclose(gidABMX) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group in mounted file through softlink */
     if ((gidABC = H5Gopen2(gidAB, "C", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     *objname = '\0';
     if (H5Iget_name(gidABC, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/A/B/C") != 0)
         TEST_ERROR;
 
     /* Close object in mounted file */
     if (H5Gclose(gidABC) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open group in original file through softlink */
     if ((gidABT = H5Gopen2(gidAB, "T", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     *objname = '\0';
     if (H5Iget_name(gidABT, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/A/B/T") != 0)
         TEST_ERROR;
 
     /* Close object in original file */
     if (H5Gclose(gidABT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open "normal" dataset in mounted file */
     if ((didABMXYD = H5Dopen2(gidAB, "M/X/Y/D", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check name */
     *objname = '\0';
     if (H5Iget_name(didABMXYD, objname, (size_t)NAME_BUF_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (strcmp(objname, "/A/B/M/X/Y/D") != 0)
         TEST_ERROR;
 
     /* Close object in mounted file */
     if (H5Dclose(didABMXYD) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Gclose(gidAB) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Shut down */
     PASSED();
@@ -2004,7 +2004,7 @@ test_missing_unmount(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2132,7 +2132,7 @@ test_hold_open_file(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2282,7 +2282,7 @@ test_hold_open_group(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2422,7 +2422,7 @@ test_fcdegree_same(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2560,7 +2560,7 @@ test_fcdegree_semi(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2695,7 +2695,7 @@ test_fcdegree_strong(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -2894,7 +2894,7 @@ test_acc_perm(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -3109,7 +3109,7 @@ test_mult_mount(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -3323,7 +3323,7 @@ test_nested_survive(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -3429,7 +3429,7 @@ test_close_parent(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Both underlying shared files should be open still */
     H5F_sfile_assert_num(2);
@@ -3760,7 +3760,7 @@ test_cut_graph(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Unmount file #2 from file #1, cutting the graph */
     if (H5Funmount(gidM, "/A") < 0)
@@ -4143,7 +4143,7 @@ test_sharedacc(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -4252,7 +4252,7 @@ test_sharedclose(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     /* Create file #1 & its group */
@@ -4295,7 +4295,7 @@ test_sharedclose(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();
@@ -4447,7 +4447,7 @@ test_multisharedclose(hid_t fapl)
 
     /* Check that all file IDs have been closed */
     if (H5I_nmembers(H5I_FILE) != 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     H5F_sfile_assert_num(0);
 
     PASSED();

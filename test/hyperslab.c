@@ -1083,7 +1083,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
 
         /* Get coordinates of offset */
         if (H5VM_array_calc(off, ARRAY_OFFSET_NDIMS, dims, new_coords) < 0)
-            TEST_ERROR;
+            FAIL_STACK_ERROR;
 
         /* Check computed coordinates */
         for (v = 0; v < ARRAY_OFFSET_NDIMS; v++)

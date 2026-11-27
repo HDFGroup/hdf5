@@ -74,7 +74,7 @@ check_data_i(const char *dsetname, hid_t fid)
 
     /* Open the dataset. */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Initialization. */
     /* Input (last row is different) */
@@ -90,7 +90,7 @@ check_data_i(const char *dsetname, hid_t fid)
      * memory and display.
      */
     if (H5Dread(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_out) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check results */
     for (i = 0; i < (NX + 1); i++)
@@ -104,7 +104,7 @@ check_data_i(const char *dsetname, hid_t fid)
 
     /* Close/release resources. */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Failure */
     if (nerrors) {
@@ -145,7 +145,7 @@ check_data_f(const char *dsetname, hid_t fid)
 
     /* Open the dataset. */
     if ((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Initialization. */
     /* Input (last row is different) */
@@ -161,7 +161,7 @@ check_data_f(const char *dsetname, hid_t fid)
      * memory and display.
      */
     if (H5Dread(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_out) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check results */
     for (i = 0; i < (NX + 1); i++)
@@ -175,7 +175,7 @@ check_data_f(const char *dsetname, hid_t fid)
 
     /* Close/release resources. */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Failure */
     if (nerrors) {
@@ -218,7 +218,7 @@ check_file(char *filename)
     /* Open the file. */
     if ((fid = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
         nerrors++;
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     }
 
     TESTING("regular dataset of LE DOUBLE");
@@ -314,7 +314,7 @@ check_file(char *filename)
     nerrors += check_data_f(DATASETNAME23, fid);
 
     if (H5Fclose(fid))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     return nerrors;
 
 error:

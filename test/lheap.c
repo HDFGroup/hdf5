@@ -115,13 +115,13 @@ test_corrupt_heap_traversal(void)
         FAIL_PUTS_ERROR("unable to build the path of the damaged test file");
 
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Shrink the metadata cache */
     memset(&mdc_config, 0, sizeof(mdc_config));
     mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
     if (H5Pget_mdc_config(fapl, &mdc_config) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     mdc_config.set_initial_size = true;
     mdc_config.initial_size     = (size_t)(16 * 1024);
     mdc_config.min_size         = (size_t)(16 * 1024);
@@ -130,7 +130,7 @@ test_corrupt_heap_traversal(void)
     mdc_config.flash_incr_mode  = H5C_flash_incr__off;
     mdc_config.decr_mode        = H5C_decr__off;
     if (H5Pset_mdc_config(fapl, &mdc_config) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The file is damaged, so the open and the walk are allowed to fail */
     H5E_BEGIN_TRY
@@ -147,12 +147,12 @@ test_corrupt_heap_traversal(void)
         H5E_END_TRY
 
         if (H5Fclose(file) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         file = H5I_INVALID_HID;
     }
 
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -207,7 +207,7 @@ test_unprotect_detached_entry(hid_t fapl)
     if (NULL == h5_fixname(FILENAME[1], fapl, filename, sizeof(filename)))
         FAIL_PUTS_ERROR("unable to build the test file name");
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR;
     if (H5AC_ignore_tags(f) < 0)
@@ -284,7 +284,7 @@ test_unprotect_detached_entry(hid_t fapl)
 
     /* Closing the file also checks that no entry was left pinned */
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 

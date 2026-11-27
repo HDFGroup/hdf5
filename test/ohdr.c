@@ -84,7 +84,7 @@ test_cont(char *filename, hid_t fapl)
 
     /* Create the file to operate on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR;
     if (H5AC_ignore_tags(f) < 0) {
@@ -152,7 +152,7 @@ test_cont(char *filename, hid_t fapl)
     if (H5O_close(&oh_locB, NULL) < 0)
         FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -199,7 +199,7 @@ test_bad_cont_chunk_size(char *filename, hid_t fapl)
     memset(&block_loc, 0, sizeof(block_loc));
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR;
     if (H5AC_ignore_tags(f) < 0)
@@ -267,17 +267,17 @@ test_bad_cont_chunk_size(char *filename, hid_t fapl)
     if (H5O_close(&block_loc, NULL) < 0)
         FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     file = H5I_INVALID_HID;
 
     if ((fd = HDopen(filename, O_RDWR, H5_POSIX_CREATE_MODE_RW)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (HDlseek(fd, (HDoff_t)size_addr, SEEK_SET) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (HDwrite(fd, size_buf, sizeof_size) != (ssize_t)sizeof_size)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (HDclose(fd) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     fd = -1;
 
     H5E_BEGIN_TRY
@@ -300,7 +300,7 @@ test_bad_cont_chunk_size(char *filename, hid_t fapl)
     if (ret >= 0)
         TEST_ERROR;
     if (H5Fclose(reopened) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     reopened = H5I_INVALID_HID;
 
     PASSED();
@@ -349,24 +349,24 @@ test_ohdr_cache(char *filename, hid_t fapl)
 
     /* Make a copy of the FAPL */
     if ((my_fapl = H5Pcopy(fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Tweak down the size of the metadata cache to only 64K */
     mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
     if (H5Pget_mdc_config(my_fapl, &mdc_config) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     mdc_config.set_initial_size = true;
     mdc_config.initial_size     = 32 * 1024;
     mdc_config.max_size         = 64 * 1024;
     mdc_config.min_size         = 8 * 1024;
     if (H5Pset_mdc_config(my_fapl, &mdc_config) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the file to operate on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(my_fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR;
     if (H5AC_ignore_tags(f) < 0)
@@ -446,7 +446,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR;
 
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -494,13 +494,13 @@ test_ohdr_swmr(bool new_format)
 
     /* File access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the file with/without latest format: ensure version 2 object header for SWMR */
     if (new_format) {
         /* Set to use latest library format */
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((fid = H5Fcreate(FILE_OHDR_SWMR, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR;
@@ -519,47 +519,47 @@ test_ohdr_swmr(bool new_format)
     /* Create a small data space for compact dataset */
     dims[0] = (hsize_t)compact_size;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create property list for compact dataset creation */
     if ((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the layout for the compact dataset */
     if (H5Pset_layout(plist, H5D_COMPACT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create a compact dataset */
     if ((did = H5Dcreate2(fid, DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, plist, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write to the compact dataset */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the file for SWMR write with/without latest format */
     if ((fid = H5Fopen(FILE_OHDR_SWMR, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open the compact dataset */
     if ((did = H5Dopen2(fid, DSET_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the object information */
     if (H5Oget_native_info(did, &ninfo, H5O_NATIVE_INFO_HDR) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (new_format)
         if (ninfo.hdr.version != OBJ_VERSION_LATEST)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* The size of object header should be greater than the speculative read size of H5O_SPEC_READ_SIZE */
     /* This will exercise the coding for the re-read of the object header for SWMR access */
@@ -568,27 +568,27 @@ test_ohdr_swmr(bool new_format)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the file */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataspace */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset creation property list */
     if (H5Pclose(plist) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the file access property list */
     if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Remove the test file */
     if (HDremove(FILE_OHDR_SWMR) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Free the buffer */
     free(wbuf);
@@ -828,28 +828,28 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Make a copy of the data file from svn. */
     if (h5_make_local_copy(FILE_BOGUS, testfile) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     TESTING("object with unknown header message and no flags set");
 
     /* Open filename */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Open FILE_BOGUS */
     if ((fid_bogus = H5Fopen(testfile, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set up location ID depending on bogus_id */
     if (bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in FILE_BOGUS */
         if ((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         loc_bogus = gid_bogus;
 
         /* Create "group" in filename */
         if ((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         loc = gid;
     }
     else { /* H5O_BOGUS_VALID_ID */
@@ -859,9 +859,9 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Open the dataset with the unknown header message, but no extra flags */
     if ((did = H5Dopen2(loc_bogus, "Dataset1", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -869,9 +869,9 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Open the dataset with the unknown header message, and "shareable" flag */
     if ((did = H5Dopen2(loc_bogus, "Dataset5", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -879,9 +879,9 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Open the dataset with the unknown header message, and "fail if unknown and open for write" flag */
     if ((did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -904,24 +904,24 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Copy object with "mark if unknown" flag on message into file (FILENAME[0]) that can be modified */
     if (H5Ocopy(loc_bogus, "Dataset4", loc, "Dataset4", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Closing: filename */
     if (bogus_id == H5O_BOGUS_INVALID_ID)
         if (H5Gclose(gid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open filename, with read-only permissions */
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set up location ID depending on bogus_id */
     if (bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
         if ((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         loc = gid;
     }
     else
@@ -929,7 +929,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Open the dataset with the "mark if unknown" message */
     if ((did = H5Dopen2(loc, "Dataset4", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the "unknown" message was _NOT_ marked */
     if (H5O__check_msg_marked_test(did, false) < 0)
@@ -937,26 +937,26 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close "group" in filename depending on bogus_id */
     if (bogus_id == H5O_BOGUS_INVALID_ID)
         if (H5Gclose(gid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Close filename (to flush change to object header) */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open filename */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set up location ID depending on bogus_id */
     if (bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
         if ((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         loc = gid;
     }
     else
@@ -964,46 +964,46 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Open the dataset with the "mark if unknown" message */
     if ((did = H5Dopen2(loc, "Dataset4", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create data space */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create an attribute, to get the object header into write access */
     if ((aid = H5Acreate2(did, "Attr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close dataspace */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close attribute */
     if (H5Aclose(aid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close "group" in filename depending on bogus_id */
     if (bogus_id == H5O_BOGUS_INVALID_ID)
         if (H5Gclose(gid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
     /* Close filename (to flush change to object header) */
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Re-open filename */
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set up location ID depending on bogus_id */
     if (bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in filename */
         if ((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         loc = gid;
     }
     else
@@ -1011,7 +1011,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Re-open the dataset with the "mark if unknown" message */
     if ((did = H5Dopen2(loc, "Dataset4", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the "unknown" message was marked */
     if (H5O__check_msg_marked_test(did, true) < 0)
@@ -1019,35 +1019,35 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Closing: filename */
     if (bogus_id == H5O_BOGUS_INVALID_ID)
         if (H5Gclose(gid) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
     /* Closing: FILE_BOGUS */
     if (bogus_id == H5O_BOGUS_INVALID_ID)
         if (H5Gclose(gid_bogus) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     if (H5Fclose(fid_bogus) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     TESTING("object in r/w file with unknown header message & 'fail if unknown and open for write' flag set");
 
     /* Open FILE_BOGUS with RW intent this time */
     if ((fid_bogus = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set up location ID */
     if (bogus_id == H5O_BOGUS_INVALID_ID) {
         /* Open "group" in FILE_BOGUS */
         if ((gid_bogus = H5Gopen2(fid_bogus, "group", H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         loc_bogus = gid_bogus;
     }
     else
@@ -1083,9 +1083,9 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     /* Closing: FILE_BOGUS */
     if (bogus_id == H5O_BOGUS_INVALID_ID)
         if (H5Gclose(gid_bogus) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     if (H5Fclose(fid_bogus) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
 
@@ -2173,7 +2173,7 @@ main(void)
 
             /* Create the file to operate on */
             if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR;
             if (H5AC_ignore_tags(f) < 0) {
@@ -2281,9 +2281,9 @@ main(void)
             if (H5O_close(&oh_loc, NULL) < 0)
                 FAIL_STACK_ERROR;
             if (H5Fclose(file) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if (NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR;
             if (H5AC_ignore_tags(f) < 0)

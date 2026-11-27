@@ -12286,29 +12286,29 @@ test_dapl_values(hid_t fapl_id)
     /* Create the file */
     h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dcpl and set up VDS mapping */
     if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* source */
     dims = 42;
     if ((src_sid = H5Screate_simple(1, &dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* vds */
     dims     = 0;
     max_dims = H5S_UNLIMITED;
     if ((vds_sid = H5Screate_simple(1, &dims, &max_dims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     start  = 0;
     stride = 42;
     count  = H5S_UNLIMITED;
     block  = 42;
     if (H5Sselect_hyperslab(vds_sid, H5S_SELECT_SET, &start, &stride, &count, &block) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* map */
     if (H5Pset_virtual(dcpl_id, vds_sid, "f-%b.h5", "/dset1", src_sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dapls and set values
      * There are two of them. The reason for this is that the only way
@@ -12317,71 +12317,71 @@ test_dapl_values(hid_t fapl_id)
      */
     /* dapl 1 */
     if ((dapl_id1 = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_virtual_view(dapl_id1, H5D_VDS_FIRST_MISSING) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* dapl 2 */
     if ((dapl_id2 = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* default but we set it explicitly to be sure */
     if (H5Pset_virtual_view(dapl_id2, H5D_VDS_LAST_AVAILABLE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pset_virtual_printf_gap(dapl_id2, 123) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the datasets */
     if ((did1 = H5Dcreate2(fid, "dset1", H5T_NATIVE_INT, vds_sid, H5P_DEFAULT, dcpl_id, dapl_id1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((did2 = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, vds_sid, H5P_DEFAULT, dcpl_id, dapl_id2)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dapls */
     if (H5Pclose(dapl_id1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     dapl_id1 = -1;
     if (H5Pclose(dapl_id2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     dapl_id2 = -1;
 
     /* Get a data access property lists from the dataset */
     if ((dapl_id1 = H5Dget_access_plist(did1)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dapl_id2 = H5Dget_access_plist(did2)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check the values from the dapls */
     /* dapl 1 */
     if (H5Pget_virtual_view(dapl_id1, &view) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5D_VDS_FIRST_MISSING != view)
         TEST_ERROR;
     /* dapl 2 */
     if (H5Pget_virtual_view(dapl_id2, &view) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5D_VDS_LAST_AVAILABLE != view)
         TEST_ERROR;
     if (H5Pget_virtual_printf_gap(dapl_id2, &gap_size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (gap_size != 123)
         TEST_ERROR;
 
     /* Close everything */
     if (H5Sclose(vds_sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(src_sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(did2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl_id1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl_id2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;

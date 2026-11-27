@@ -306,12 +306,12 @@ test_rtree_search(void)
 
             /* Verify that results are equivalent to a manual search */
             if (verify_rtree_search(result_set, leaves_temp, leaf_count, min, max, rank) < 0) {
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
 
             /* Free search results */
             if (H5RT_free_results(result_set) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             result_set = NULL;
 
             if (H5RT_free(tree) < 0)
@@ -402,12 +402,12 @@ test_rtree_copy(void)
             /* Verify that results are equivalent to a manual search */
             if (verify_rtree_search(result_set, tree_copy->leaves, leaf_count, min, max, rank) < 0) {
                 H5RT_free_results(result_set);
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
 
             /* Free search results */
             if (H5RT_free_results(result_set) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             result_set = NULL;
 
             if (H5RT_free(tree_copy) < 0)
@@ -649,7 +649,7 @@ test_rtree_dapl(bool use_tree, bool read_init, hid_t vds_fapl, hid_t src_fapl)
     memset(test_str, 0, sizeof(test_str));
 
     if (snprintf(test_str, sizeof(test_str), "spatial tree option %s", use_tree ? "enabled" : "disabled") < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (read_init) {
         strncat(test_str, " with read initialization", sizeof(test_str) - strlen(test_str) - 1);
@@ -668,33 +668,33 @@ test_rtree_dapl(bool use_tree, bool read_init, hid_t vds_fapl, hid_t src_fapl)
 
     /* One-time setup */
     if ((file_id = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create virtual dataset with enough mappings to use tree */
     if ((vdset_id = create_virtual_dataset(file_id, dapl_id, RTREE_MAX_TEST_MAPPINGS, src_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dclose(vdset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the spatial tree property */
     if (H5Pset_virtual_spatial_tree(dapl_id, use_tree) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read/write the entire virtual dataset to force tree initialization */
     if (read_init) {
         if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
     else {
         if (H5Dwrite(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
 
     /* Verify tree existence matches expectation */
@@ -702,46 +702,46 @@ test_rtree_dapl(bool use_tree, bool read_init, hid_t vds_fapl, hid_t src_fapl)
         FAIL_STACK_ERROR;
 
     if (!tree_correct)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close the dataset and re-open it with the opposite value set in DAPL */
     if (H5Dclose(vdset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     vdset_id = H5I_INVALID_HID;
 
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     file_id = H5I_INVALID_HID;
 
     if (H5Pclose(dapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     dapl_id      = H5I_INVALID_HID;
     tree_correct = false;
     memset(rbuf, 0, sizeof(int) * RTREE_MAX_TEST_MAPPINGS);
 
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_virtual_spatial_tree(dapl_id, use_tree_inverse) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((file_id = H5Fopen(vfilename, H5F_ACC_RDWR, vds_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((vdset_id = H5Dopen2(file_id, RTREE_DAPL_VDS_NAME, dapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read/write the entire virtual dataset to force tree initialization */
     if (read_init) {
         if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
     else {
         if (H5Dwrite(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
     }
 
     /* Verify tree existence matches expectation after re-open */
@@ -749,15 +749,15 @@ test_rtree_dapl(bool use_tree, bool read_init, hid_t vds_fapl, hid_t src_fapl)
         FAIL_STACK_ERROR;
 
     if (!tree_correct)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Cleanup */
     if (H5Dclose(vdset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -817,29 +817,29 @@ test_rtree_threshold(bool use_tree, hid_t vds_fapl, hid_t src_fapl)
         expect_tree = (use_tree && (num_mappings >= H5D_VIRTUAL_TREE_THRESHOLD));
 
         if ((file_id = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Set the spatial tree property */
         if (H5Pset_virtual_spatial_tree(dapl_id, use_tree) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Create virtual dataset with specified number of mappings */
         if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings, src_fapl)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Read the virtual dataset to force initialization */
         if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Verify data pattern (each element should equal its index) */
         for (int i = 0; i < num_mappings; i++) {
             if (rbuf[i] != i) {
                 printf("%d mappings: Data mismatch at [%d]: expected %d, got %d\n", num_mappings, i, i,
                        rbuf[i]);
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
         }
 
@@ -848,7 +848,7 @@ test_rtree_threshold(bool use_tree, hid_t vds_fapl, hid_t src_fapl)
             FAIL_STACK_ERROR;
 
         if (dset->shared->layout.type != H5D_VIRTUAL)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         /* Get the virtual storage structure */
         storage = &(dset->shared->layout.storage.u.virt);
@@ -857,35 +857,35 @@ test_rtree_threshold(bool use_tree, hid_t vds_fapl, hid_t src_fapl)
         if (expect_tree) {
             if (storage->tree == NULL) {
                 printf("%d mappings: Expected spatial tree to exist but it was NULL\n", num_mappings);
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
             /* not_in_tree_list can be NULL if all mappings fit in tree - this is OK */
             /* Just verify consistency: if nused > 0, then list should exist */
             if (storage->not_in_tree_nused > 0 && storage->not_in_tree_list == NULL) {
                 printf("%d mappings: Expected not_in_tree_list array to exist but it was NULL\n",
                        num_mappings);
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
         }
         else {
             if (storage->tree != NULL) {
                 printf("%d mappings: Expected spatial tree to be NULL but it exists\n", num_mappings);
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
             if (storage->not_in_tree_list != NULL) {
                 printf("%d mappings: Expected not_in_tree_list array to be NULL but it exists\n",
                        num_mappings);
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             }
         }
 
         /* Cleanup */
         if (H5Dclose(vdset_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Pclose(dapl_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Fclose(file_id) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
 
         vdset_id = H5I_INVALID_HID;
         dapl_id  = H5I_INVALID_HID;
@@ -942,27 +942,27 @@ test_rtree_rw(bool use_tree, hid_t vds_fapl, hid_t src_fapl)
     h5_fixname(FILENAME[3], vds_fapl, vfilename, sizeof(vfilename));
 
     if ((file_id = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set the spatial tree property */
     if (H5Pset_virtual_spatial_tree(dapl_id, use_tree) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create virtual dataset with specified number of mappings */
     if ((vdset_id = create_virtual_dataset(file_id, dapl_id, num_mappings, src_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify initial read values (each element should equal its index) */
     if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     for (int i = 0; i < num_mappings; i++) {
         if (rbuf[i] != i) {
             printf("%d mappings: Data mismatch at [%d]: expected %d, got %d\n", num_mappings, i, i, rbuf[i]);
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         }
     }
 
@@ -971,37 +971,37 @@ test_rtree_rw(bool use_tree, hid_t vds_fapl, hid_t src_fapl)
         wbuf[i] = 2 * i;
 
     if ((space_id = H5Screate_simple(1, (const hsize_t *)&wdims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, (const hsize_t *)&(hsize_t){0}, NULL,
                             (const hsize_t *)&wdims, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dwrite(vdset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, wbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read back entire dataset and verify values */
     if (H5Dread(vdset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     for (int i = 0; i < num_mappings; i++) {
         int expected = (i < num_mappings / 2) ? (2 * i) : i;
         if (rbuf[i] != expected) {
             printf("%d mappings: Post-write data mismatch at [%d]: expected %d, got %d\n", num_mappings, i,
                    expected, rbuf[i]);
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         }
     }
 
     /* Cleanup */
     if (H5Dclose(vdset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(file_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(space_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -1062,89 +1062,89 @@ test_vds_empty_slice(hid_t vds_fapl, hid_t src_fapl)
 
     /* Create source file with single dataset */
     if ((srcfile_id = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, src_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((src_space = H5Screate_simple(1, &src_dim, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((raw_dset_id = H5Dcreate2(srcfile_id, "src", H5T_NATIVE_INT, src_space, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dwrite(raw_dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((vdsfile_id = H5Fcreate(vdsfilename, H5F_ACC_TRUNC, H5P_DEFAULT, vds_fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((vds_space = H5Screate_simple(1, &vds_dim, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Add mappings and create VDS */
     for (i = 0; i < vds_dim; i++) {
         if ((vds_sel = H5Scopy(vds_space)) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         start = i;
         count = 1;
         if (H5Sselect_hyperslab(vds_sel, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Pset_virtual(dcpl, vds_sel, srcfilename_map, "src", src_space) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         if (H5Sclose(vds_sel) < 0)
-            FAIL_STACK_ERROR;
+            TEST_ERROR;
         vds_sel = H5I_INVALID_HID;
     }
 
     if ((vds_dset_id =
              H5Dcreate2(vdsfile_id, "vds", H5T_NATIVE_INT, vds_space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Trigger tree initialization by reading a single element */
     start = 0;
     count = 1;
     if ((mem_space = H5Screate_simple(1, &count, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((file_space = H5Dget_space(vds_dset_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dread(vds_dset_id, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, &read_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(mem_space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(file_space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     mem_space  = H5I_INVALID_HID;
     file_space = H5I_INVALID_HID;
 
     /* Attempt zero-element read */
     count = 0;
     if ((mem_space = H5Screate_simple(1, &count, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((file_space = H5Dget_space(vds_dset_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dread(vds_dset_id, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, &read_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Cleanup */
     if (H5Sclose(mem_space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(file_space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(src_space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(vds_space) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(raw_dset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Dclose(vds_dset_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(srcfile_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(vdsfile_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;

@@ -130,7 +130,7 @@ test_filter_write(char *file_name, hid_t my_fapl, bool cache_enabled)
 
     /* Check that the filter was registered */
     if (true != H5Zfilter_avail(H5Z_FILTER_FAIL_TEST))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Enable the filter as mandatory */
     if (H5Pset_filter(dcpl, H5Z_FILTER_FAIL_TEST, 0, (size_t)0, NULL) < 0)

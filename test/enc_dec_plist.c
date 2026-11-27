@@ -130,7 +130,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if ((orig_plist_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (NULL == (orig_plist = (H5P_genplist_t *)H5I_object(orig_plist_id)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create auxiliary file access property list for libver bounds */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -148,7 +148,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
@@ -170,7 +170,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
 
     /* Get internal pointer to decoded property list */
     if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
      * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
@@ -180,7 +180,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
@@ -201,7 +201,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
@@ -215,7 +215,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if ((dec_plist_id = H5Pdecode(temp_buf)) < 0)
         TEST_ERROR;
     if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
      * through the public interface. Internally, it should be H5F_PAGE_BUFFER_SIZE_DEFAULT if the format is at
@@ -225,7 +225,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (low >= H5F_LIBVER_V200) {
         if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
             FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
@@ -249,7 +249,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != 1)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (page_buf_size != 1)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
@@ -263,7 +263,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if ((dec_plist_id = H5Pdecode(temp_buf)) < 0)
         TEST_ERROR;
     if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify decoded value of page buffer size. It should be 1 both publicly and internally. */
     if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
@@ -271,7 +271,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != 1)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (page_buf_size != 1)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
@@ -293,7 +293,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
@@ -307,7 +307,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if ((dec_plist_id = H5Pdecode(temp_buf)) < 0)
         TEST_ERROR;
     if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
      * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
@@ -317,7 +317,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
@@ -433,7 +433,7 @@ main(void)
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("Default DCPL Encoding/Decoding");
             if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(dcpl, low, high) < 0)
@@ -444,26 +444,26 @@ main(void)
             TESTING("DCPL Encoding/Decoding");
 
             if ((H5Pset_chunk(dcpl, 2, chunk_size)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_fill_value(dcpl, H5T_NATIVE_DOUBLE, &fill)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_dset_no_attrs_hint(dcpl, false)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             max_size[0] = 100;
             if ((H5Pset_external(dcpl, "ext1.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_external(dcpl, "ext2.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_external(dcpl, "ext3.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_external(dcpl, "ext4.data", 0, (hsize_t)(max_size[0] * sizeof(int) / 4))) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(dcpl, low, high) < 0)
@@ -471,7 +471,7 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(dcpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
@@ -482,7 +482,7 @@ main(void)
 
             else {
                 if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 /* Set virtual layout */
                 if (H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
@@ -505,7 +505,7 @@ main(void)
 
                 /* release resource */
                 if ((H5Pclose(dcpl)) < 0)
-                    FAIL_STACK_ERROR;
+                    TEST_ERROR;
 
                 PASSED();
             }
@@ -513,7 +513,7 @@ main(void)
             /******* ENCODE/DECODE DAPLS *****/
             TESTING("Default DAPL Encoding/Decoding");
             if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(dapl, low, high) < 0)
@@ -524,7 +524,7 @@ main(void)
             TESTING("DAPL Encoding/Decoding");
 
             if ((H5Pset_chunk_cache(dapl, nslots, nbytes, w0)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(dapl, low, high) < 0)
@@ -532,14 +532,14 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(dapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
             /******* ENCODE/DECODE OCPLS *****/
             TESTING("Default OCPL Encoding/Decoding");
             if ((ocpl = H5Pcreate(H5P_OBJECT_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(ocpl, low, high) < 0)
@@ -550,13 +550,13 @@ main(void)
             TESTING("OCPL Encoding/Decoding");
 
             if ((H5Pset_attr_creation_order(ocpl, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED))) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_attr_phase_change(ocpl, 110, 105)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_filter(ocpl, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(ocpl, low, high) < 0)
@@ -564,14 +564,14 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(ocpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
             /******* ENCODE/DECODE DXPLS *****/
             TESTING("Default DXPL Encoding/Decoding");
             if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(dxpl, low, high) < 0)
@@ -582,32 +582,32 @@ main(void)
             TESTING("DXPL Encoding/Decoding");
 
             if ((H5Pset_btree_ratios(dxpl, 0.2, 0.6, 0.2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_hyper_vector_size(dxpl, 5)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
 #ifdef H5_HAVE_PARALLEL
             if ((H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_INDIVIDUAL_IO)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_dxpl_mpio_chunk_opt(dxpl, H5FD_MPIO_CHUNK_MULTI_IO)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_dxpl_mpio_chunk_opt_ratio(dxpl, 30)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_dxpl_mpio_chunk_opt_num(dxpl, 40)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 #endif /* H5_HAVE_PARALLEL */
             if ((H5Pset_edc_check(dxpl, H5Z_DISABLE_EDC)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_data_transform(dxpl, c_to_f)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (H5Pset_modify_write_buf(dxpl, true) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(dxpl, low, high) < 0)
@@ -615,14 +615,14 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(dxpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
             /******* ENCODE/DECODE GCPLS *****/
             TESTING("Default GCPL Encoding/Decoding");
             if ((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(gcpl, low, high) < 0)
@@ -633,20 +633,20 @@ main(void)
             TESTING("GCPL Encoding/Decoding");
 
             if ((H5Pset_local_heap_size_hint(gcpl, 256)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_link_phase_change(gcpl, 2, 2)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Query the group creation properties */
             if ((H5Pget_link_phase_change(gcpl, &max_compact, &min_dense)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_est_link_info(gcpl, 3, 9)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_link_creation_order(gcpl, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED))) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(gcpl, low, high) < 0)
@@ -654,14 +654,14 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(gcpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
             /******* ENCODE/DECODE LCPLS *****/
             TESTING("Default LCPL Encoding/Decoding");
             if ((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(lcpl, low, high) < 0)
@@ -672,7 +672,7 @@ main(void)
             TESTING("LCPL Encoding/Decoding");
 
             if ((H5Pset_create_intermediate_group(lcpl, true)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(lcpl, low, high) < 0)
@@ -680,14 +680,14 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(lcpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
             /******* ENCODE/DECODE LAPLS *****/
             TESTING("Default LAPL Encoding/Decoding");
             if ((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(lapl, low, high) < 0)
@@ -698,26 +698,26 @@ main(void)
             TESTING("LAPL Encoding/Decoding");
 
             if ((H5Pset_nlinks(lapl, (size_t)134)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_elink_acc_flags(lapl, H5F_ACC_RDONLY)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_elink_prefix(lapl, "/tmpasodiasod")) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Create FAPL for the elink FAPL */
             if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_alignment(fapl, 2, 1024)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_elink_fapl(lapl, fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Close the elink's FAPL */
             if ((H5Pclose(fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(lapl, low, high) < 0)
@@ -725,14 +725,14 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(lapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
             /******* ENCODE/DECODE OCPYPLS *****/
             TESTING("Default OCPYPL Encoding/Decoding");
             if ((ocpypl = H5Pcreate(H5P_OBJECT_COPY)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(ocpypl, low, high) < 0)
@@ -743,12 +743,12 @@ main(void)
             TESTING("OCPYPL Encoding/Decoding");
 
             if ((H5Pset_copy_object(ocpypl, H5O_COPY_EXPAND_EXT_LINK_FLAG)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Padd_merge_committed_dtype_path(ocpypl, "foo")) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Padd_merge_committed_dtype_path(ocpypl, "bar")) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(ocpypl, low, high) < 0)
@@ -756,14 +756,14 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(ocpypl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
             /******* ENCODE/DECODE FAPLS *****/
             TESTING("Default FAPL Encoding/Decoding");
             if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(fapl, low, high) < 0)
@@ -774,31 +774,31 @@ main(void)
             TESTING("FAPL Encoding/Decoding");
 
             if ((H5Pset_family_offset(fapl, 1024)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_meta_block_size(fapl, 2098452)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_sieve_buf_size(fapl, 1048576)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_alignment(fapl, 2, 1024)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_cache(fapl, 1024, 128, 10485760, 0.3)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_elink_file_cache_size(fapl, 10485760)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_gc_references(fapl, 1)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_small_data_block_size(fapl, 2048)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_fclose_degree(fapl, H5F_CLOSE_WEAK)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_multi_type(fapl, H5FD_MEM_GHEAP)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_mdc_config(fapl, &my_cache_config)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
             if ((H5Pset_mdc_image_config(fapl, &my_cache_image_config)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(fapl, low, high) < 0)
@@ -806,7 +806,7 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(fapl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if (test_encode_decode_page_buf_size(low, high) < 0)
                 FAIL_PUTS_ERROR("Page buffer size encoding/decoding failed\n");
@@ -817,7 +817,7 @@ main(void)
             TESTING("Default FCPL Encoding/Decoding");
 
             if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(fcpl, low, high) < 0)
@@ -828,25 +828,25 @@ main(void)
             TESTING("FCPL Encoding/Decoding");
 
             if ((H5Pset_userblock(fcpl, 1024) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_istore_k(fcpl, 3) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_sym_k(fcpl, 4, 5) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_shared_mesg_nindexes(fcpl, 8) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_shared_mesg_index(fcpl, 1, H5O_SHMESG_SDSPACE_FLAG, 32) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_shared_mesg_phase_change(fcpl, 60, 20) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             if ((H5Pset_sizes(fcpl, 8, 4) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(fcpl, low, high) < 0)
@@ -854,7 +854,7 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(fcpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
@@ -862,7 +862,7 @@ main(void)
             TESTING("Default STRCPL Encoding/Decoding");
 
             if ((strcpl = H5Pcreate(H5P_STRING_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(strcpl, low, high) < 0)
@@ -873,7 +873,7 @@ main(void)
             TESTING("STRCPL Encoding/Decoding");
 
             if ((H5Pset_char_encoding(strcpl, H5T_CSET_UTF8) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(strcpl, low, high) < 0)
@@ -881,7 +881,7 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(strcpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
@@ -889,7 +889,7 @@ main(void)
             TESTING("Default ACPL Encoding/Decoding");
 
             if ((acpl = H5Pcreate(H5P_ATTRIBUTE_CREATE)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding default property list */
             if (test_encode_decode(acpl, low, high) < 0)
@@ -900,7 +900,7 @@ main(void)
             TESTING("ACPL Encoding/Decoding");
 
             if ((H5Pset_char_encoding(acpl, H5T_CSET_UTF8) < 0))
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             /* Test encoding & decoding property list */
             if (test_encode_decode(acpl, low, high) < 0)
@@ -908,7 +908,7 @@ main(void)
 
             /* release resource */
             if ((H5Pclose(acpl)) < 0)
-                FAIL_STACK_ERROR;
+                TEST_ERROR;
 
             PASSED();
 
