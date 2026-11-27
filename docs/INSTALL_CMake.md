@@ -686,10 +686,20 @@ HDF5 Java bindings support two native interface implementations:
 
 Maven Artifacts:
 
-- `org.hdfgroup:hdf5-java-ffm` is FFM implementation
+- `org.hdfgroup:hdf5-native` (classified by platform: `linux-x86_64`, `windows-x86_64`, `macos-x86_64`, `macos-aarch64`) bundles the `libhdf5` shared library built by CMake, together with the zlib and libaec (`libaec` + `libsz`) shared libraries it links for the built-in deflate/GZIP and SZIP filters
+- `org.hdfgroup:hdf5-jni-native` (same classifiers) bundles only the JNI bridge (`hdf5_java`); use with `hdf5-java-jni`
 - `org.hdfgroup:hdf5-java-jni` is JNI implementation
+- `org.hdfgroup:hdf5-java-ffm` is FFM implementation
 
-Both implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
+When `HDF5_ENABLE_MAVEN_DEPLOY` is on, CMake also produces the native JARs (`COMPONENT maven`): `hdf5-native-*.jar` always (with zlib and libaec only when `libhdf5` links them as shared libraries), and `hdf5-jni-native-*.jar` for JNI builds. Each JAR places its shared libraries under `natives/hdf5/<platform>/` (for example `natives/hdf5/linux_64/libhdf5.so`).
+
+Dependency layering: `hdf5-java-jni` requires `hdf5-jni-native` and `hdf5-native`, because the JNI bridge is built against that `libhdf5`. Maven resolves both through OS-activated profiles in the published POM, for the four classifiers above. Build tools that ignore POM profiles (Gradle, for example) must declare `hdf5-jni-native` and `hdf5-native` with the platform classifier explicitly. For `hdf5-java-ffm`, `hdf5-native` is optional: add it to your POM for a classpath-only deployment, or use a system HDF5 install. With a system install, the OS loader must find `libhdf5` (`LD_LIBRARY_PATH`, `DYLD_LIBRARY_PATH`, `PATH` or the standard library directories; `java.library.path` is not used for it, by FFM or JNI), and for JNI the `hdf5_java` bridge built with that install must also be found.
+
+On first use of the bindings (the `hdf.hdf5lib.H5` static initializer for JNI, the jextract symbol lookup for FFM, or an explicit `H5.loadH5Lib()` call), `hdf.hdf5lib.Hdf5NativeLoader` copies whichever bundled libraries are on the classpath into a new directory under `java.io.tmpdir`, accessible only to the current user, and loads them: zlib, then libaec and libsz, then `libhdf5`, then the JNI bridge. The loader does not use a temporary directory that other users can modify (on Linux and macOS: not owned by you or root, or writable by others without the sticky bit, as with some shared scratch directories); in that case set `java.io.tmpdir` to a directory only you can write to. Libraries cannot be loaded from a file system mounted `noexec`, which some systems use for `/tmp` (for example RHEL 8); there, set `java.io.tmpdir` to a directory from which programs can be executed. A bundled library that is present but cannot be loaded is reported as an SLF4J warning. With the native JARs present, the built-in deflate/GZIP and SZIP filters work without a system HDF5 install or `HDF5_PLUGIN_PATH`. For JNI, setting `hdf.hdf5lib.H5.loadLibraryName` or `hdf.hdf5lib.H5.hdf5lib` selects your own `hdf5_java`, and the bundled libraries are then not loaded. Set `-Dhdf.hdf5lib.Hdf5NativeLoader.skip=true` to ignore the bundled libraries and use your own.
+
+The native JARs do not contain filter plugins (`HDF5_PLUGIN_PATH`) or any other shared library `libhdf5` depends on, and the MSVC runtime is not bundled; Windows users may need the Visual C++ Redistributable. Each native JAR carries the licenses of the libraries it bundles under `META-INF/` (`LICENSE` for HDF5, `LICENSE-zlib` and `LICENSE-libaec` when the HDF5 build compiles those from source); the third-party licenses are also listed in `java/lib/NOTICES.txt`.
+
+Both Java implementations use the same `hdf.hdf5lib.*` package structure for seamless migration.
 
 To build HDF5 with Maven deployment support:
 

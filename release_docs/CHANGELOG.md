@@ -36,6 +36,8 @@ For releases prior to version 2.0.0, please see the release.txt file and for mor
 
 ## Java Enhancements:
 
+- Added platform-classified Maven artifacts that bundle the native libraries: `hdf5-native` (`libhdf5`, plus zlib and libaec when `libhdf5` links them as shared libraries) and `hdf5-jni-native` (the JNI bridge). `hdf5-java-jni` requires both; for `hdf5-java-ffm`, `hdf5-native` is optional. With these JARs on the classpath, `hdf5-java-jni` and `hdf5-java-ffm` load the bundled libraries, so no system HDF5 install or `java.library.path` setup is needed, and the built-in deflate/GZIP and SZIP filters work. Set `-Dhdf.hdf5lib.Hdf5NativeLoader.skip=true` to use a system install instead.
+
 
 ## Acknowledgements:
 

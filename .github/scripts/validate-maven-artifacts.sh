@@ -133,6 +133,33 @@ validate_jar_file() {
     #   - jarhdf5-*.jar: Wrapper classes (hdf/hdf5lib/*)
     # JNI builds have single JAR with hdf/hdf5lib/* classes
 
+    if [[ "${jar_basename}" == hdf5-native-* ]] || [[ "${jar_basename}" == hdf5-jni-native-* ]]; then
+        # Each library is stored under the name System.mapLibraryName gives it
+        local main_lib
+        if [[ "${jar_basename}" == hdf5-native-* ]]; then
+            main_lib=$(find "${temp_dir}/natives" -type f \( -name "libhdf5.so" -o -name "libhdf5.dylib" -o -name "hdf5.dll" \) 2>/dev/null | head -1)
+        else
+            main_lib=$(find "${temp_dir}/natives" -type f \( -name "libhdf5_java.so" -o -name "libhdf5_java.dylib" -o -name "hdf5_java.dll" \) 2>/dev/null | head -1)
+        fi
+        if [[ -z "${main_lib}" ]]; then
+            add_error "Native bundle JAR missing its library under natives/hdf5/<platform>/: ${jar_basename}"
+        else
+            log_info "Found native library in bundle: $(basename "${main_lib}")"
+        fi
+        if [[ "${jar_basename}" == hdf5-native-* ]]; then
+            # zlib and libaec are bundled when libhdf5 links them as shared libraries; libsz needs libaec
+            local mapped_libsz mapped_libaec
+            mapped_libsz=$(find "${temp_dir}/natives" -type f \( -name "libsz.so" -o -name "libsz.dylib" -o -name "sz.dll" -o -name "szip.dll" \) 2>/dev/null | head -1)
+            mapped_libaec=$(find "${temp_dir}/natives" -type f \( -name "libaec.so" -o -name "libaec.dylib" -o -name "aec.dll" \) 2>/dev/null | head -1)
+            if [[ -n "${mapped_libsz}" && -z "${mapped_libaec}" ]] || [[ -z "${mapped_libsz}" && -n "${mapped_libaec}" ]]; then
+                add_error "hdf5-native JAR has only one of libsz/libaec under natives/hdf5/<platform>/"
+            fi
+        fi
+        rm -rf "${temp_dir}"
+        log_success "JAR validation completed: ${jar_basename}"
+        return 0
+    fi
+
     if [[ "${jar_basename}" == *"javahdf5"* ]]; then
         # This is the FFM bindings JAR - check for FFM classes
         local ffm_classes=(
@@ -210,8 +237,27 @@ validate_pom_file() {
         add_error "Invalid or missing groupId in POM"
     fi
 
-    if ! grep -qE "<artifactId>hdf5-java(-ffm|-jni)?</artifactId>" "${pom_file}"; then
-        add_error "Invalid or missing artifactId in POM (expected hdf5-java, hdf5-java-ffm, or hdf5-java-jni)"
+    local allowed_hdf5_artifact_ids=(
+        hdf5-native
+        hdf5-jni-native
+        hdf5-java
+        hdf5-java-ffm
+        hdf5-java-jni
+        hdf5-java-examples
+    )
+    # The project's own artifactId is the first one outside <parent>; later ones belong to
+    # dependencies (the binding POMs list the native bundles in their profiles)
+    local own_artifact_id
+    own_artifact_id=$(sed '/<parent>/,/<\/parent>/d' "${pom_file}" | grep -o '<artifactId>[^<]*</artifactId>' | head -1 | sed 's/<[^>]*>//g' || true)
+    local artifact_id_ok=false
+    for aid in "${allowed_hdf5_artifact_ids[@]}"; do
+        if [[ "${own_artifact_id}" == "${aid}" ]]; then
+            artifact_id_ok=true
+            break
+        fi
+    done
+    if [[ "${artifact_id_ok}" != "true" ]]; then
+        add_error "Invalid or missing artifactId '${own_artifact_id}' in POM (expected one of: ${allowed_hdf5_artifact_ids[*]})"
     fi
 
     # Extract version
@@ -303,6 +349,7 @@ validate_platform_classifiers() {
 
     local valid_classifiers=(
         "linux-x86_64"
+        "linux-aarch64"
         "windows-x86_64"
         "macos-x86_64"
         "macos-aarch64"
@@ -347,6 +394,57 @@ validate_platform_classifiers() {
 }
 
 # Maven dependency simulation
+# Sets sim_group_id, sim_artifact_id, sim_version, sim_jar_file and sim_classifier for a POM;
+# sim_jar_file is empty when no JAR for the POM's artifactId is found next to it
+read_simulation_coordinates() {
+    local pom_file="$1"
+
+    sim_group_id=$(grep -o '<groupId>[^<]*</groupId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    sim_artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    sim_version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+
+    # CMake names the binding JAR jarhdf5-<version>[-<classifier>].jar whatever its artifactId;
+    # the native bundles and examples are named after their artifactId
+    local jar_stem="${sim_artifact_id}"
+    case "${sim_artifact_id}" in
+        hdf5-java | hdf5-java-ffm | hdf5-java-jni) jar_stem="jarhdf5" ;;
+    esac
+
+    # Find the JAR for this POM (parenthesize -o so -maxdepth applies to all names)
+    sim_jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 \( -name "${jar_stem}-${sim_version}.jar" -o -name "${jar_stem}-${sim_version}-*.jar" -o -name "${jar_stem}-*.jar" \) ! -name "*-sources.jar" ! -name "*-javadoc.jar" 2>/dev/null | head -1)
+
+    # Platform classifier from <name>-<version>-<classifier>.jar
+    sim_classifier=""
+    local jar_basename
+    jar_basename=$(basename "${sim_jar_file:-none}" .jar)
+    if [[ "${jar_basename}" == "${jar_stem}-${sim_version}-"* ]]; then
+        sim_classifier="${jar_basename#"${jar_stem}-${sim_version}-"}"
+    fi
+}
+
+# Install a POM's JAR into the local Maven repository with its classifier, so that classified
+# dependencies between artifacts resolve
+install_maven_artifact() {
+    local pom_file="$1"
+
+    command -v mvn &> /dev/null || return 0
+    read_simulation_coordinates "${pom_file}"
+    [[ -n "${sim_jar_file}" ]] || return 0
+
+    log_info "Installing artifact to local Maven repository: ${sim_group_id}:${sim_artifact_id}:${sim_version}${sim_classifier:+:${sim_classifier}}"
+    if ! mvn install:install-file \
+        -Dfile="${sim_jar_file}" \
+        -DgroupId="${sim_group_id}" \
+        -DartifactId="${sim_artifact_id}" \
+        -Dversion="${sim_version}" \
+        ${sim_classifier:+-Dclassifier="${sim_classifier}"} \
+        -Dpackaging=jar \
+        -DpomFile="${pom_file}" \
+        -q 2>&1 | tee -a "${VALIDATION_LOG}"; then
+        add_warning "Failed to install ${sim_artifact_id} to local Maven repository"
+    fi
+}
+
 simulate_maven_dependency() {
     local pom_file="$1"
 
@@ -362,32 +460,15 @@ simulate_maven_dependency() {
     temp_project=$(mktemp -d)
     trap "rm -rf '${temp_project}'" EXIT
 
-    # Extract coordinates from POM
-    local group_id artifact_id version
-    group_id=$(grep -o '<groupId>[^<]*</groupId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
-    artifact_id=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
-    version=$(grep -o '<version>[^<]*</version>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || echo "")
+    local group_id artifact_id version classifier
+    read_simulation_coordinates "${pom_file}"
+    group_id="${sim_group_id}"
+    artifact_id="${sim_artifact_id}"
+    version="${sim_version}"
+    classifier="${sim_classifier}"
 
-    # Find the JAR file in the artifacts directory
-    local jar_file
-    jar_file=$(find "$(dirname "${pom_file}")" -maxdepth 2 -name "${artifact_id}-${version}.jar" -o -name "${artifact_id}-*.jar" | head -1)
-
-    if [ -z "${jar_file}" ]; then
+    if [ -z "${sim_jar_file}" ]; then
         add_warning "Could not find JAR file for ${artifact_id}:${version} - skipping dependency simulation"
-        return 0
-    fi
-
-    # Install artifact to local Maven repository first
-    log_info "Installing artifact to local Maven repository: ${group_id}:${artifact_id}:${version}"
-    if ! mvn install:install-file \
-        -Dfile="${jar_file}" \
-        -DgroupId="${group_id}" \
-        -DartifactId="${artifact_id}" \
-        -Dversion="${version}" \
-        -Dpackaging=jar \
-        -DpomFile="${pom_file}" \
-        -q 2>&1 | tee -a "${VALIDATION_LOG}"; then
-        add_warning "Failed to install artifact to local Maven repository"
         return 0
     fi
 
@@ -406,7 +487,8 @@ simulate_maven_dependency() {
         <dependency>
             <groupId>${group_id}</groupId>
             <artifactId>${artifact_id}</artifactId>
-            <version>${version}</version>
+            <version>${version}</version>${classifier:+
+            <classifier>${classifier}</classifier>}
         </dependency>
     </dependencies>
 </project>
@@ -433,7 +515,7 @@ check_deployment_readiness() {
     local jar_files pom_files
     # Only count HDF5 JAR files, exclude dependencies like slf4j
     jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
-    pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
+    pom_files=($(find "${artifacts_dir}" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-jni-native.xml" \) 2>/dev/null || true))
 
     if [[ ${#jar_files[@]} -eq 0 ]]; then
         add_error "No JAR files found in artifacts directory"
@@ -507,7 +589,7 @@ main() {
     local jar_files pom_files all_jars
     # Only validate HDF5 JAR files, exclude dependencies like slf4j
     jar_files=($(find "${artifacts_dir}" -name "*hdf5*.jar" -not -name "*test*" 2>/dev/null || true))
-    pom_files=($(find "${artifacts_dir}" -name "pom.xml" 2>/dev/null || true))
+    pom_files=($(find "${artifacts_dir}" \( -name "pom.xml" -o -name "pom-hdf5-native.xml" -o -name "pom-hdf5-jni-native.xml" \) 2>/dev/null || true))
     all_jars=($(find "${artifacts_dir}" -name "*.jar" 2>/dev/null || true))
 
     # Log what we found
@@ -534,9 +616,49 @@ main() {
         validate_pom_file "${pom_file}"
     done
 
-    # Version consistency check
+    # Version consistency: pair each POM with JARs that share its artifactId (not only pom_files[0])
     if [[ ${#pom_files[@]} -gt 0 && ${#jar_files[@]} -gt 0 ]]; then
-        validate_version_consistency "${pom_files[0]}" "${jar_files[@]}"
+        for pom_file in "${pom_files[@]}"; do
+            local pname aid
+            pname=$(basename "${pom_file}")
+            # Main module POM is handled below (JAR names may not equal Maven artifactId)
+            if [[ "${pname}" == "pom.xml" ]]; then
+                continue
+            fi
+            if [[ "${pname}" =~ ^pom-(.+)\.xml$ ]]; then
+                aid="${BASH_REMATCH[1]}"
+            else
+                aid=$(grep -o '<artifactId>[^<]*</artifactId>' "${pom_file}" | head -1 | sed 's/<[^>]*>//g' || true)
+            fi
+            if [[ -z "${aid}" ]]; then
+                continue
+            fi
+            local matching=()
+            for jf in "${jar_files[@]}"; do
+                if [[ "$(basename "${jf}")" == "${aid}-"* ]]; then
+                    matching+=("${jf}")
+                fi
+            done
+            if [[ ${#matching[@]} -gt 0 ]]; then
+                validate_version_consistency "${pom_file}" "${matching[@]}"
+            fi
+        done
+        for pom_file in "${pom_files[@]}"; do
+            if [[ "$(basename "${pom_file}")" != "pom.xml" ]]; then
+                continue
+            fi
+            local rest=()
+            for jf in "${jar_files[@]}"; do
+                local jb
+                jb=$(basename "${jf}")
+                if [[ "${jb}" != hdf5-native-* && "${jb}" != hdf5-jni-native-* ]]; then
+                    rest+=("${jf}")
+                fi
+            done
+            if [[ ${#rest[@]} -gt 0 ]]; then
+                validate_version_consistency "${pom_file}" "${rest[@]}"
+            fi
+        done
     fi
 
     # Platform classifier validation
@@ -544,9 +666,15 @@ main() {
         validate_platform_classifiers "${jar_files[@]}"
     fi
 
-    # Maven dependency simulation
+    # Maven dependency simulation (once per POM that has a matching JAR in the same directory tree).
+    # Install every artifact first: the native bundles depend on each other by classifier.
     if [[ ${#pom_files[@]} -gt 0 ]]; then
-        simulate_maven_dependency "${pom_files[0]}"
+        for pom_file in "${pom_files[@]}"; do
+            install_maven_artifact "${pom_file}"
+        done
+        for pom_file in "${pom_files[@]}"; do
+            simulate_maven_dependency "${pom_file}"
+        done
     fi
 
     # Generate final report

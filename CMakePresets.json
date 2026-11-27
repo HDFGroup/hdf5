@@ -284,6 +284,38 @@
       }
     },
     {
+      "name": "ci-Maven-Zlib",
+      "hidden": true,
+      "inherits": [
+        "ci-base-tgz",
+        "ci-CompressionVars"
+      ],
+      "cacheVariables": {
+        "HDF5_PACKAGE_EXTLIBS": "ON",
+        "HDF5_USE_ZLIB_NG": "OFF",
+        "ZLIB_USE_LOCALCONTENT": "OFF",
+        "HDF5_USE_ZLIB_STATIC": "OFF",
+        "HDF5_ENABLE_ZLIB_SUPPORT": "ON",
+        "ZLIB_USE_EXTERNAL": "ON"
+      }
+    },
+    {
+      "name": "ci-Maven-Libaec",
+      "hidden": true,
+      "inherits": [
+        "ci-base-tgz",
+        "ci-CompressionVars"
+      ],
+      "cacheVariables": {
+        "HDF5_PACKAGE_EXTLIBS": "ON",
+        "LIBAEC_USE_LOCALCONTENT": "OFF",
+        "HDF5_USE_LIBAEC_STATIC": "OFF",
+        "HDF5_ENABLE_SZIP_SUPPORT": "ON",
+        "HDF5_ENABLE_SZIP_ENCODING": "ON",
+        "SZIP_USE_EXTERNAL": "ON"
+      }
+    },
+    {
       "name": "ci-Maven-Minimal",
       "hidden": true,
       "cacheVariables": {
@@ -534,6 +566,8 @@
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-Java",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal"
       ]
     },
@@ -543,6 +577,8 @@
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-Java",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
@@ -552,6 +588,8 @@
       "inherits": [
         "ci-x64-Release-MSVC",
         "ci-Java",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal"
       ]
     },
@@ -561,6 +599,8 @@
       "inherits": [
         "ci-x64-Release-MSVC",
         "ci-Java",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
@@ -570,6 +610,8 @@
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal"
       ]
     },
@@ -579,6 +621,8 @@
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
@@ -588,6 +632,8 @@
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-Java-FFM",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal"
       ]
     },
@@ -597,6 +643,8 @@
       "inherits": [
         "ci-x64-Release-GNUC",
         "ci-Java-FFM",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
@@ -606,6 +654,8 @@
       "inherits": [
         "ci-x64-Release-MSVC",
         "ci-Java-FFM",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal"
       ]
     },
@@ -615,6 +665,8 @@
       "inherits": [
         "ci-x64-Release-MSVC",
         "ci-Java-FFM",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
@@ -624,6 +676,8 @@
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java-FFM",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal"
       ]
     },
@@ -633,6 +687,8 @@
       "inherits": [
         "ci-x64-Release-Clang",
         "ci-Java-FFM",
+        "ci-Maven-Zlib",
+        "ci-Maven-Libaec",
         "ci-Maven-Minimal-Snapshot"
       ]
     },
