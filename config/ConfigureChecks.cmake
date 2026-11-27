@@ -47,8 +47,10 @@ include (CMakePushCheckState)
 
 set (HDF_PREFIX "H5")
 
-# Check for Darwin (not just Apple - we also want to catch OpenDarwin)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+# Check for Darwin (not just Apple - we also want to catch OpenDarwin).
+# iOS, tvOS, watchOS, and visionOS share the Darwin kernel and libc
+# (e.g., BSD-style qsort_r), so treat them as Darwin too.
+if (${CMAKE_SYSTEM_NAME} MATCHES "^(Darwin|iOS|tvOS|watchOS|visionOS)$")
     set (${HDF_PREFIX}_HAVE_DARWIN 1)
 endif ()
 

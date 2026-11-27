@@ -442,6 +442,18 @@ Fixes GitHub issue #6679.
 
 ## Configuration
 
+### Fixed a crash in the R-tree code on iOS, tvOS, watchOS and visionOS
+
+   `H5_HAVE_DARWIN` was defined only when `CMAKE_SYSTEM_NAME` is `Darwin`, so builds for
+   iOS, tvOS, watchOS and visionOS called Apple's BSD-style `qsort_r()` with the GNU
+   argument order. The comparator and context pointers were swapped, and the R-tree code
+   used for virtual datasets crashed on its first comparison. These builds also skipped
+   Darwin's `INT_MAX` limit on the size of a single POSIX read or write.
+
+   `H5_HAVE_DARWIN` is now defined for these platforms too.
+
+   Fixes GitHub issue #6917
+
 ### Fixed h5cc, h5c++ and h5fc in the glibc 2.28 and Intel Linux binaries
 
    The wrappers run the compiler CMake recorded at configure time, by default as an absolute
