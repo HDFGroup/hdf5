@@ -216,6 +216,19 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Fixed thread-enabled builds on platforms without pthread cancellation support
+
+   CMake now checks whether the pthread cancellation APIs can be compiled and
+   linked. On platforms without these APIs, such as Android, the library uses
+   its existing no-op cancellation path while retaining thread synchronization
+   and thread-safe support. The existing cancellation behavior is unchanged
+   on platforms where the check succeeds.
+
+   The thread cancellation test is only enabled when the required pthread
+   cancellation APIs are available.
+
+   Addresses GitHub issue #4987.
+
 ### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
 
    An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds

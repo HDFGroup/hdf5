@@ -255,6 +255,9 @@
 /* Define to 1 if the compiler supports the pthread_barrier_*() routines */
 #cmakedefine H5_HAVE_PTHREAD_BARRIER @H5_HAVE_PTHREAD_BARRIER@
 
+/* Define to 1 if the pthread cancellation APIs are available. */
+#cmakedefine H5_HAVE_PTHREAD_CANCELLATION @H5_HAVE_PTHREAD_CANCELLATION@
+
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine H5_HAVE_PWD_H @H5_HAVE_PWD_H@
 

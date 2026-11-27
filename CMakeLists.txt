@@ -915,6 +915,7 @@ if (H5_HAVE_PARALLEL)
 endif ()
 
 # Determine if a threading package is available on this system
+set (H5_HAVE_PTHREAD_CANCELLATION 0)
 if (HDF5_ENABLE_THREADS)
   set (THREADS_PREFER_PTHREAD_FLAG ON)
   find_package (Threads)
@@ -935,6 +936,36 @@ if (HDF5_ENABLE_THREADS)
       set (H5_HAVE_C11_THREADS 1)
     elseif (CMAKE_USE_PTHREADS_INIT)
       set (H5_HAVE_PTHREAD_H 1)
+
+      # Check for usable pthread cancellation APIs without running a target executable.
+      include (CheckCSourceCompiles)
+      block ()
+        cmake_push_check_state (RESET)
+        set (CMAKE_REQUIRED_LIBRARIES Threads::Threads)
+        set (CMAKE_TRY_COMPILE_TARGET_TYPE EXECUTABLE)
+        check_c_source_compiles ([=[
+          #include <pthread.h>
+
+          static void cleanup(void *arg) { (void)arg; }
+
+          int main(void)
+          {
+              int (*cancel)(pthread_t) = pthread_cancel;
+              int (*setcancelstate)(int, int *) = pthread_setcancelstate;
+              int oldstate = 0;
+              int ret = setcancelstate(PTHREAD_CANCEL_DISABLE, &oldstate);
+              pthread_cleanup_push(cleanup, 0);
+              ret |= cancel(pthread_self());
+              pthread_cleanup_pop(0);
+              ret |= setcancelstate(oldstate, 0);
+              return ret;
+          }
+        ]=] H5_PTHREAD_CANCELLATION_WORKS)
+        cmake_pop_check_state ()
+      endblock ()
+      if (H5_PTHREAD_CANCELLATION_WORKS)
+        set (H5_HAVE_PTHREAD_CANCELLATION 1)
+      endif ()
     else ()
       message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
     endif ()

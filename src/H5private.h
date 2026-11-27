@@ -1149,8 +1149,8 @@ extern char H5_lib_vers_info_g[];
 
 #ifdef H5_HAVE_THREADS
 
-/* Thread cancellation is only possible w/pthreads */
-#if defined(H5_HAVE_PTHREAD_H)
+/* Thread cancellation is only possible when the pthread cancellation APIs are available. */
+#ifdef H5_HAVE_PTHREAD_CANCELLATION
 
 /* Local variable for saving cancellation state */
 #define H5CANCEL_DECL_REAL int oldstate = 0;
