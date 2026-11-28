@@ -5477,15 +5477,25 @@ test_file_lock_concur(hid_t in_fapl)
         }
         H5E_END_TRY
 
-        /* Should fail */
-        if (child_fid == FAIL)
-            exit(EXIT_SUCCESS);
-
-        /* Close the pipe */
-        if (HDclose(out_pdf[0]) < 0)
+        if (child_fid >= 0)
             exit(EXIT_FAILURE);
 
-        exit(EXIT_FAILURE);
+        /* A rejected create must leave the file held by the reader intact. */
+        if (H5Pget_driver(fapl) == H5FD_SEC2) {
+            h5_stat_size_t size = h5_get_file_size(filename, fapl);
+
+            if (size <= 0)
+                exit(EXIT_FAILURE);
+            H5E_BEGIN_TRY
+            {
+                child_fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+            }
+            H5E_END_TRY
+            if (child_fid >= 0 || h5_get_file_size(filename, fapl) != size)
+                exit(EXIT_FAILURE);
+        }
+
+        exit(EXIT_SUCCESS);
     } /* end if */
 
     /* close unused read end for out_pdf */

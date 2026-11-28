@@ -874,6 +874,31 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__sec2_truncate() */
 
+/* Truncate a newly opened sec2 file after the creator acquires the lock. */
+herr_t
+H5FD_sec2_truncate_on_create(H5FD_t *_file)
+{
+    H5FD_sec2_t *file = (H5FD_sec2_t *)_file;
+    h5_stat_t    sb;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(file && file->pub.driver_id == H5FD_SEC2);
+    assert(file->eoa == 0);
+
+    /* A previous writer may have changed EOF between open and lock. */
+    if (HDfstat(file->fd, &sb) < 0)
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat locked file");
+    H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
+
+    if (H5FD__sec2_truncate(_file, H5P_DEFAULT, false) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to truncate locked file");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD__sec2_lock
  *
