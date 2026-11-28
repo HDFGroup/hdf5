@@ -216,6 +216,14 @@ We would like to thank the many HDF5 community members who contributed to this r
 
 ## Library
 
+### Preserve the existing file when a sec2 truncate is denied by a file lock
+
+   When another process held a conflicting lock, `H5Fcreate` with `H5F_ACC_TRUNC`
+   could return a lock error after emptying the file. With file locking enabled,
+   the sec2 driver now truncates the file after acquiring the lock.
+
+   Fixes GitHub issue #6919
+
 ### Fixed an assertion failure when a filter pipeline contains `H5Z_MAX_NFILTERS` filters
 
    An `assert()` in the internal function `H5Z_pipeline()` caused a crash in debug builds

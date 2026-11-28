@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* File access                              */
 #include "H5FDprivate.h" /* File drivers                             */
+#include "H5FDsec2.h"    /* POSIX unbuffered file driver             */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
@@ -1828,6 +1829,7 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
     H5F_t             *file   = NULL; /*the success return value      */
     H5F_shared_t      *shared = NULL; /*shared part of `file'         */
     H5FD_t            *lf     = NULL; /*file driver part of `shared'  */
+    unsigned           open_flags = flags; /* flags passed to the VFD */
     unsigned           tent_flags;    /*tentative flags               */
     H5FD_class_t      *drvr;          /*file driver class info        */
     H5P_genplist_t    *a_plist;       /*file access property list     */
@@ -1868,6 +1870,10 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
     if (H5F__check_if_using_file_locks(a_plist, &use_file_locking, &ignore_disabled_locks) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file locking flags");
 
+    /* The sec2 open must not truncate a file while another process holds its lock. */
+    if (use_file_locking && (flags & H5F_ACC_TRUNC) && drvr == H5FD_get_class(H5FD_SEC2))
+        open_flags &= ~H5F_ACC_TRUNC;
+
     /*
      * Opening a file is a two step process. First we try to open the
      * file in a way which doesn't affect its state (like not truncating
@@ -1880,7 +1886,7 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
      * way for us to detect it here anyway).
      */
     if (drvr->cmp) {
-        tent_flags = flags & ~(H5F_ACC_CREAT | H5F_ACC_TRUNC | H5F_ACC_EXCL);
+        tent_flags = open_flags & ~(H5F_ACC_CREAT | H5F_ACC_TRUNC | H5F_ACC_EXCL);
 
         /*
          * When performing a tentative open of a file where we have stripped
@@ -1899,7 +1905,7 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
          * the underlying file driver might provide more details on why the
          * file open failed.
          */
-        if (tent_flags != flags) {
+        if (tent_flags != open_flags) {
             /* Make tentative attempt to open file */
             if (H5FD_open(true, &lf, name, tent_flags, fapl_id, HADDR_UNDEF) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't try opening file");
@@ -1908,11 +1914,11 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
              * then make another attempt at opening the file.
              */
             if (NULL == lf)
-                tent_flags = flags;
+                tent_flags = open_flags;
         }
     }
     else
-        tent_flags = flags;
+        tent_flags = open_flags;
 
     /*
      * If a tentative attempt to open the file wasn't necessary, attempt
@@ -1967,7 +1973,7 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
     } /* end if */
     else {
         /* Check if tentative open was good enough */
-        if (flags != tent_flags) {
+        if (open_flags != tent_flags) {
             /*
              * This file is not yet open by the library and the flags we used to
              * open it are different than the desired flags. Close the tentative
@@ -1977,7 +1983,7 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to close low-level file info");
             lf = NULL;
 
-            if (H5FD_open(false, &lf, name, flags, fapl_id, HADDR_UNDEF) < 0)
+            if (H5FD_open(false, &lf, name, open_flags, fapl_id, HADDR_UNDEF) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file");
             assert(lf);
         } /* end if */
@@ -1990,6 +1996,12 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
                     HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close low-level file info");
                 HGOTO_ERROR(H5E_FILE, H5E_CANTLOCKFILE, FAIL, "unable to lock the file");
             } /* end if */
+
+        if (open_flags != flags && H5FD_sec2_truncate_on_create(lf) < 0) {
+            if (H5FD_close(lf) < 0)
+                HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close low-level file info");
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to truncate file");
+        }
 
         /* Create the 'top' file structure */
         if (NULL == (file = H5F__new(NULL, flags, fcpl_id, fapl_id, lf))) {
